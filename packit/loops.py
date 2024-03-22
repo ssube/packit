@@ -53,7 +53,7 @@ def loop_refine(
 
     intro = prompt_templates["refine"][0]
 
-    while not stop_condition(current_iteration, max_iterations):
+    while not stop_condition(max_iterations, current_iteration):
         agent = agents[agent_index]
         prompt = agent(intro + " " + prompt, **context)
 

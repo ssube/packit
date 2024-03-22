@@ -21,12 +21,13 @@ prompts = {
 
 # Connect to a local LLM
 ollama_api = environ.get("OLLAMA_API", "http://localhost:11434")
+ollama_model = environ.get("OLLAMA_MODEL", "mixtral")
 num_ctx = environ.get("OLLAMA_NUM_CTX", 2**13)
 num_gpu = environ.get("OLLAMA_NUM_GPU", 100)
 
 llm = ChatOllama(
     temperature=0.65,
-    model="mixtral",
+    model=ollama_model,
     base_url=ollama_api,
     num_ctx=num_ctx,
     num_gpu=num_gpu,

@@ -8,6 +8,9 @@ Something in between Langchain and CrewAI. Conversational development where your
 
 - [PACkit](#packit)
   - [Contents](#contents)
+  - [Examples](#examples)
+    - [Run Ollama](#run-ollama)
+    - [Run the examples](#run-the-examples)
   - [Concepts](#concepts)
     - [Agents](#agents)
       - [Agent Backstory](#agent-backstory)
@@ -24,6 +27,47 @@ Something in between Langchain and CrewAI. Conversational development where your
       - [Binary Results](#binary-results)
       - [Integer Results](#integer-results)
       - [JSON Results](#json-results)
+
+## Examples
+
+### Run Ollama
+
+Launch a local Ollama server with the Mixtral model:
+
+```shell
+export OLLAMA_HOST=0.0.0.0 # only needed for remote access
+export OLLAMA_MODELS=/mnt/very-large-disk/ollama/models
+
+ollama pull mixtral
+ollama serve
+```
+
+### Run the examples
+
+Run the examples:
+
+```shell
+> python3 -m examples.cowboy_story
+ Gather 'round folks, and listen close as I recount the tale of a legendary haunted cattle drive. It was a dark and stormy night, not unlike this one, when a group of hardened cowboys set out to drive a herd of cattle from Texas to Kansas.
+
+These cowboys were some of the toughest hombres around; they had faced danger many times before and lived to tell the tale. Yet, they had heard whispers of strange occurrences along this very trail. They dismissed it as mere superstition and embarked on their journey.
+
+As they made their way northward, they began to notice peculiar happenings. Cattle would low in fear for no apparent reason, and the horses became easily spooked. At night, eerie howls and moans echoed around them, seeming to come from nowhere and everywhere at once.
+
+One evening, as they sat by their campfire, much like we are now, a lone figure approached riding towards them. As it drew nearer, they discerned it was a cowboy, his face pale and drawn. He rode up to the fire and cautioned them about the haunted cattle drive.
+
+"I was part of a group that attempted to drive these cattle before," he said, "but we were plagued by uncanny happenings. Cattle would vanish without a trace during the night, only to be discovered miles away, lifeless and drained of blood. Horses would suddenly rear and buck without provocation. And when darkness fell, we'd hear shrill screams and wails emanating from what sounded like the very earth itself."
+
+The cowboys scoffed at his warning, insisting they weren't afraid of any ghost stories. However, as days turned into nights, more inexplicable events transpired. Though they couldn't understand why, they knew something was amiss.
+
+One night, while they lay asleep under the stars, a blood-curdling scream pierced the silence. They grabbed their guns and rushed out into the darkness, where they saw a ghostly figure riding towards them. It was a woman, dressed all in white, her face contorted in a scream of terror.
+
+The cowboys watched as she rode past them, right through their campfire, leaving behind nothing but smoke and ash. Her chilling screams lingered in their ears long after she disappeared into the shadowy night.
+
+From that moment forth, they believed in the legend. They hurried their cattle to Kansas, never stopping or looking back. When they finally arrived, relief washed over them, but they never forgot the haunted cattle drive.
+
+So, as you sit around this campfire, listening to my tale, remember the legend of the Haunted Cattle Drive. Out here on the prairie, one can never truly know what might be lurking in the shadows.
+```
 
 ## Concepts
 
