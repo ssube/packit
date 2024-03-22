@@ -2,15 +2,18 @@
 
 Prompt Agent Construction Kit.
 
-Something in between Langchain and CrewAI. Conversational development where your code is the manager.
+Conversational development where your code is the manager.
+
+Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI). A
+loose toolkit of loops, operators, and predicates to help LLMs communicate with code.
 
 ## Contents
 
 - [PACkit](#packit)
   - [Contents](#contents)
   - [Examples](#examples)
-    - [Run Ollama](#run-ollama)
-    - [Run the examples](#run-the-examples)
+    - [With OpenAI API](#with-openai-api)
+    - [With Local Ollama](#with-local-ollama)
   - [Concepts](#concepts)
     - [Agents](#agents)
       - [Agent Backstory](#agent-backstory)
@@ -30,9 +33,13 @@ Something in between Langchain and CrewAI. Conversational development where your
 
 ## Examples
 
-### Run Ollama
+### With OpenAI API
 
-Launch a local Ollama server with the Mixtral model:
+TODO: OpenAI example
+
+### With Local Ollama
+
+Launch a local [Ollama server](https://ollama.com/) with the [Mixtral model](https://mistral.ai/news/mixtral-of-experts/):
 
 ```shell
 export OLLAMA_HOST=0.0.0.0 # only needed for remote access
@@ -41,8 +48,6 @@ export OLLAMA_MODELS=/mnt/very-large-disk/ollama/models
 ollama pull mixtral
 ollama serve
 ```
-
-### Run the examples
 
 Run the examples:
 
