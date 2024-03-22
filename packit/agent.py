@@ -40,7 +40,7 @@ class Agent:
         while retry < max_retry:
             retry += 1
             result = self.llm.invoke(messages)
-            if not result.response_metadata["done"]:
+            if not self.response_complete(result):
                 logger.warning("LLM did not finish: %s", result)
                 # TODO: get the rest of the response
 
