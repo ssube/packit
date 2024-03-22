@@ -1,5 +1,5 @@
 from packit.agent import Agent, AgentContext
-from packit.conditions import condition_threshold_mean
+from packit.conditions import condition_counter_mean
 from packit.results import bool_result
 
 
@@ -26,7 +26,7 @@ class Panel:
         prompt: str,
         context: AgentContext,
         parse_result=bool_result,
-        decision_condition=condition_threshold_mean,
+        decision_condition=condition_counter_mean,
         min_count: int | None = None,
     ) -> str:
         if min_count is None:

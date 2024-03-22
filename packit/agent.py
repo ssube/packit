@@ -10,6 +10,7 @@ logger = getLogger(__name__)
 
 
 AgentContext = dict[str, str]
+AgentModelMessage = HumanMessage | SystemMessage
 
 
 class AgentModel:
@@ -31,7 +32,7 @@ class Agent:
 
     def invoke_retry(
         self,
-        messages: list[HumanMessage | SystemMessage],
+        messages: list[AgentModelMessage],
         max_retry: int = 3,
         prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
     ):
@@ -43,12 +44,16 @@ class Agent:
                 logger.warning("LLM did not finish: %s", result)
                 # TODO: get the rest of the response
 
+            do_skip = False
             for skip_token in prompt_templates["skip"]:
                 if skip_token in result.content:
                     logger.warning(
                         "found skip token %s, skipping response: %s", skip_token, result
                     )
-                    break
+                    do_skip = True
+
+            if do_skip:
+                continue
 
             return result
 
