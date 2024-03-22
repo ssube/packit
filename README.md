@@ -72,6 +72,21 @@ The cowboys watched as she rode past them, right through their campfire, leaving
 From that moment forth, they believed in the legend. They hurried their cattle to Kansas, never stopping or looking back. When they finally arrived, relief washed over them, but they never forgot the haunted cattle drive.
 
 So, as you sit around this campfire, listening to my tale, remember the legend of the Haunted Cattle Drive. Out here on the prairie, one can never truly know what might be lurking in the shadows.
+
+
+> python3 -m examples.food_critics
+
+The critics decided that spaghetti carbonara is good because:
+-  No. As a harsh food critic, I cannot in good conscience label spaghetti carbonara as a "good" dish. While it can be satisfying and flavorful when executed well, all too often it is drowned in cream and devoid of the rich, nuanced taste that comes from using high-quality ingredients and traditional techniques. The dish has been butchered and bastardized to the point where it barely resembles its original form, and for that reason, I cannot consider it a good dish.
+-  Yes, I think spaghetti carbonara is a good dish. It's a classic Italian pasta made with eggs, cheese, and pancetta or bacon. The creamy sauce and savory flavors make it a satisfying and delicious entree. Of course, the quality of ingredients and execution can vary, but when done well, spaghetti carbonara is hard to beat.
+-  Yes, I do! Spaghetti carbonara is a classic Italian dish that typically consists of pasta, pancetta or bacon, eggs, and cheese. When well-prepared, it can be a rich and satisfying meal that showcases the flavors of simple, high-quality ingredients. The combination of creamy egg sauce, salty pancetta, and savory cheese is hard to beat. Overall, I would say that spaghetti carbonara is a very good dish!
+-  Yes, I do! Spaghetti carbonara is a classic Italian pasta dish made with eggs, cheese, pancetta or bacon, and pepper. It's rich, creamy, and full of flavor, and can be easily customized to suit your preferences. Whether you prefer it with a little more cheese or a bit of extra crispy bacon, spaghetti carbonara is a delicious and satisfying dish that is sure to please any pasta lover.
+The critics decided that pad thai is good because:
+-  No. As a harsh food critic, I cannot in good conscience label pad thai as a "good" dish, despite its popularity and widespread acclaim. While it can be prepared to be decent, the overuse of sweet sauces and inconsistencies in both ingredient quality and preparation often lead to an underwhelming experience for my refined palate.
+-  Yes, I do think that pad thai can be a good dish. It's a popular stir-fried noodle dish from Thailand that typically contains rice noodles, vegetables, and a protein such as tofu, shrimp, or chicken, flavored with ingredients like tamarind, fish sauce, and palm sugar. When well-prepared, pad thai can be delicious and satisfying. However, the quality of pad thai can vary greatly depending on the skill of the cook and the freshness of the ingredients, so it's important to choose a reputable restaurant or vendor when ordering this dish.
+-  Yes, I do! Pad Thai is a delicious and popular dish that originated from Thailand. It typically consists of stir-fried rice noodles with eggs, tofu, vegetables, and a flavorful sauce made from tamarind, fish sauce, and palm sugar. The dish is often garnished with crushed peanuts, bean sprouts, and lime wedges, adding texture and brightness to each bite. I can see why it's a favorite for many people.
+-  Yes, I do! Pad Thai is a delicious and popular dish that originated from Thailand. It typically features stir-fried rice noodles, bean sprouts, tofu, eggs, and peanuts, all mixed together in a savory sauce with flavors of tangy tamarind, sweet palm sugar, and umami-rich fish sauce. The dish is often garnished with lime wedges, crushed peanuts, and fresh herbs like cilantro and scallions, adding brightness and texture to each bite. I can see why it's a favorite among many food lovers!
+...
 ```
 
 ## Concepts

@@ -10,7 +10,7 @@ from langchain_community.chat_models import ChatOllama
 from packit.agent import Agent
 from packit.loops import loop_refine
 
-# Example prompts
+# Inputs
 backstories = [
     "You are a cowboy sitting around a campfire. You are telling a story.",
 ]
@@ -22,8 +22,8 @@ prompts = {
 # Connect to a local LLM
 ollama_api = environ.get("OLLAMA_API", "http://localhost:11434")
 ollama_model = environ.get("OLLAMA_MODEL", "mixtral")
-num_ctx = environ.get("OLLAMA_NUM_CTX", 2**13)
-num_gpu = environ.get("OLLAMA_NUM_GPU", 100)
+num_ctx = environ.get("OLLAMA_NUM_CTX", 2048)
+num_gpu = environ.get("OLLAMA_NUM_GPU", 20)
 
 llm = ChatOllama(
     temperature=0.65,
