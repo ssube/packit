@@ -1,11 +1,13 @@
 # PACkit
 
-Prompt Agent Construction Kit.
+The Prompt Agent Construction Kit, or maybe the Programmable Agent Construction Kit.
 
 Conversational development where your code is the manager.
 
 Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI). A
 loose toolkit of loops, operators, and predicates to help LLMs communicate with code.
+
+![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
 ## Contents
 
@@ -125,7 +127,9 @@ context window).
 
 #### Panel Results
 
-Panels can make their decision using
+Panels can make their decision using any of the available comparators. By default, they will compare their mean
+rating against a predefined threshold. If the consensus exceeds the threshold, the panel will give an affirmative
+answer. This can also be inverted using a counter or the not comparator.
 
 ### Loops
 
@@ -151,7 +155,7 @@ The refinement will continue until the iteration limit has been reached or the s
 
 #### Binary Results
 
-Interpret the response as an integer.
+Interpret the response as a boolean, yes or no.
 
 #### Integer Results
 
