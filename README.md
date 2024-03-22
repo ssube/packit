@@ -5,7 +5,7 @@ The Prompt Agent Construction Kit, or maybe the Programmable Agent Construction 
 Conversational development where your code is the manager.
 
 Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI). A
-loose toolkit of loops, operators, and predicates to help LLMs communicate with code.
+loose toolkit of loops, operators, and predicates to help LLMs communicate with each other and with your code.
 
 ![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
