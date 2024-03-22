@@ -13,9 +13,9 @@
       "cwd": "${workspaceFolder}",
       "env": {
           "PYTHONPATH": "${workspaceFolder}",
-          // "OLLAMA_NUM_CTX":"2048",
-          // "OLLAMA_API":"http://10.2.2.81:11434",
-          // "OLLAMA_NUM_GPU": "25"
+          "OLLAMA_NUM_CTX":"2048",
+          "OLLAMA_API":"http://10.2.2.81:11434",
+          "OLLAMA_NUM_GPU": "25"
       }
     }
   ]

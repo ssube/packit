@@ -56,6 +56,13 @@ def condition_threshold_sum(max_threshold: int, *currents: int) -> bool:
     return sum(currents) > max_threshold
 
 
+def condition_threshold_mean(max_threshold: float, *currents: int) -> bool:
+    """
+    Stop when the mean of the current thresholds is greater than the max threshold.
+    """
+    return sum(currents) / len(currents) > max_threshold
+
+
 def condition_and(*conditions: Condition) -> Condition:
     """
     Stop when all conditions are met.

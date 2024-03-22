@@ -1,7 +1,7 @@
 from typing import Any
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import condition_counter_mean
+from packit.conditions import condition_threshold_mean
 from packit.results import bool_result
 
 
@@ -28,16 +28,13 @@ class Panel:
         prompt: str,
         context: AgentContext,
         parse_result=bool_result,
-        decision_condition=condition_counter_mean,
-        min_count: int | None = None,
+        decision_condition=condition_threshold_mean,
+        min_threshold: float = 0.5,
     ) -> tuple[bool, dict[str, str]]:
-        if min_count is None:
-            min_count = len(self.agents) / 2
-
         results = self.invoke(prompt, context)
         values = [parse_result(result) for result in results.values()]
 
-        return decision_condition(min_count, *values), results
+        return decision_condition(min_threshold, *values), results
 
     def __call__(self, prompt, **kwargs: Any) -> Any:
         return self.decide(prompt, kwargs)

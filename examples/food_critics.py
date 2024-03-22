@@ -21,14 +21,12 @@ entrees = [
     "spaghetti carbonara",
     "pad thai",
     "chicken tikka masala",
-    "beef bourguignon",
-    "sushi",
-    "pizza",
-    "hamburger",
-    "hot dog",
-    "tacos",
-    "ramen",
-    "pho",
+    "dirt",
+    "rocks",
+    "batteries",
+    "a shoe",
+    "noodles",
+    "rice",
 ]
 
 prompts = {
