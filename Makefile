@@ -33,18 +33,24 @@ package-upload:
 
 lint-check:
 	black --check packit/
+	black --check examples/
 	black --check tests/
 	flake8 packit
+	flake8 examples
 	flake8 tests
 	isort --check-only --skip __init__.py --filter-files packit
+	isort --check-only --skip __init__.py --filter-files examples
 	isort --check-only --skip __init__.py --filter-files tests
 
 lint-fix:
 	black packit/
+	black examples/
 	black tests/
 	flake8 packit
+	flake8 examples
 	flake8 tests
 	isort --skip __init__.py --filter-files packit
+	isort --skip __init__.py --filter-files examples
 	isort --skip __init__.py --filter-files tests
 
 style: lint-fix

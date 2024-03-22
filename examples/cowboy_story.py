@@ -12,7 +12,7 @@ from packit.loops import loop_refine
 
 # Example prompts
 backstories = [
-  "You are a cowboy sitting around a campfire. You are telling a story.",
+    "You are a cowboy sitting around a campfire. You are telling a story.",
 ]
 
 prompts = {
@@ -24,11 +24,19 @@ ollama_api = environ.get("OLLAMA_API", "http://localhost:11434")
 num_ctx = environ.get("OLLAMA_NUM_CTX", 2**13)
 num_gpu = environ.get("OLLAMA_NUM_GPU", 100)
 
-llm = ChatOllama(temperature=0.65, model="mixtral", base_url=ollama_api, num_ctx=num_ctx, num_gpu=num_gpu)
+llm = ChatOllama(
+    temperature=0.65,
+    model="mixtral",
+    base_url=ollama_api,
+    num_ctx=num_ctx,
+    num_gpu=num_gpu,
+)
 
 # Create the cowboys
 cowboy_count = randint(3, 6)
-cowboys = [Agent(f"cowboy {i}", choice(backstories), {}, llm) for i in range(cowboy_count)]
+cowboys = [
+    Agent(f"cowboy {i}", choice(backstories), {}, llm) for i in range(cowboy_count)
+]
 
 # Choose a random cowboy to start the story
 starter = choice(cowboys)
