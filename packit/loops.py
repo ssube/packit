@@ -22,7 +22,7 @@ def loop_converse(
     agent_index = 0
     current_iteration = 0
 
-    while not stop_condition(current_iteration, max_iterations):
+    while not stop_condition(max_iterations, current_iteration):
         agent = agents[agent_index]
         prompt = agent(prompt, **context)
 

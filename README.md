@@ -48,15 +48,18 @@ from packit.loops import loop_converse
 
 llm = ChatOpenAI(model="gpt-4", temperature=0)
 
+ending = "Leave the end open for the next person to continue the story."
 backstories = {
-    "captain": "You are a ship's captain, telling a story of the one that didn't get away.",
-    "fisherman": "You are a fisherman, recounting a tale of the one that got away.",
-    "pirate": "You are a salty pirate, telling a tale of the high seas.",
-    "sailor": "You are a sailor, spinning a yarn about the open ocean.",
+    "captain": "You are a ship's captain, telling a story of the one that didn't get away. "
+    + ending,
+    "fisherman": "You are a fisherman, recounting a tale of the one that got away. "
+    + ending,
+    "pirate": "You are a salty pirate, telling a tale of the high seas. " + ending,
+    "sailor": "You are a sailor, spinning a yarn about the open ocean. " + ending,
 }
 
-agents = {k: Agent(v, backstories[k], {}) for k, v in backstories.items()}
-starter = choice(list(agents.values()))
+agents = [Agent(name, backstory, {}, llm) for name, backstory in backstories.items()]
+starter = choice(agents)
 
 story = starter("Start writing a tall tale about sea monsters.")
 story = loop_converse(agents, story)
@@ -66,9 +69,34 @@ print("The tall tale is:", story)
 
 ## Examples
 
+Some of the examples are set up for OpenAI and some are set up for Ollama.
+
+Until I can abstract that out, please make sure you run the right examples for the LLM and API that you are using.
+
 ### With OpenAI API
 
-TODO: OpenAI example
+```shell
+export OPENAI_API_KEY="your-api-key-here"
+
+> time python3 -m examples.readme
+The tall tale is: Gather 'round, ye sea dogs and landlubbers alike, and lend an ear to this old salt. I've a tale to spin, a yarn to weave, about the one that didn't get away. A tale of a sea monster, a leviathan of the deep, that would make even the bravest sailor's blood run cold.
+
+'Twas a time many moons ago, when I was but a young captain, full of fire and brine. We were sailing the South Seas, the wind in our sails and the sun on our backs, when the sea turned as black as a moonless night. The air grew cold, and a fog as thick as pea soup rolled in, obscuring our vision. The crew grew restless, whispering of ghost ships and sea serpents. But I, in my youthful arrogance, dismissed their fears as old wives' tales.
+
+Then, from the depths, it came. A monstrous beast, the likes of which no man had ever seen. It was as long as our ship, with scales that shimmered like a thousand emeralds under the water. Its eyes were as red as the setting sun, and it had teeth as sharp as cutlasses. It roared, a sound that shook the very timbers of our ship, and the sea around us boiled with its fury.
+
+The crew was paralyzed with fear, but not I. I grabbed a harpoon and climbed to the crow's nest, determined to face the beast. As it lunged towards our ship, I took aim and threw the harpoon with all my might. It struck true, embedding itself in the monster's hide.
+
+But the beast was not so easily defeated. It thrashed and roared, its tail smashing into our ship and sending men flying. I held on for dear life, praying to Poseidon for mercy. Then, with a final, desperate effort, I drew my cutlass and leapt onto the beast's back.
+
+I fought like a man possessed, hacking and slashing at the monster. Blood and sea water sprayed everywhere, and the beast roared in pain and fury. But I did not let up. I fought until my arms were numb and my vision blurred, until finally, with a mighty roar, the beast fell silent.
+
+Exhausted, I slid off its back and into the sea, watching as the monster sank beneath the waves. I was pulled aboard by my crew, who stared at me in awe. From that day forth, they spoke of the battle in hushed whispers, of the young captain who had faced a sea monster and lived to tell the tale.
+
+And that, my friends, is the story of the one that didn't get away. A tale of courage and determination, of a man and a monster, locked in a battle for the ages. So next time you find yourself out on the open sea, remember this tale. For the ocean is a vast and mysterious place, full of wonders and terrors alike. And who knows what monsters lurk beneath its waves?
+
+real    0m30.965s
+```
 
 ### With Local Ollama
 
