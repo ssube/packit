@@ -81,9 +81,9 @@ print("Correct result:", a * b)
 
 # Ask the manager if the result is correct
 decision = manager(
-    "You are having trouble with a function call and need help. "
+    "You are having trouble with a function call and asked tech support for help. "
     "You need to multiply two numbers together. The first number is {a} and the second number is {b}. "
-    "The tech support agent has provided a function call to multiply two numbers and the result is {result}. "
+    "The tech support agent has provided the result: {result}. "
     "Is this the correct result? Reply with a one word answer: 'yes' or 'no'.",
     a=a,
     b=b,
@@ -98,4 +98,7 @@ if bool_result(decision):
     else:
         print("The manager accepted an incorrect result.")
 else:
-    print("The manager rejected the result.")
+    if (a * b) == result:
+        print("The manager rejected the correct result.")
+    else:
+        print("The manager rejected an incorrect result.")
