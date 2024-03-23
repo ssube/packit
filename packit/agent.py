@@ -2,7 +2,7 @@ from logging import getLogger
 from os import environ
 from typing import Any
 
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from packit.formats import format_str_or_json
 from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
@@ -23,13 +23,22 @@ class Agent:
     backstory: str
     context: AgentContext
     llm: type[AgentModel]
+    memory: list[AgentModelMessage] | None
+    memory_limit: int
     name: str
 
-    def __init__(self, name, backstory, context, llm):
+    def __init__(self, name, backstory, context, llm, memory=True, memory_limit=10):
         self.backstory = backstory
         self.context = context
         self.llm = llm
         self.name = name
+
+        if memory:
+            self.memory = []
+            self.memory_limit = memory_limit
+        else:
+            self.memory = None
+            self.memory_limit = 0
 
     def invoke_retry(
         self,
@@ -70,19 +79,40 @@ class Agent:
         formatted_prompt = prompt.format(**args)
         formatted_backstory = self.backstory.format(**args)
 
-        logger.info("System: %s", formatted_backstory)
-        logger.info("Prompt: %s", formatted_prompt)
-        messages = [
-            SystemMessage(content=formatted_backstory),
-            HumanMessage(content=formatted_prompt),
-        ]
+        logger.debug("System: %s", formatted_backstory)
+        logger.debug("Prompt: %s", formatted_prompt)
+
+        system = SystemMessage(content=formatted_backstory)
+        human = HumanMessage(content=formatted_prompt)
+
+        if self.memory is not None:
+            logger.debug("Memory: %s", self.memory)
+            messages = [
+                system,
+                *self.memory,
+                human,
+            ]
+        else:
+            messages = [
+                system,
+                human,
+            ]
 
         result = self.invoke_retry(messages)
 
         if not self.response_complete(result):
             logger.warning("LLM did not finish: %s", result)
 
-        return result.content
+        reply = result.content
+        logger.debug("Response: %s", reply)
+
+        if self.memory is not None:
+            self.memory.append(human)
+            self.memory.append(AIMessage(content=reply))
+            if len(self.memory) > self.memory_limit:
+                self.memory = self.memory[-self.memory_limit :]
+
+        return reply
 
     def response_complete(self, result: Any) -> bool:
         if "done" in result.response_metadata:
@@ -97,7 +127,9 @@ class Agent:
         return self.invoke(prompt, kwargs)
 
 
-def agent_easy_connect(temperature=0.0, driver="openai", model="gpt-4") -> AgentModel:
+def agent_easy_connect(
+    driver: str = "openai", model: str = "gpt-4", temperature: float = 0.0
+) -> AgentModel:
     """
     Quick connect to one of a few pre-defined LLMs using common environment variables.
 
