@@ -150,9 +150,9 @@ The critics decided that pad thai is good because:
 
 The critics decided that rocks is bad because:
 -  No. Rocks are not a suitable ingredient for any dish, as they are hard and indigestible. Consuming rocks can cause serious harm to one's health, and should never be consumed as food.
--  No, I do not think rocks would make a good dish. Rocks are hard and not edible, so they would not be enjoyable to eat. Additionally, consuming non-food items can be harmful to your health.                                                                                                            -  No, I do not think that rocks would make a good dish to serve as an entree. Rocks are not edible and consuming them could be very harmful. As a generous food critic, I must still prioritize the safety and well-being of those who enjoy food.
--  No, I do not think rocks would make a good dish to eat. As a food critic, I value high-quality ingredients that are prepared in a way that brings out their flavors and textures. Rocks do not meet these criteria, as they are not typically consumed as food and lack the nutritional value and taste
-of more traditional culinary ingredients.
+-  No, I do not think rocks would make a good dish. Rocks are hard and not edible, so they would not be enjoyable to eat. Additionally, consuming non-food items can be harmful to your health.
+-  No, I do not think that rocks would make a good dish to serve as an entree. Rocks are not edible and consuming them could be very harmful. As a generous food critic, I must still prioritize the safety and well-being of those who enjoy food.
+-  No, I do not think rocks would make a good dish to eat. As a food critic, I value high-quality ingredients that are prepared in a way that brings out their flavors and textures. Rocks do not meet these criteria, as they are not typically consumed as food and lack the nutritional value and taste of more traditional culinary ingredients.
 ...
 ```
 
