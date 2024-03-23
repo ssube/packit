@@ -2,6 +2,9 @@ from random import choice
 
 from packit.agent import Agent, agent_easy_connect
 from packit.loops import loop_converse
+from packit.utils import logger_with_colors
+
+logger = logger_with_colors(__name__)
 
 ending = "Leave the end open for the next person to continue the story."
 backstories = {
@@ -20,4 +23,4 @@ starter = choice(agents)
 story = starter("Start writing a tall tale about sea monsters.")
 story = loop_converse(agents, story)
 
-print("The tall tale is:", story)
+logger.info("The tall tale is:", story)

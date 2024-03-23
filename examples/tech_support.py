@@ -1,15 +1,14 @@
-from logging import getLogger
 from random import randint
 
-from coloredlogs import install
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
 from packit.agent import Agent, agent_easy_connect
 from packit.results import bool_result, function_result
 from packit.tools import multiply_tool, sum_tool
+from packit.utils import logger_with_colors
 
-install(level="DEBUG")
-logger = getLogger(__name__)
+# Set up logging
+logger = logger_with_colors(__name__)
 
 # Set up some basic tools
 tools = [
@@ -53,7 +52,7 @@ question = manager(
     a=a,
     b=b,
 )
-print("Question:", question)
+logger.info("Question: %s", question)
 
 # Ask the tech support agent to solve the problem
 example_call = {
@@ -75,14 +74,14 @@ result = tech_support(
     example=example_call,
     tools=tools,
 )
-print("Raw result:", result)
+logger.info("Raw result: %s", result)
 
 result = function_result(
     result,
     tool_dict,
 )
-print("Multiply result:", result)
-print("Correct result:", a * b)
+logger.info("Multiply result: %s", result)
+logger.info("Correct result: %s", a * b)
 
 # Ask the manager if the result is correct
 decision = manager(
@@ -94,16 +93,16 @@ decision = manager(
     b=b,
     result=result,
 )
-print("Decision:", decision)
+logger.info("Decision: %s", decision)
 
 # Compare the outputs
 if bool_result(decision):
     if (a * b) == result:
-        print("The manager accepted the correct result.")
+        logger.info("The manager accepted the correct result.")
     else:
-        print("The manager accepted an incorrect result.")
+        logger.error("The manager accepted an incorrect result.")
 else:
     if (a * b) == result:
-        print("The manager rejected the correct result.")
+        logger.error("The manager rejected the correct result.")
     else:
-        print("The manager rejected an incorrect result.")
+        logger.info("The manager rejected an incorrect result.")

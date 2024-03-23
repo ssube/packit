@@ -6,6 +6,10 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 from packit.agent import Agent, agent_easy_connect
 from packit.results import function_result
 from packit.tools import lowercase_tool, multiply_tool, sum_tool, uppercase_tool
+from packit.utils import logger_with_colors
+
+# Set up logging
+logger = logger_with_colors(__name__)
 
 # Set up some basic tools
 tools = [
@@ -33,7 +37,7 @@ agent = Agent(
 # Ask the agent to multiply two random numbers
 a = randint(1, 100)
 b = randint(1, 100)
-print("Multiplying:", a, b)
+logger.info("Multiplying:", a, b)
 
 example_call = {
     "function": "multiply",
@@ -51,19 +55,19 @@ prompt = (
     "The available functions are: {tools}"
 )
 result = agent(prompt, a=a, b=b, example=dumps(example_call), tools=dumps(tools))
-print("Raw result:", result)
+logger.info("Raw result:", result)
 
 result = function_result(
     result,
     tool_dict,
 )
-print("Multiply result:", result)
-print("Correct result:", a * b)
+logger.info("Multiply result:", result)
+logger.info("Correct result:", a * b)
 
 # Do some sums
 for i in range(2, 6):
     numbers = [randint(1, 100) for _ in range(i)]
-    print("Summing:", numbers)
+    logger.info("Summing:", numbers)
 
     prompt = (
         "Sum up the following numbers: {numbers}. "
@@ -77,11 +81,11 @@ for i in range(2, 6):
     result = agent(
         prompt, numbers=numbers, example=dumps(example_call), tools=dumps(tools)
     )
-    print("Raw result:", result)
+    logger.info("Raw result:", result)
 
     result = function_result(
         result,
         tool_dict,
     )
-    print("Sum result:", result)
-    print("Correct result:", sum(numbers))
+    logger.info("Sum result:", result)
+    logger.info("Correct result:", sum(numbers))

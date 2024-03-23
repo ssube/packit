@@ -5,6 +5,10 @@ from langchain_core.utils.function_calling import convert_to_openai_tool
 from packit.agent import Agent, agent_easy_connect
 from packit.results import function_result
 from packit.tools import lowercase_tool, titlecase_tool, uppercase_tool
+from packit.utils import logger_with_colors
+
+# Set up logging
+logger = logger_with_colors(__name__)
 
 # Set up some basic tools
 tools = [
@@ -51,10 +55,10 @@ for input in inputs:
         "The available functions are: {tools}"
     )
     result = agent(prompt, input=input, example=dumps(example_call), tools=dumps(tools))
-    print("Raw result:", result)
+    logger.info("Raw result:", result)
 
     result = function_result(
         result,
         tool_dict,
     )
-    print("Title case result:", result)
+    logger.info("Title case result:", result)

@@ -5,6 +5,9 @@ Ask a panel of food critics to rate a list of entreés.
 from packit.agent import Agent, agent_easy_connect
 from packit.formats import format_bullet_list
 from packit.panel import Panel
+from packit.utils import logger_with_colors
+
+logger = logger_with_colors(__name__)
 
 # Inputs
 backstories = {
@@ -52,6 +55,6 @@ panel = Panel(panel_weights)
 # Rate each of the entreés
 for entree in entrees:
     decision, reasons = panel(prompts["entree"], entree=entree)
-    print(
+    logger.info(
         f"The critics decided that {entree} is {decisions[decision]} because:\n{format_bullet_list(reasons.values())}"
     )

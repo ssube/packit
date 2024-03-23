@@ -6,6 +6,9 @@ from random import choice, randint
 
 from packit.agent import Agent, agent_easy_connect
 from packit.loops import loop_refine
+from packit.utils import logger_with_colors
+
+logger = logger_with_colors(__name__)
 
 # Inputs
 backstories = [
@@ -31,4 +34,4 @@ story = starter(prompts["start"])
 story = loop_refine(cowboys, story)
 
 # Print the story
-print(story)
+logger.info(story)

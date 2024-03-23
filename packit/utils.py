@@ -1,7 +1,28 @@
 from base64 import b64encode
 from hashlib import sha256
 from json import dumps
+from os import environ
 from time import monotonic
+
+
+def logger_with_colors(name: str, level="INFO"):
+    """
+    Get a logger with colored output.
+    """
+    from logging import getLogger
+
+    debug = environ.get("DEBUG", "false").lower() == "true"
+    if debug:
+        level = "DEBUG"
+
+    try:
+        from coloredlogs import install
+
+        install(level=level)
+    except ImportError:
+        pass
+
+    return getLogger(name)
 
 
 def hash_dict(data: dict):
