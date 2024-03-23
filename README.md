@@ -30,11 +30,13 @@ allows you to build a hierarchical mixture of experts on the fly.
       - [Panel Results](#panel-results)
     - [Loops](#loops)
       - [Conversation Loops](#conversation-loops)
+      - [Extension Loops](#extension-loops)
       - [Panel Loops](#panel-loops)
       - [Refinement Loops](#refinement-loops)
     - [Results](#results)
       - [Binary Results](#binary-results)
       - [Integer Results](#integer-results)
+      - [Function Results](#function-results)
       - [JSON Results](#json-results)
 
 ## Quickstart
@@ -206,7 +208,16 @@ Using two or more agents, have them respond to one another in a conversational m
 
 The conversation will continue until the iteration limit has been reached or the stop condition becomes true.
 
-This is similar to what CrewAI does, but much simpler.
+Each agent will pass their response on to the next agent and ask them to consider it. This is similar to what CrewAI
+does, but much simpler.
+
+#### Extension Loops
+
+Using one or more agents, have them incrementally extend the output.
+
+The extension will continue until the iteration limit has been reached or the stop condition becomes true.
+
+Each agent will pass their response on to the next agent and prompt them to extend it.
 
 #### Panel Loops
 
@@ -218,6 +229,8 @@ Using one or more agents, have them incrementally refine the output.
 
 The refinement will continue until the iteration limit has been reached or the stop condition becomes true.
 
+Each agent will pass their response on to the next agent and prompt them to refine and correct it.
+
 ### Results
 
 #### Binary Results
@@ -227,6 +240,11 @@ Interpret the response as a boolean, yes or no.
 #### Integer Results
 
 Interpret the response as an integer.
+
+#### Function Results
+
+Interpret the response as a function call using [LangChain's JSON schema](https://python.langchain.com/docs/modules/model_io/chat/function_calling#defining-functions-schemas)
+for function calls and invoke the function from a dictionary of callbacks.
 
 #### JSON Results
 

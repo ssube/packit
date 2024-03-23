@@ -23,4 +23,4 @@ starter = choice(agents)
 story = starter("Start writing a tall tale about sea monsters.")
 story = loop_converse(agents, story)
 
-logger.info("The tall tale is:", story)
+logger.info("The tall tale is: %s", story)
