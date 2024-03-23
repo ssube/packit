@@ -75,6 +75,8 @@ All examples should work with both OpenAI and Ollama, allowing you to test them 
 
 ### With OpenAI API
 
+Run the examples, making sure to set your OpenAI API key and the `gpt-4` model:
+
 ```shell
 export OPENAI_API_KEY="your-api-key-here"
 export PACKIT_MODEL="gpt-4"
@@ -98,6 +100,9 @@ And that, my friends, is the story of the one that didn't get away. A tale of co
 
 real    0m30.965s
 ```
+
+If you receive an error from the OpenAI API that the `mixtral` model does not exist or is not accessible, make sure you
+have set the `PACKIT_MODEL` variable to a valid OpenAI model, like `gpt-4`.
 
 ### With Ollama API
 
