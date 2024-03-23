@@ -48,7 +48,6 @@ b = randint(1, 100)
 
 # Ask the manager to prepare a prompt for the tech support agent
 question = manager(
-    # "You are having trouble with a function call and need help. "
     "You need to multiply two numbers together. The first number is {a} and the second number is {b}. "
     "Ask the tech support agent to find and use the correct function to solve your problem. "
     "Do not introduce yourself or sign the message. Be clear and concise. ",
@@ -74,7 +73,6 @@ logger.info("Correct result: %s", a * b)
 
 # Ask the manager if the result is correct
 decision = manager(
-    # "You are having trouble with a function call and asked tech support for help. "
     "You need to multiply two numbers together. The first number is {a} and the second number is {b}. "
     "The tech support agent has provided this result: {result}. "
     "Is this the correct result? Reply with a one word answer: 'yes' or 'no'.",
