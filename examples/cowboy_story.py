@@ -5,18 +5,18 @@ N cowboys are sitting around a fire, each telling part of an ever-growing story.
 from random import choice, randint
 
 from packit.agent import Agent, agent_easy_connect
-from packit.loops import loop_refine
+from packit.loops import loop_extend
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
 
 # Inputs
 backstories = [
-    "You are a cowboy sitting around a campfire. You are telling a story.",
+    "You are a cowboy sitting around a campfire, telling an increasingly unbelievable story.",
 ]
 
 prompts = {
-    "start": "You are a cowboy sitting around a campfire. You are telling a story.",
+    "start": "Start a campfire story about ghostly porcupines.",
 }
 
 # Create the cowboys
@@ -31,7 +31,7 @@ starter = choice(cowboys)
 story = starter(prompts["start"])
 
 # Each cowboy tells a part of the story
-story = loop_refine(cowboys, story)
+story = loop_extend(cowboys, story)
 
 # Print the story
 logger.info(story)

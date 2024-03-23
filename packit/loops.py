@@ -13,7 +13,7 @@ def loop_converse(
     context: AgentContext | None = None,
     max_iterations: int = 10,
     stop_condition: Condition = condition_threshold,
-):
+) -> str:
     """
     Loop through a list of agents and have them converse with each other.
     """
@@ -24,7 +24,38 @@ def loop_converse(
 
     while not stop_condition(max_iterations, current_iteration):
         agent = agents[agent_index]
-        prompt = agent(prompt, **context)
+        intro = get_random_prompt("converse")
+        prompt = agent(intro + " " + prompt, **context)
+
+        agent_index = (agent_index + 1) % len(agents)
+        current_iteration += 1
+
+    if current_iteration == max_iterations:
+        logger.warning("Max iterations reached")
+
+    return prompt
+
+
+def loop_extend(
+    agents: list[Agent],
+    prompt: str,
+    context: AgentContext | None = None,
+    max_iterations: int = 10,
+    stop_condition: Condition = condition_threshold,
+    prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
+) -> str:
+    """
+    Loop through a list of agents to extend a prompt.
+    """
+    context = context or {}
+
+    agent_index = 0
+    current_iteration = 0
+
+    while not stop_condition(max_iterations, current_iteration):
+        agent = agents[agent_index]
+        intro = get_random_prompt("extend")
+        prompt = agent(intro + " " + prompt, **context)
 
         agent_index = (agent_index + 1) % len(agents)
         current_iteration += 1
@@ -42,7 +73,7 @@ def loop_refine(
     max_iterations: int = 10,
     stop_condition: Condition = condition_threshold,
     prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
-):
+) -> str:
     """
     Loop through a list of agents to refine a prompt.
     """

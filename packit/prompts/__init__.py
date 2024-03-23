@@ -1,13 +1,13 @@
 from random import choice
 from typing import Literal
 
-from packit.prompts.mixtral import (
+from .mixtral import (
     prompts as mixtral_prompts,
     function_call as mixtral_function_call,
 )
-from packit.prompts.smaug import prompts as smaug_prompts
+from .smaug import prompts as smaug_prompts
 
-PromptTemplateKey = Literal["function", "refine", "skip"]
+PromptTemplateKey = Literal["converse", "extend", "function", "refine", "skip"]
 PromptTemplates = dict[PromptTemplateKey, list[str]]
 
 DEFAULT_PROMPTS = mixtral_prompts

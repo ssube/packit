@@ -4,6 +4,14 @@ function_call = {
 }
 
 prompts = {
+    "converse": [
+        "What do you think about this?",
+    ],
+    "extend": [
+        "How would you continue this?",
+        "What would you add to this?",
+        "Expand on this idea and provide more details.",
+    ],
     "function": [
         "Given the following JSON object, please respond with a valid function call in JSON syntax. "
         "For example: {example}. "
