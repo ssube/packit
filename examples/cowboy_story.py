@@ -20,7 +20,7 @@ prompts = {
 }
 
 # Create the cowboys
-llm = agent_easy_connect()
+llm = agent_easy_connect(model="mixtral")
 cowboy_count = randint(3, 6)
 cowboys = [
     Agent(f"cowboy {i}", choice(backstories), {}, llm) for i in range(cowboy_count)

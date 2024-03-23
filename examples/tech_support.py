@@ -1,31 +1,25 @@
 from random import randint
 
-from langchain_core.utils.function_calling import convert_to_openai_tool
-
 from packit.agent import Agent, agent_easy_connect
 from packit.prompts import get_function_example, get_random_prompt
 from packit.results import bool_result, function_result
-from packit.tools import multiply_tool, sum_tool
+from packit.tools import multiply_tool, prepare_tools, sum_tool
 from packit.utils import logger_with_colors
 
 # Set up logging
 logger = logger_with_colors(__name__)
 
 # Set up some basic tools
-tools = [
-    convert_to_openai_tool(multiply_tool),
-    convert_to_openai_tool(sum_tool),
-]
-tool_dict = {
-    "multiply_tool": multiply_tool,
-    "sum_tool": sum_tool,
-}
+tools, tool_dict = prepare_tools(
+    [
+        multiply_tool,
+        sum_tool,
+    ]
+)
 
 # Connect to two different models
 manager_llm = agent_easy_connect(model="mixtral")
-function_llm = agent_easy_connect(
-    model="knoopx/hermes-2-pro-mistral:7b-q8_0", override_model=True
-)
+function_llm = agent_easy_connect(model="knoopx/hermes-2-pro-mistral:7b-q8_0")
 
 # Set up agents for each role
 manager = Agent(

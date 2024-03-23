@@ -23,3 +23,4 @@ Those exist for one (or sometimes both) of two reasons:
 - Examples should run on their own, as standalone Python scripts
 - Examples should be compatible with both OpenAI and Ollama
 - Examples should be < 100 lines of code
+- Examples should not need to import directly from `langchain*`

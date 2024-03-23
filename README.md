@@ -49,8 +49,6 @@ from langchain_openai import ChatOpenAI
 from packit.agent import Agent
 from packit.loops import loop_converse
 
-llm = ChatOpenAI(model="gpt-4", temperature=0)
-
 ending = "Leave the end open for the next person to continue the story."
 backstories = {
     "captain": "You are a ship's captain, telling a story of the one that didn't get away. " + ending,
@@ -59,6 +57,7 @@ backstories = {
     "sailor": "You are a sailor, spinning a yarn about the open ocean. " + ending,
 }
 
+llm = ChatOpenAI(model="gpt-4", temperature=0)
 agents = [Agent(name, backstory, {}, llm) for name, backstory in backstories.items()]
 starter = choice(agents)
 
@@ -70,12 +69,13 @@ print("The tall tale is:", story)
 
 ## Examples
 
-All examples should work with both OpenAI and Ollama, depending on whether you want to run them in the cloud or locally.
+All examples should work with both OpenAI and Ollama, allowing you to test them locally or in the cloud.
 
 ### With OpenAI API
 
 ```shell
 export OPENAI_API_KEY="your-api-key-here"
+export PACKIT_MODEL="gpt-4"
 
 > time python3 -m examples.readme
 The tall tale is: Gather 'round, ye sea dogs and landlubbers alike, and lend an ear to this old salt. I've a tale to spin, a yarn to weave, about the one that didn't get away. A tale of a sea monster, a leviathan of the deep, that would make even the bravest sailor's blood run cold.

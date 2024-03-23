@@ -16,7 +16,7 @@ backstories = {
     "sailor": "You are a sailor, spinning a yarn about the open ocean. " + ending,
 }
 
-llm = agent_easy_connect()
+llm = agent_easy_connect(model="mixtral")
 agents = [Agent(name, backstory, {}, llm) for name, backstory in backstories.items()]
 starter = choice(agents)
 

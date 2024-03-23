@@ -38,7 +38,7 @@ decisions = {
 }
 
 # Create the food critics
-llm = agent_easy_connect()
+llm = agent_easy_connect(model="mixtral")
 critics = {
     critic: Agent(f"{critic} critic", backstory, {}, llm)
     for critic, backstory in backstories.items()
