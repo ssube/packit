@@ -25,14 +25,14 @@ allows you to build a hierarchical mixture of experts on the fly.
       - [Agent Backstory](#agent-backstory)
       - [Agent Context](#agent-context)
       - [Agent Temperature](#agent-temperature)
-    - [Panels](#panels)
-      - [Panel Methods](#panel-methods)
-      - [Panel Results](#panel-results)
     - [Loops](#loops)
       - [Conversation Loops](#conversation-loops)
       - [Extension Loops](#extension-loops)
       - [Panel Loops](#panel-loops)
       - [Refinement Loops](#refinement-loops)
+    - [Panels](#panels)
+      - [Panel Methods](#panel-methods)
+      - [Panel Results](#panel-results)
     - [Results](#results)
       - [Binary Results](#binary-results)
       - [Integer Results](#integer-results)
@@ -182,24 +182,6 @@ In technical terms, the context is the dictionary of variables available for use
 
 An `Agent`'s temperature controls how creative they will be, but too high of a temperature will stop making sense.
 
-### Panels
-
-A `Panel` is a weighted panel of agents. Each agent will be given the same user prompt, along with their own system
-prompt, or backstory. Their responses will be interpreted the same way. Agents with a greater weight will be asked more
-often than the others.
-
-#### Panel Methods
-
-Panels can use many methods to make their decision. Agents can respond with a yes/no answer or rank items on a scale.
-When multiple items are provided, they can be evaluated individually or as a single group (with a large enough
-context window).
-
-#### Panel Results
-
-Panels can make their decision using any of the available comparators. By default, they will compare their mean
-rating against a predefined threshold. If the consensus exceeds the threshold, the panel will give an affirmative
-answer. This can also be inverted using a counter or the not comparator.
-
 ### Loops
 
 #### Conversation Loops
@@ -230,6 +212,24 @@ Using one or more agents, have them incrementally refine the output.
 The refinement will continue until the iteration limit has been reached or the stop condition becomes true.
 
 Each agent will pass their response on to the next agent and prompt them to refine and correct it.
+
+### Panels
+
+A `Panel` is a weighted panel of agents. Each agent will be given the same user prompt, along with their own system
+prompt, or backstory. Their responses will be interpreted the same way. Agents with a greater weight will be asked more
+often than the others.
+
+#### Panel Methods
+
+Panels can use many methods to make their decision. Agents can respond with a yes/no answer or rank items on a scale.
+When multiple items are provided, they can be evaluated individually or as a single group (with a large enough
+context window).
+
+#### Panel Results
+
+Panels can make their decision using any of the available comparators. By default, they will compare their mean
+rating against a predefined threshold. If the consensus exceeds the threshold, the panel will give an affirmative
+answer. This can also be inverted using a counter or the not comparator.
 
 ### Results
 
