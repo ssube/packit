@@ -19,7 +19,7 @@ allows you to build a hierarchical mixture of experts on the fly.
   - [Quickstart](#quickstart)
   - [Examples](#examples)
     - [With OpenAI API](#with-openai-api)
-    - [With Local Ollama](#with-local-ollama)
+    - [With Ollama API](#with-ollama-api)
   - [Concepts](#concepts)
     - [Agents](#agents)
       - [Agent Backstory](#agent-backstory)
@@ -99,9 +99,10 @@ And that, my friends, is the story of the one that didn't get away. A tale of co
 real    0m30.965s
 ```
 
-### With Local Ollama
+### With Ollama API
 
-Launch a local [Ollama server](https://ollama.com/) with the [Mixtral model](https://mistral.ai/news/mixtral-of-experts/):
+Launch a local or remote [Ollama server](https://ollama.com/) and download the
+[Mixtral model](https://mistral.ai/news/mixtral-of-experts/):
 
 ```shell
 export OLLAMA_HOST=0.0.0.0 # only needed for remote access
