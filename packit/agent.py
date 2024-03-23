@@ -97,14 +97,14 @@ class Agent:
         return self.invoke(prompt, kwargs)
 
 
-def agent_easy_connect(temperature=0.0) -> AgentModel:
+def agent_easy_connect(temperature=0.0, driver="openai", model="gpt-4") -> AgentModel:
     """
     Quick connect to one of a few pre-defined LLMs using common environment variables.
 
     This has very limited features and is mostly for testing and the examples.
     """
-    driver = environ.get("PACKIT_DRIVER", "openai")
-    model = environ.get("PACKIT_MODEL", "gpt-4")
+    driver = environ.get("PACKIT_DRIVER", driver)
+    model = environ.get("PACKIT_MODEL", model)
 
     if driver == "openai":
         from langchain_openai import ChatOpenAI

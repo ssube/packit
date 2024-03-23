@@ -61,7 +61,10 @@ ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
 
 
 def function_result(value: str, tools: ToolDict) -> str:
-    value = value.replace("<|im_end|>", "")
+    value = value.replace(
+        "\\_", "_"
+    )  # some models like to escape underscores in the function name
+    value = value.replace("<|im_end|>", "")  # some models include this terminator
     data = json_result(value)
 
     if "function" not in data:
