@@ -6,6 +6,9 @@ Conversational development where your code is the manager.
 
 Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI). A
 loose toolkit of loops, operators, and predicates to help LLMs communicate with each other and with your code.
+Compatible with all Langchain chat models that support `invoke`, which is all of them. Supports function calling with
+JSON-trained models. Using [`Panel`s](#panels) with [MoE models like Mixtral](https://huggingface.co/blog/moe) will
+form a mixture of mixtures of experts.
 
 ![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
@@ -50,10 +53,8 @@ llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 ending = "Leave the end open for the next person to continue the story."
 backstories = {
-    "captain": "You are a ship's captain, telling a story of the one that didn't get away. "
-    + ending,
-    "fisherman": "You are a fisherman, recounting a tale of the one that got away. "
-    + ending,
+    "captain": "You are a ship's captain, telling a story of the one that didn't get away. " + ending,
+    "fisherman": "You are a fisherman, recounting a tale of the one that got away. " + ending,
     "pirate": "You are a salty pirate, telling a tale of the high seas. " + ending,
     "sailor": "You are a sailor, spinning a yarn about the open ocean. " + ending,
 }
@@ -69,9 +70,7 @@ print("The tall tale is:", story)
 
 ## Examples
 
-Some of the examples are set up for OpenAI and some are set up for Ollama.
-
-Until I can abstract that out, please make sure you run the right examples for the LLM and API that you are using.
+All examples should work with both OpenAI and Ollama, depending on whether you want to run them in the cloud or locally.
 
 ### With OpenAI API
 

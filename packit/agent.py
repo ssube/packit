@@ -1,4 +1,5 @@
 from logging import getLogger
+from os import environ
 from typing import Any
 
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -94,3 +95,34 @@ class Agent:
 
     def __call__(self, prompt: str, **kwargs: Any) -> str:
         return self.invoke(prompt, kwargs)
+
+
+def agent_easy_connect(temperature=0.0) -> AgentModel:
+    """
+    Quick connect to one of a few pre-defined LLMs using common environment variables.
+
+    This has very limited features and is mostly for testing and the examples.
+    """
+    driver = environ.get("PACKIT_DRIVER", "openai")
+    model = environ.get("PACKIT_MODEL", "gpt-4")
+
+    if driver == "openai":
+        from langchain_openai import ChatOpenAI
+
+        return ChatOpenAI(model=model, temperature=temperature)
+    elif driver == "ollama":
+        from langchain_community.chat_models import ChatOllama
+
+        ollama_api = environ.get("OLLAMA_API", "http://localhost:11434")
+        num_ctx = environ.get("OLLAMA_NUM_CTX", 2048)
+        num_gpu = environ.get("OLLAMA_NUM_GPU", 20)
+
+        return ChatOllama(
+            model=model,
+            temperature=temperature,
+            base_url=ollama_api,
+            num_ctx=num_ctx,
+            num_gpu=num_gpu,
+        )
+    else:
+        raise ValueError(f"Unknown driver: {driver}")

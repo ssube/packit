@@ -26,5 +26,5 @@ class MockLLM:
         self.messages.extend(messages)
         reply = self.replies[self.index]
 
-        self.index += 1
+        self.index = (self.index + 1) % len(self.replies)
         return MockResponse(reply, DEFAULT_STOP)

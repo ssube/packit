@@ -1,11 +1,7 @@
 from random import choice
 
-from langchain_openai import ChatOpenAI
-
-from packit.agent import Agent
+from packit.agent import Agent, agent_easy_connect
 from packit.loops import loop_converse
-
-llm = ChatOpenAI(model="gpt-4", temperature=0)
 
 ending = "Leave the end open for the next person to continue the story."
 backstories = {
@@ -17,6 +13,7 @@ backstories = {
     "sailor": "You are a sailor, spinning a yarn about the open ocean. " + ending,
 }
 
+llm = agent_easy_connect()
 agents = [Agent(name, backstory, {}, llm) for name, backstory in backstories.items()]
 starter = choice(agents)
 

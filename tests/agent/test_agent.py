@@ -17,7 +17,7 @@ class TestAgent(TestCase):
         result = agent.invoke_retry(["prompt"], prompt_templates={"skip": ["<skip>"]})
         self.assertEqual(result.content, "prompt")
         self.assertTrue(result.response_metadata["done"])
-        self.assertEqual(llm.index, 2)
+        self.assertEqual(llm.index, 0)
 
     def test_format_context(self):
         llm = MockLLM(["prompt"])

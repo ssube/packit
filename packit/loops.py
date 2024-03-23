@@ -1,7 +1,8 @@
 from logging import getLogger
+from random import choice
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_counter
+from packit.conditions import Condition, condition_threshold
 from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
 
 logger = getLogger(__name__)
@@ -12,7 +13,7 @@ def loop_converse(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_counter,
+    stop_condition: Condition = condition_threshold,
 ):
     """
     Loop through a list of agents and have them converse with each other.
@@ -40,7 +41,7 @@ def loop_refine(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_counter,
+    stop_condition: Condition = condition_threshold,
     prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
 ):
     """
@@ -51,10 +52,9 @@ def loop_refine(
     agent_index = 0
     current_iteration = 0
 
-    intro = prompt_templates["refine"][0]
-
     while not stop_condition(max_iterations, current_iteration):
         agent = agents[agent_index]
+        intro = choice(prompt_templates["refine"])
         prompt = agent(intro + " " + prompt, **context)
 
         agent_index = (agent_index + 1) % len(agents)

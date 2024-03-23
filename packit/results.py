@@ -1,6 +1,7 @@
 from json import loads
 from logging import getLogger
 from re import sub
+from typing import Callable
 
 logger = getLogger(__name__)
 
@@ -29,7 +30,7 @@ def int_result(value: str) -> int:
     return int(value)
 
 
-def json_result(value: str, list_result=False) -> list[str]:
+def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
     # collapse lines
     value = value.replace("\n", "").replace("\r", "")
 
@@ -54,3 +55,40 @@ def json_result(value: str, list_result=False) -> list[str]:
 
     logger.debug("JSON after fixups: %s", value)
     return loads(value)
+
+
+ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
+
+
+def function_result(value: str, tools: ToolDict) -> str:
+    value = value.replace("<|im_end|>", "")
+    data = json_result(value)
+
+    if "function" not in data:
+        raise ValueError("No function specified")
+
+    function_name = data["function"]
+    if function_name not in tools:
+        raise ValueError(f"Unknown tool {function_name}")
+
+    function_params = data.get("parameters", {})
+    tool_function, result_parser = get_tool_with_parser(tools[function_name])
+
+    try:
+        tool_result = tool_function(**function_params)
+    except Exception as e:
+        raise ValueError(f"Error running tool {function_name}: {e}")
+
+    if result_parser is None:
+        return tool_result
+
+    return result_parser(tool_result)
+
+
+def get_tool_with_parser(
+    tool: Callable | tuple[Callable, Callable | None]
+) -> tuple[Callable, Callable | None]:
+    if isinstance(tool, tuple):
+        return tool
+
+    return tool, None
