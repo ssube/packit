@@ -8,7 +8,7 @@ Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https:
 loose toolkit of loops, operators, and predicates to help LLMs communicate with each other and with your code.
 Compatible with all Langchain chat models that support `invoke`, which is all of them. Supports function calling with
 JSON-trained models. Using [the `Panel`](#panels) with [MoE models like Mixtral](https://huggingface.co/blog/moe)
-allow you to build hierarchical mixtures of experts on the fly.
+allows you to build a hierarchical mixture of experts on the fly.
 
 ![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
