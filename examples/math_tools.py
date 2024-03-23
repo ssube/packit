@@ -26,7 +26,7 @@ tool_dict = {
 }
 
 # Create an agent that uses the tool
-llm = agent_easy_connect()
+llm = agent_easy_connect(model="knoopx/hermes-2-pro-mistral:7b-q8_0")
 agent = Agent(
     "programmer",
     "You are an expert computer programmer with a lot of experience.",
