@@ -1,8 +1,8 @@
 from json import dumps
 
 
-def format_str_or_json(value: str | dict) -> str:
-    if isinstance(value, dict):
+def format_str_or_json(value: str | dict | list) -> str:
+    if isinstance(value, (dict, list)):
         return dumps(value)
 
     return value
