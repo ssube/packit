@@ -109,9 +109,11 @@ ollama pull mixtral
 ollama serve
 ```
 
-Run the examples:
+Run the examples, making sure to set the `ollama` driver:
 
 ```shell
+export PACKIT_DRIVER=ollama
+
 > python3 -m examples.cowboy_story
  Gather 'round folks, and listen close as I recount the tale of a legendary haunted cattle drive. It was a dark and stormy night, not unlike this one, when a group of hardened cowboys set out to drive a herd of cattle from Texas to Kansas.
 
