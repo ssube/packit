@@ -12,6 +12,9 @@ def bool_result(value: str) -> bool:
     value = value.strip()
 
     # take the first phrase from longer answers
+    if "." in value:
+        value = value.split(".")[0]
+
     if "," in value:
         value = value.split(",")[0]
 

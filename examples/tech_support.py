@@ -3,6 +3,7 @@ from random import randint
 from langchain_core.utils.function_calling import convert_to_openai_tool
 
 from packit.agent import Agent, agent_easy_connect
+from packit.prompts import get_function_example, get_random_prompt
 from packit.results import bool_result, function_result
 from packit.tools import multiply_tool, sum_tool
 from packit.utils import logger_with_colors
@@ -22,7 +23,9 @@ tool_dict = {
 
 # Connect to two different models
 manager_llm = agent_easy_connect(model="mixtral")
-function_llm = agent_easy_connect(model="knoopx/hermes-2-pro-mistral:7b-q8_0")
+function_llm = agent_easy_connect(
+    model="knoopx/hermes-2-pro-mistral:7b-q8_0", override_model=True
+)
 
 # Set up agents for each role
 manager = Agent(
@@ -55,23 +58,9 @@ question = manager(
 logger.info("Question: %s", question)
 
 # Ask the tech support agent to solve the problem
-example_call = {
-    "function": "multiply",
-    "parameters": {"a": 3, "b": 8},
-}
-
-function_prompt = (
-    "Given the following JSON object, please respond with a valid function call in JSON syntax. "
-    "For example: {example}. "
-    "Do not implement the function or include code for the body of the function. Only call the function once. "
-    "Do not introduce yourself or sign the message. Be clear and concise. "
-    "Fill in all of the parameters with valid values, according to their type and description. "
-    "Make sure you fill in all of the required parameters. "
-    "The available functions are: {tools}"
-)
 result = tech_support(
-    question + function_prompt,
-    example=example_call,
+    question + get_random_prompt("function"),
+    example=get_function_example(),
     tools=tools,
 )
 logger.info("Raw result: %s", result)

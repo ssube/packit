@@ -5,6 +5,7 @@ from typing import Any
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from packit.formats import format_str_or_json
+from packit.memory import make_limited_memory
 from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
 
 logger = getLogger(__name__)
@@ -23,31 +24,38 @@ class Agent:
     backstory: str
     context: AgentContext
     llm: type[AgentModel]
+    max_retry: int
     memory: list[AgentModelMessage] | None
-    memory_limit: int
     name: str
 
-    def __init__(self, name, backstory, context, llm, memory=True, memory_limit=10):
+    def __init__(
+        self,
+        name,
+        backstory,
+        context,
+        llm,
+        max_retry=3,
+        memory=True,
+        memory_maker=make_limited_memory,
+    ):
         self.backstory = backstory
         self.context = context
         self.llm = llm
+        self.max_retry = max_retry
         self.name = name
 
         if memory:
-            self.memory = []
-            self.memory_limit = memory_limit
+            self.memory = memory_maker()
         else:
             self.memory = None
-            self.memory_limit = 0
 
     def invoke_retry(
         self,
         messages: list[AgentModelMessage],
-        max_retry: int = 3,
         prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
     ):
         retry = 0
-        while retry < max_retry:
+        while retry < self.max_retry:
             retry += 1
             result = self.llm.invoke(messages)
             if not self.response_complete(result):
@@ -70,7 +78,12 @@ class Agent:
         logger.warning("failed to get a valid response from agent")
         return result
 
-    def invoke(self, prompt: str, context: AgentContext) -> str:
+    def invoke(
+        self,
+        prompt: str,
+        context: AgentContext,
+        prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
+    ) -> str:
         args = {}
         args.update(self.context)
         args.update(context)
@@ -98,7 +111,7 @@ class Agent:
                 human,
             ]
 
-        result = self.invoke_retry(messages)
+        result = self.invoke_retry(messages, prompt_templates=prompt_templates)
 
         if not self.response_complete(result):
             logger.warning("LLM did not finish: %s", result)
@@ -109,8 +122,6 @@ class Agent:
         if self.memory is not None:
             self.memory.append(human)
             self.memory.append(AIMessage(content=reply))
-            if len(self.memory) > self.memory_limit:
-                self.memory = self.memory[-self.memory_limit :]
 
         return reply
 
@@ -128,7 +139,10 @@ class Agent:
 
 
 def agent_easy_connect(
-    driver: str = "openai", model: str = "gpt-4", temperature: float = 0.0
+    driver: str = "openai",
+    model: str = "gpt-4",
+    override_model: bool = False,
+    temperature: float = 0.0,
 ) -> AgentModel:
     """
     Quick connect to one of a few pre-defined LLMs using common environment variables.
@@ -136,7 +150,9 @@ def agent_easy_connect(
     This has very limited features and is mostly for testing and the examples.
     """
     driver = environ.get("PACKIT_DRIVER", driver)
-    model = environ.get("PACKIT_MODEL", model)
+
+    if not override_model:
+        model = environ.get("PACKIT_MODEL", model)
 
     if driver == "openai":
         from langchain_openai import ChatOpenAI

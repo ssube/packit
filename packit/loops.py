@@ -1,9 +1,8 @@
 from logging import getLogger
-from random import choice
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import Condition, condition_threshold
-from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
+from packit.prompts import DEFAULT_PROMPTS, PromptTemplates, get_random_prompt
 
 logger = getLogger(__name__)
 
@@ -54,7 +53,7 @@ def loop_refine(
 
     while not stop_condition(max_iterations, current_iteration):
         agent = agents[agent_index]
-        intro = choice(prompt_templates["refine"])
+        intro = get_random_prompt("refine")
         prompt = agent(intro + " " + prompt, **context)
 
         agent_index = (agent_index + 1) % len(agents)
