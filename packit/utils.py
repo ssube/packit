@@ -48,6 +48,7 @@ def could_be_json(data: str) -> bool:
     """
     Check if a string could be JSON.
     """
+    data = data.strip()
     return (data.startswith("{") or data.startswith("[")) and (
         data.endswith("}") or data.endswith("]")
     )

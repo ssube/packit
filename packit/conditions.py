@@ -68,8 +68,8 @@ def condition_and(*conditions: Condition) -> Condition:
     Stop when all conditions are met.
     """
 
-    def _condition_and() -> bool:
-        return all(condition() for condition in conditions)
+    def _condition_and(*args) -> bool:
+        return all(condition(*args) for condition in conditions)
 
     return _condition_and
 
@@ -79,8 +79,8 @@ def condition_or(*conditions: Condition) -> Condition:
     Stop when any condition is met.
     """
 
-    def _condition_or() -> bool:
-        return any(condition() for condition in conditions)
+    def _condition_or(*args) -> bool:
+        return any(condition(*args) for condition in conditions)
 
     return _condition_or
 

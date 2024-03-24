@@ -68,7 +68,9 @@ def function_result(value: str, tools: ToolDict) -> str:
         "\\_", "_"
     )  # some models like to escape underscores in the function name
     value = value.replace("<|im_end|>", "")  # some models include this terminator
+
     data = json_result(value)
+    data = normalize_function_json(data)
 
     if "function" not in data:
         raise ValueError("No function specified")
@@ -111,3 +113,20 @@ def get_tool_with_parser(
         return tool
 
     return tool, None
+
+
+def normalize_function_json(
+    data: dict,
+) -> dict:
+    if "function" in data and isinstance(data["function"], dict):
+        return {
+            "function": data["function"]["name"],
+            "parameters": data["function"].get("parameters", {}),
+        }
+    elif "function" in data and isinstance(data["function"], str):
+        return {
+            "function": data["function"],
+            "parameters": data.get("parameters", {}),
+        }
+    else:
+        return data

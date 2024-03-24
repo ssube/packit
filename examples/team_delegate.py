@@ -1,8 +1,8 @@
 from packit.agent import Agent, agent_easy_connect
-from packit.prompts import get_function_example, get_random_prompt
-from packit.results import multi_function_result
-from packit.tools import make_team_tools, prepare_tools
-from packit.utils import could_be_json, logger_with_colors
+from packit.conditions import condition_or, condition_threshold
+from packit.loops import loop_team
+from packit.tools import make_complete_tool, make_team_tools, prepare_tools
+from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
 
@@ -20,21 +20,8 @@ coworker_names = [coworker.name for coworker in coworkers]
 
 
 # Prepare a tool to complete tasks and exit the loop
-complete = False
-
-
-def complete_tool(answer: str) -> str:
-    """
-    Complete a task.
-
-    Args:
-        answer: The answer to the task.
-    """
-    global complete
-    complete = True
-
-    logger.info("Task answer: %s", answer)
-    return "Task complete."
+complete_tool, complete_condition = make_complete_tool()
+complete_or_threshold = condition_or(complete_condition, condition_threshold)
 
 
 # Prepare the teamwork tools
@@ -69,38 +56,27 @@ tasks = [
 
 for task in tasks:
     logger.info("Task: %s", task)
-    result = manager(
-        "Using your team, complete the following task: {task} "
-        "Your team includes coworkers named: {names}. " + get_random_prompt("function"),
-        names=coworker_names,
-        task=task,
-        example=get_function_example(),
-        tools=tools,
-    )
-    logger.info("Result: %s", result)
-
-    answers = []
     complete = False
 
-    while not complete:
-        if could_be_json(result):
-            new_answers = multi_function_result(result, tool_dict)
-        else:
-            new_answers = [result]
-
-        answers.extend(new_answers)
-
-        # Provide the response to the team leader
-        result = manager(
+    loop_team(
+        manager,
+        coworkers,
+        tools,
+        tool_dict,
+        ("Using your team, complete the following task: {task} "),
+        (
             "You are trying to complete the following task with your team: {task}. "
             "If you have all of the information that you need, call the complete tool to finish the task. "
             "If the task is not complete, ask another question or delegate another task. "
-            "Your team includes coworkers named: {names}. "
-            "Your coworkers have provided the following answers to your previous questions: {answers}. ",
-            answers=answers,
-            names=coworker_names,
-            task=task,
-        )
-        logger.info("Response: %s", result)
+            "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
+        ),
+        {
+            "task": task,
+        },
+        stop_condition=complete_or_threshold,
+    )
 
-    logger.info("Task complete.")
+    if complete:
+        logger.info("Task complete.")
+    else:
+        logger.error("Task incomplete.")

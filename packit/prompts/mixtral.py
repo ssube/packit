@@ -4,8 +4,14 @@ function_call = {
 }
 
 prompts = {
+    "answers": [
+        "Your coworkers have provided the following answers: {answers}.",
+    ],
     "converse": [
         "What do you think about this?",
+    ],
+    "coworker": [
+        "Your team includes coworkers named: {names}.",
     ],
     "extend": [
         "How would you continue this?",
