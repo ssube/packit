@@ -139,6 +139,7 @@ def loop_team(
 
     while not stop_condition(max_iterations, current_iteration):
         new_answers = result_parser(result, tool_dict, tool_filter=tool_filter)
+        logger.debug("New answers:", new_answers)
         answers.extend(new_answers)
 
         result = manager(

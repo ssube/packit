@@ -88,6 +88,7 @@ def function_result(
     if function_name not in tools:
         raise ValueError(f"Unknown tool {function_name}")
 
+    logger.debug("Using tool: ", data)
     function_params = data.get("parameters", {})
     tool_function, result_parser = get_tool_with_parser(tools[function_name])
 

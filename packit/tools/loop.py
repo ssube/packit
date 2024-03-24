@@ -1,4 +1,7 @@
+from logging import getLogger
 from typing import Callable
+
+logger = getLogger(__name__)
 
 
 def make_complete_tool() -> tuple[Callable, Callable]:
@@ -19,6 +22,7 @@ def make_complete_tool() -> tuple[Callable, Callable]:
         nonlocal complete
         complete = True
 
+        logger.info("Answer: %s", answer)
         return "Task complete."
 
     def complete_condition(*args) -> bool:
