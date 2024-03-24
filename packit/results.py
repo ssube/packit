@@ -3,6 +3,8 @@ from logging import getLogger
 from re import sub
 from typing import Callable
 
+from packit.utils import could_be_json
+
 logger = getLogger(__name__)
 
 
@@ -120,6 +122,20 @@ def multi_function_result(
     return results
 
 
+def multi_function_or_str_result(
+    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+) -> str:
+    try:
+        if could_be_json(value):
+            return multi_function_result(value, tools, tool_filter=tool_filter)
+
+        return [str_result(value)]
+    except Exception as e:
+        logger.error("Error calling function: %s", e)
+        return [f"Error: {e}"]
+
+
+#region internal utils
 def get_tool_with_parser(
     tool: Callable | tuple[Callable, Callable | None]
 ) -> tuple[Callable, Callable | None]:
@@ -144,3 +160,4 @@ def normalize_function_json(
         }
     else:
         return data
+#endregion
