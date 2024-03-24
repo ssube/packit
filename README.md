@@ -159,6 +159,11 @@ task.
 
 All examples should work with both OpenAI and Ollama, allowing you to test them locally or in the cloud.
 
+**Note:** running loops with a very large iteration limit or without an iteration limit at all can consume a **very
+large** number of tokens. Take care when using API keys for cloud services that charge by the token, they can be very
+expensive if you are not careful. Most loops use an iteration limit by default, but these have not been thoroughly
+tested, so proceed with caution. I recommend using a local model and server for both cost and privacy reasons.
+
 ### With OpenAI API
 
 Run the examples, making sure to set your OpenAI API key and the `gpt-4` model:
