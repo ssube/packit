@@ -117,35 +117,49 @@ manager = Agent(
     llm,
 )
 
-loop_team(
-    manager,
-    coworkers,
-    toolbox.definitions,
-    toolbox.callbacks,
-    initial_prompt=(
-        "Using your team, complete the following task: {task}. "
-        "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
-        "Do not call the complete tool until the task is finished. "
-        "Do not call the complete tool until you have received a response from your team. "
-        "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
-    ),
-    loop_prompt=(
-        "You are trying to complete the following task with your team: {task}. "
-        "If you have all of the information that you need, call the complete tool to finish the task. "
-        "If the task is not complete, ask another question or delegate another task. "
-        "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
-    ),
-    {
-        "task": task,
-    },
-    stop_condition=complete_or_threshold,
-    tool_filter=tool_filter,
-)
+# Complete some tasks
+tasks = [
+    "Write a novel about a haunted house.",
+    "Calculate the square root of 144.",
+    "Write a program that multiplies two numbers.",
+    "Identify the genus of a tree with wide, five-pointed leaves.",
+    "Research the history of the Roman Empire.",
+]
 
-if complete_condition():
-    logger.info("Task complete.")
-else:
-    logger.error("Task incomplete.")
+for task in tasks:
+    print("Task:", task)
+    clear_filter()
+    reset_complete()
+
+    loop_team(
+        manager,
+        coworkers,
+        toolbox.definitions,
+        toolbox.callbacks,
+        initial_prompt=(
+            "Using your team, complete the following task: {task}. "
+            "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
+            "Do not call the complete tool until the task is finished. "
+            "Do not call the complete tool until you have received a response from your team. "
+            "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
+        ),
+        loop_prompt=(
+            "You are trying to complete the following task with your team: {task}. "
+            "If you have all of the information that you need, call the complete tool to finish the task. "
+            "If the task is not complete, ask another question or delegate another task. "
+            "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
+        ),
+        {
+            "task": task,
+        },
+        stop_condition=complete_or_threshold,
+        tool_filter=tool_filter,
+    )
+
+    if complete_condition():
+        print("Task complete.")
+    else:
+        print("Task incomplete.")
 ```
 
 In contrast to a [CrewAI crew](https://docs.crewai.com/core-concepts/Crews/), which is a monolithic construct that can
