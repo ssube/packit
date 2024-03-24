@@ -27,4 +27,8 @@ def make_complete_tool() -> tuple[Callable, Callable]:
         """
         return complete
 
-    return complete_tool, complete_condition
+    def reset_complete() -> None:
+        nonlocal complete
+        complete = False
+
+    return complete_tool, complete_condition, reset_complete
