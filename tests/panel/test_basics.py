@@ -11,7 +11,7 @@ class TestPanelBasics(TestCase):
         agents = {Agent(f"test-{i}", "Test agent", {}, llm): i for i in range(4)}
         panel = Panel(agents)
 
-        results = panel.invoke("prompt", {})
+        results = panel.sample("prompt", {})
         result_agents = list(results.keys())
 
         self.assertEqual(

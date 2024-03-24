@@ -1,8 +1,11 @@
+from logging import getLogger
 from typing import Any
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
 from packit.results import bool_result
+
+logger = getLogger(__name__)
 
 
 class Panel:
@@ -13,17 +16,26 @@ class Panel:
         self.agents = list(agents.keys())
         self.weights = list(agents.values())
 
-    def invoke(self, prompt: str, context: AgentContext) -> dict[str, str]:
+    def sample(
+        self, prompt: str, context: AgentContext, max_retry=3, parse_result=bool_result
+    ) -> dict[str, str]:
         results = {}
 
         for agent, weight in zip(self.agents, self.weights):
             for i in range(weight):
                 result = agent.invoke(prompt, context)
-                results[f"{agent.name}-{i}"] = result
+                retry = 0
+                while retry < max_retry:
+                    try:
+                        results[f"{agent.name}-{i}"] = parse_result(result)
+                        break
+                    except Exception:
+                        logger.exception("Error parsing result")
+                        retry += 1
 
         return results
 
-    def decide(
+    def invoke(
         self,
         prompt: str,
         context: AgentContext,
@@ -31,10 +43,10 @@ class Panel:
         decision_condition=condition_threshold_mean,
         min_threshold: float = 0.5,
     ) -> tuple[bool, dict[str, str]]:
-        results = self.invoke(prompt, context)
-        values = [parse_result(result) for result in results.values()]
+        results = self.sample(prompt, context)
+        values = list(results.values())
 
         return decision_condition(min_threshold, *values), results
 
     def __call__(self, prompt, **kwargs: Any) -> Any:
-        return self.decide(prompt, kwargs)
+        return self.invoke(prompt, kwargs)
