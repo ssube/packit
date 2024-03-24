@@ -1,8 +1,8 @@
 from packit.agent import Agent, agent_easy_connect
 from packit.prompts import get_function_example, get_random_prompt
-from packit.results import function_result
+from packit.results import multi_function_result
 from packit.tools import make_team_tools, prepare_tools
-from packit.utils import logger_with_colors
+from packit.utils import could_be_json, logger_with_colors
 
 logger = logger_with_colors(__name__)
 
@@ -83,17 +83,12 @@ for task in tasks:
     complete = False
 
     while not complete:
-        function_calls = result.replace("\r\n", "\n").split("\n\n")
-        for function_call in function_calls:
-            try:
-                answer = function_result(
-                    function_call,
-                    tool_dict,
-                )
-                logger.info("Answer: %s", answer)
-                answers.append(answer)
-            except Exception as e:
-                logger.error("Error calling function: %s", e)
+        if could_be_json(result):
+            new_answers = multi_function_result(result, tool_dict)
+        else:
+            new_answers = [result]
+
+        answers.extend(new_answers)
 
         # Provide the response to the team leader
         result = manager(

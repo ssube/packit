@@ -91,6 +91,19 @@ def function_result(value: str, tools: ToolDict) -> str:
     return result_parser(tool_result)
 
 
+def multi_function_result(value: str, tools: ToolDict) -> list[str]:
+    calls = value.replace("\r\n", "\n").split("\n\n")
+    results = []
+    for call in calls:
+        try:
+            results.append(function_result(call, tools))
+        except Exception as e:
+            logger.error("Error calling function: %s", e)
+            results.append(f"Error: {e}")
+
+    return results
+
+
 def get_tool_with_parser(
     tool: Callable | tuple[Callable, Callable | None]
 ) -> tuple[Callable, Callable | None]:

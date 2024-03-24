@@ -42,3 +42,12 @@ def monotonic_delta(start: float) -> tuple[float, float]:
     """
     last = monotonic()
     return (last - start, last)
+
+
+def could_be_json(data: str) -> bool:
+    """
+    Check if a string could be JSON.
+    """
+    return (data.startswith("{") or data.startswith("[")) and (
+        data.endswith("}") or data.endswith("]")
+    )
