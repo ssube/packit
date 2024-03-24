@@ -1,7 +1,7 @@
 from json import loads
 from logging import getLogger
 from re import sub
-from typing import Callable
+from typing import Callable, Literal
 
 from packit.utils import could_be_json
 
@@ -135,7 +135,46 @@ def multi_function_or_str_result(
         return [f"Error: {e}"]
 
 
-#region internal utils
+MarkdownBlock = Literal["code", "text"]
+
+
+def markdown_result(
+    value: str, block_type: MarkdownBlock = "code", code_language="python"
+) -> str:
+    """
+    Parse a markdown document and return the code blocks or text blocks.
+
+    TODO: replace code_language with a filter function
+    """
+    from mistletoe import Document
+    from mistletoe.block_token import CodeFence, Paragraph
+    from mistletoe.span_token import RawText
+
+    def get_paragraph_text(block: Paragraph | RawText) -> str:
+        if isinstance(block, RawText):
+            return block.content
+
+        return "".join([get_paragraph_text(child) for child in block.children])
+
+    document = Document(value)
+
+    if block_type == "code":
+        return [
+            block.content
+            for block in document.children
+            if isinstance(block, CodeFence) and block.info_string == code_language
+        ]
+    elif block_type == "text":
+        return [
+            get_paragraph_text(block)
+            for block in document.children
+            if isinstance(block, (Paragraph, RawText))
+        ]
+    else:
+        raise ValueError("Invalid block type")
+
+
+# region internal utils
 def get_tool_with_parser(
     tool: Callable | tuple[Callable, Callable | None]
 ) -> tuple[Callable, Callable | None]:
@@ -160,4 +199,6 @@ def normalize_function_json(
         }
     else:
         return data
-#endregion
+
+
+# endregion

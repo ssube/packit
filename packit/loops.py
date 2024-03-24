@@ -9,7 +9,7 @@ from packit.prompts import (
     get_function_example,
     get_random_prompt,
 )
-from packit.results import multi_function_or_str_result, ToolDict, ToolFilter
+from packit.results import ToolDict, ToolFilter, multi_function_or_str_result
 
 logger = getLogger(__name__)
 
@@ -113,7 +113,9 @@ def loop_team(
     context: AgentContext | None = None,
     max_iterations: int = 10,
     prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
-    result_parser: Callable[[str, ToolDict, ToolFilter], list[str]] = multi_function_or_str_result,
+    result_parser: Callable[
+        [str, ToolDict, ToolFilter], list[str]
+    ] = multi_function_or_str_result,
     stop_condition: Condition = condition_threshold,
     tool_filter: Callable[[str], str] | None = None,
 ) -> str:
@@ -136,9 +138,7 @@ def loop_team(
     )
 
     while not stop_condition(max_iterations, current_iteration):
-        new_answers = result_parser(
-            result, tool_dict, tool_filter=tool_filter
-        )
+        new_answers = result_parser(result, tool_dict, tool_filter=tool_filter)
         answers.extend(new_answers)
 
         result = manager(
