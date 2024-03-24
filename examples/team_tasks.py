@@ -2,7 +2,7 @@ from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
-from packit.tools import make_complete_tool, make_team_tools, prepare_tools
+from packit.tools import Toolbox, make_complete_tool, make_team_tools
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -29,7 +29,7 @@ complete_or_threshold = condition_or(complete_condition, condition_threshold)
 delegate_tool, question_tool = make_team_tools(coworkers)
 
 
-tools, tool_dict = prepare_tools(
+toolbox = Toolbox(
     [
         complete_tool,
         delegate_tool,
@@ -69,8 +69,8 @@ for task in tasks:
     loop_team(
         manager,
         coworkers,
-        tools,
-        tool_dict,
+        toolbox.definitions,
+        toolbox.callbacks,
         (
             "Using your team, complete the following task: {task}. "
             "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "

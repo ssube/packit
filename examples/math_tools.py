@@ -4,9 +4,9 @@ from packit.agent import Agent, agent_easy_connect
 from packit.prompts import get_function_example, get_random_prompt
 from packit.results import function_result
 from packit.tools import (
+    Toolbox,
     lowercase_tool,
     multiply_tool,
-    prepare_tools,
     sum_tool,
     uppercase_tool,
 )
@@ -16,7 +16,7 @@ from packit.utils import logger_with_colors
 logger = logger_with_colors(__name__)
 
 # Set up some basic tools, with a few extras that should not be used
-tools, tool_dict = prepare_tools(
+toolbox = Toolbox(
     [
         lowercase_tool,
         multiply_tool,
@@ -45,13 +45,13 @@ result = agent(
     a=a,
     b=b,
     example=get_function_example(),
-    tools=tools,
+    tools=toolbox.definitions,
 )
 logger.info("Raw result: %s", result)
 
 result = function_result(
     result,
-    tool_dict,
+    toolbox.callbacks,
 )
 logger.info("Multiply result: %s", result)
 logger.info("Correct result: %s", a * b)
@@ -65,13 +65,13 @@ for i in range(2, 6):
         "Sum up the following numbers: {numbers}. " + get_random_prompt("function"),
         numbers=numbers,
         example=get_function_example(),
-        tools=tools,
+        tools=toolbox.definitions,
     )
     logger.info("Raw result: %s", result)
 
     result = function_result(
         result,
-        tool_dict,
+        toolbox.callbacks,
     )
     logger.info("Sum result: %s", result)
     logger.info("Correct result: %s", sum(numbers))
