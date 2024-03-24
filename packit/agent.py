@@ -99,7 +99,7 @@ class Agent:
         human = HumanMessage(content=formatted_prompt)
 
         if self.memory is not None:
-            logger.debug("Memory: %s", self.memory)
+            # logger.debug("Memory: %s", self.memory)
             messages = [
                 system,
                 *self.memory,

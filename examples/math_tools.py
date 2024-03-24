@@ -59,7 +59,7 @@ logger.info("Correct result: %s", a * b)
 # Do some sums
 for i in range(2, 6):
     numbers = [randint(1, 100) for _ in range(i)]
-    logger.info("Summing:", numbers)
+    logger.info("Summing: %s", numbers)
 
     result = agent(
         "Sum up the following numbers: {numbers}. " + get_random_prompt("function"),
