@@ -149,15 +149,22 @@ def markdown_result(
     """
     from mistletoe import Document
     from mistletoe.block_token import CodeFence, Paragraph
-    from mistletoe.span_token import RawText
+    from mistletoe.span_token import LineBreak, RawText
 
     def get_paragraph_text(block: Paragraph | RawText) -> str:
         if isinstance(block, RawText):
             return block.content
+        if isinstance(block, LineBreak):
+            return "\n"
 
         return "".join([get_paragraph_text(child) for child in block.children])
 
+    value = value.replace("<|im_end|>", "")  # some models include this terminator
+
     document = Document(value)
+
+    if len(document.children) == 1:
+        return [get_paragraph_text(document.children[0])]
 
     if block_type == "code":
         return [
