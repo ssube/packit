@@ -1,5 +1,6 @@
 from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
+from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
 from packit.tools import make_complete_tool, make_team_tools, prepare_tools
 from packit.utils import logger_with_colors
@@ -37,6 +38,12 @@ tools, tool_dict = prepare_tools(
 )
 
 
+# Prepare a filter to prevent repeated tool calls
+tool_filter, clear_filter = repeat_tool_filter(
+    "You have already used that tool, please try something else."
+)
+
+
 # Create a team leader
 manager = Agent(
     "team leader",
@@ -56,6 +63,7 @@ tasks = [
 
 for task in tasks:
     logger.info("Task: %s", task)
+    clear_filter()
     reset_complete()
 
     loop_team(
@@ -63,7 +71,13 @@ for task in tasks:
         coworkers,
         tools,
         tool_dict,
-        ("Using your team, complete the following task: {task} "),
+        (
+            "Using your team, complete the following task: {task}. "
+            "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
+            "Do not call the complete tool until the task is finished. "
+            "Do not call the complete tool until you have received a response from your team. "
+            "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
+        ),
         (
             "You are trying to complete the following task with your team: {task}. "
             "If you have all of the information that you need, call the complete tool to finish the task. "
@@ -74,6 +88,7 @@ for task in tasks:
             "task": task,
         },
         stop_condition=complete_or_threshold,
+        tool_filter=tool_filter,
     )
 
     if complete_condition():

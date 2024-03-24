@@ -8,6 +8,7 @@ These are some miscellaneous notes about the PACkit project and code.
   - [Contents](#contents)
   - [Duplication with Langchain](#duplication-with-langchain)
   - [Examples](#examples)
+  - [Composability](#composability)
 
 ## Duplication with Langchain
 
@@ -24,3 +25,8 @@ Those exist for one (or sometimes both) of two reasons:
 - Examples should be compatible with both OpenAI and Ollama
 - Examples should be < 100 lines of code
 - Examples should not need to import directly from `langchain*`
+
+## Composability
+
+- Components must not use global state, othere than the default prompts
+- Components with internal state must provide a way to reset that state

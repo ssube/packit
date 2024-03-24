@@ -113,8 +113,9 @@ def loop_team(
     loop_prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_threshold,
     prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
+    stop_condition: Condition = condition_threshold,
+    tool_filter: Callable[[str], str] | None = None,
 ) -> str:
     """
     Loop through a team of agents to complete a task.
@@ -137,7 +138,9 @@ def loop_team(
     while not stop_condition(max_iterations, current_iteration):
         if could_be_json(result):
             # TODO: check if answers are JSON themselves
-            new_answers = multi_function_result(result, tool_dict)
+            new_answers = multi_function_result(
+                result, tool_dict, tool_filter=tool_filter
+            )
             answers.extend(new_answers)
         else:
             # TODO: handle non-JSON results

@@ -1,3 +1,4 @@
+from time import monotonic
 from typing import Callable
 
 Condition = Callable[[], bool]
@@ -38,8 +39,11 @@ def condition_length(max_length: int, current: str) -> bool:
     return len(current) < max_length
 
 
-def condition_timeout(max_time: int, current: int) -> bool:
-    raise NotImplementedError("Timeout condition not implemented")
+def condition_timeout(max_time: int, _current: int, timer=monotonic) -> bool:
+    """
+    Stop when the time exceeds the max time.
+    """
+    return timer() < max_time
 
 
 def condition_threshold(max_threshold: int, current: int) -> bool:

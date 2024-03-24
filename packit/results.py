@@ -33,6 +33,10 @@ def int_result(value: str) -> int:
     return int(value)
 
 
+def str_result(value: str) -> str:
+    return str(value).strip()
+
+
 def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
     # collapse lines
     value = value.replace("\n", "").replace("\r", "")
@@ -60,10 +64,13 @@ def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
     return loads(value)
 
 
+ToolFilter = Callable[[dict], str | None]
 ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
 
 
-def function_result(value: str, tools: ToolDict) -> str:
+def function_result(
+    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+) -> str:
     value = value.replace(
         "\\_", "_"
     )  # some models like to escape underscores in the function name
@@ -82,6 +89,11 @@ def function_result(value: str, tools: ToolDict) -> str:
     function_params = data.get("parameters", {})
     tool_function, result_parser = get_tool_with_parser(tools[function_name])
 
+    if tool_filter is not None:
+        filter_result = tool_filter(data)
+        if filter_result is not None:
+            return filter_result
+
     try:
         tool_result = tool_function(**function_params)
     except Exception as e:
@@ -93,12 +105,14 @@ def function_result(value: str, tools: ToolDict) -> str:
     return result_parser(tool_result)
 
 
-def multi_function_result(value: str, tools: ToolDict) -> list[str]:
+def multi_function_result(
+    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+) -> list[str]:
     calls = value.replace("\r\n", "\n").split("\n\n")
     results = []
     for call in calls:
         try:
-            results.append(function_result(call, tools))
+            results.append(function_result(call, tools, tool_filter=tool_filter))
         except Exception as e:
             logger.error("Error calling function: %s", e)
             results.append(f"Error: {e}")

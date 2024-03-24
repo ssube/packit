@@ -92,6 +92,7 @@ class Agent:
         formatted_prompt = prompt.format(**args)
         formatted_backstory = self.backstory.format(**args)
 
+        logger.debug("Agent: %s", self.name)
         logger.debug("System: %s", formatted_backstory)
         logger.debug("Prompt: %s", formatted_prompt)
 

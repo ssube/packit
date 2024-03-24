@@ -43,7 +43,7 @@ class Panel:
         decision_condition=condition_threshold_mean,
         min_threshold: float = 0.5,
     ) -> tuple[bool, dict[str, str]]:
-        results = self.sample(prompt, context)
+        results = self.sample(prompt, context, parse_result=parse_result)
         values = list(results.values())
 
         return decision_condition(min_threshold, *values), results
