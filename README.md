@@ -10,6 +10,9 @@ Compatible with all [Langchain chat models](https://python.langchain.com/docs/in
 which is all of them. Supports function calling with JSON-trained models. Using [the `Panel`](#panels) with [MoE models
 like Mixtral](https://huggingface.co/blog/moe) allows you to build a hierarchical mixture of experts on the fly.
 
+Try PACkit on [Google Colab](https://colab.research.google.com/drive/1repqnb8eCCju-3eCBaQjMTP3xWXhkBhv?usp=sharing) or
+using [the Jupyter notebook](./examples/packit-demo.ipynb).
+
 ![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
 ## Contents
@@ -93,7 +96,7 @@ complete_or_threshold = condition_or(complete_condition, condition_threshold)
 delegate_tool, question_tool = make_team_tools(coworkers)
 
 
-tools, tool_dict = prepare_tools(
+toolbox = Toolbox(
     [
         complete_tool,
         delegate_tool,
@@ -117,16 +120,16 @@ manager = Agent(
 loop_team(
     manager,
     coworkers,
-    tools,
-    tool_dict,
-    (
+    toolbox.definitions,
+    toolbox.callbacks,
+    initial_prompt=(
         "Using your team, complete the following task: {task}. "
         "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
         "Do not call the complete tool until the task is finished. "
         "Do not call the complete tool until you have received a response from your team. "
         "Do not describe what you are trying to accomplish. Only reply with function calls for tools. "
     ),
-    (
+    loop_prompt=(
         "You are trying to complete the following task with your team: {task}. "
         "If you have all of the information that you need, call the complete tool to finish the task. "
         "If the task is not complete, ask another question or delegate another task. "
@@ -145,7 +148,7 @@ else:
     logger.error("Task incomplete.")
 ```
 
-In contrast to [a CrewAI crew](https://docs.crewai.com/core-concepts/Crews/), which is a monolithic construct that can
+In contrast to a [CrewAI crew](https://docs.crewai.com/core-concepts/Crews/), which is a monolithic construct that can
 be difficult to control, a PACkit team is composed of smaller functions that are callable on their own. The
 `repeat_tool_filter` tool filter prevents the team from calling the same tools repeatedly, while the
 `condition_or(complete_condition, condition_threshold)` stop condition prevents infinite loops by combining an iteration
