@@ -1,4 +1,4 @@
-from json import loads
+from json import dumps, loads
 from logging import getLogger
 from re import sub
 from typing import Callable, Literal
@@ -88,7 +88,7 @@ def function_result(
     if function_name not in tools:
         raise ValueError(f"Unknown tool {function_name}")
 
-    logger.debug("Using tool: ", data)
+    logger.debug("Using tool: %s", data)
     function_params = data.get("parameters", {})
     tool_function, result_parser = get_tool_with_parser(tools[function_name])
 
@@ -103,7 +103,8 @@ def function_result(
         raise ValueError(f"Error running tool {function_name}: {e}")
 
     if result_parser is None:
-        return tool_result
+        # TODO: keep?
+        return multi_function_or_str_result(tool_result, tools, tool_filter=tool_filter)
 
     return result_parser(tool_result)
 
@@ -111,13 +112,22 @@ def function_result(
 def multi_function_result(
     value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
 ) -> list[str]:
-    calls = value.replace("\r\n", "\n").split("\n\n")
+    # split JSON arrays or double line breaks
+    value = value.strip()
+    if "\n\n" in value:
+        calls = value.replace("\r\n", "\n").split("\n\n")
+    elif value.startswith("[") and value.endswith("]"):
+        calls = json_result(value.replace("\\_", "_"), list_result=True)
+        calls = [dumps(call) for call in calls]
+    else:
+        calls = [value]
+
     results = []
     for call in calls:
         try:
             results.append(function_result(call, tools, tool_filter=tool_filter))
         except Exception as e:
-            logger.error("Error calling function: %s", e)
+            logger.exception("Error calling function")
             results.append(f"Error: {e}")
 
     return results
@@ -196,10 +206,16 @@ def normalize_function_json(
     data: dict,
 ) -> dict:
     if "function" in data and isinstance(data["function"], dict):
-        return {
-            "function": data["function"]["name"],
-            "parameters": data["function"].get("parameters", {}),
-        }
+        if "parameters" in data["function"]:
+            return {
+                "function": data["function"]["name"],
+                "parameters": data["function"]["parameters"],
+            }
+        else:
+            return {
+                "function": data["function"]["name"],
+                "parameters": data.get("parameters", {}),
+            }
     elif "function" in data and isinstance(data["function"], str):
         return {
             "function": data["function"],

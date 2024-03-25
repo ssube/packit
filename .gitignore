@@ -3,6 +3,7 @@ dist/
 venv/
 *.egg-info/
 
+*.log
 *.swp
 
 .coverage
