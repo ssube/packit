@@ -32,9 +32,11 @@ def loop_retry(
     will be repeated with the error message.
     """
 
+    last_error = None
     success = False
 
     def parse_or_error(value) -> str:
+        nonlocal last_error
         nonlocal success
 
         try:
@@ -42,13 +44,14 @@ def loop_retry(
             success = True
             return parsed
         except Exception as e:
-            logger.error(e)
-            return e
+            logger.warning(e)
+            last_error = e
+            return str(e)
 
     stop_condition_or_success = condition_or(stop_condition, lambda *args: success)
 
     # loop until the prompt succeeds
-    return loop_reduce(
+    result = loop_reduce(
         agents=[agent],
         prompt=prompt,
         context=context,
@@ -59,3 +62,8 @@ def loop_retry(
         result_parser=parse_or_error,
         stop_condition=stop_condition_or_success,
     )
+
+    if success:
+        return result
+    elif last_error is not None:
+        raise last_error

@@ -1,10 +1,9 @@
 from logging import getLogger
-from typing import Callable
 
 logger = getLogger(__name__)
 
 
-def make_complete_tool() -> tuple[Callable, Callable]:
+def make_complete_tool():
     """
     Make a tool to complete tasks and exit the loop.
 

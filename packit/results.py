@@ -3,6 +3,10 @@ from logging import getLogger
 from re import sub
 from typing import Callable, Literal
 
+from mistletoe import Document
+from mistletoe.block_token import CodeFence, Paragraph
+from mistletoe.span_token import LineBreak, RawText
+
 from packit.utils import could_be_json
 
 logger = getLogger(__name__)
@@ -52,9 +56,9 @@ def json_fixups(value: str, list_result=False) -> str:
         r"^[\s\w\.,:]+ \[", "", value
     )  # sometimes the output will have a leading comment, like "This is the list: []"
     value = value.replace('""', '"')  # the robots will double some JSON quotes
-    value = value.replace(
-        "}{", "},{"
-    )  # the robots will sometimes forget commas between objects
+    # value = value.replace(
+    #     "}{", "},{"
+    # )  # the robots will sometimes forget commas between objects
 
     # if they forgot to open the array and left it out entirely, fix that
     if list_result and value.startswith('{"'):
@@ -72,8 +76,12 @@ def json_fixups(value: str, list_result=False) -> str:
     return value
 
 
-def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
-    value = json_fixups(value, list_result=list_result)
+def json_result(
+    value: str, list_result=False, fix_filter=json_fixups
+) -> list[str] | dict[str, str]:
+    if callable(fix_filter):
+        value = fix_filter(value, list_result=list_result)
+
     return loads(value)
 
 
@@ -82,13 +90,16 @@ ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
 
 
 def function_result(
-    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+    value: str,
+    tools: ToolDict,
+    tool_filter: ToolFilter | None = None,
+    fix_filter=json_fixups,
 ) -> str:
     value = value.replace(
         "\\_", "_"
     )  # some models like to escape underscores in the function name
 
-    data = json_result(value)
+    data = json_result(value, fix_filter=fix_filter)
     data = normalize_function_json(data)
 
     if "function" not in data:
@@ -112,22 +123,31 @@ def function_result(
     except Exception as e:
         raise ValueError(f"Error running tool {function_name}: {e}")
 
-    if result_parser is None:
-        return tool_result
+    if callable(result_parser):
+        return result_parser(tool_result)
 
-    return result_parser(tool_result)
+    # TODO: remove, return tool_result directly
+    return multi_function_result(
+        tool_result, tools, tool_filter=tool_filter, fix_filter=fix_filter
+    )
 
 
 def multi_function_result(
-    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+    value: str,
+    tools: ToolDict,
+    tool_filter: ToolFilter | None = None,
+    fix_filter=json_fixups,
 ) -> list[str]:
-    value = json_fixups(value, list_result=True)
+    if fix_filter:
+        value = fix_filter(value, list_result=True)
 
     # split JSON arrays or double line breaks
     if "\n\n" in value:
         calls = value.replace("\r\n", "\n").split("\n\n")
     elif value.startswith("[") and value.endswith("]"):
-        calls = json_result(value.replace("\\_", "_"), list_result=True)
+        calls = json_result(
+            value.replace("\\_", "_"), list_result=True, fix_filter=None
+        )
         calls = [dumps(call) for call in calls]
     else:
         calls = [value]
@@ -135,7 +155,9 @@ def multi_function_result(
     results = []
     for call in calls:
         try:
-            results.append(function_result(call, tools, tool_filter=tool_filter))
+            results.append(
+                function_result(call, tools, tool_filter=tool_filter, fix_filter=None)
+            )
         except Exception as e:
             logger.exception("Error calling function")
             results.append(f"Error: {e}")
@@ -144,19 +166,25 @@ def multi_function_result(
 
 
 def multi_function_or_str_result(
-    value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
+    value: str,
+    tools: ToolDict,
+    tool_filter: ToolFilter | None = None,
+    fix_filter=json_fixups,
 ) -> str:
     try:
         if value is None:
             return "No result"
 
         if could_be_json(value):
-            return multi_function_result(value, tools, tool_filter=tool_filter)
+            results = multi_function_result(
+                value, tools, tool_filter=tool_filter, fix_filter=fix_filter
+            )
+            return "\n".join(results)
 
-        return [str_result(value)]
+        return str_result(value)
     except Exception as e:
-        logger.error("Error calling function: %s", e)
-        return [f"Error: {e}"]
+        logger.exception("Error calling function")
+        return f"Error: {e}"
 
 
 MarkdownBlock = Literal["code", "text"]
@@ -164,15 +192,12 @@ MarkdownBlock = Literal["code", "text"]
 
 def markdown_result(
     value: str, block_type: MarkdownBlock = "code", code_language="python"
-) -> str:
+) -> list[str]:
     """
     Parse a markdown document and return the code blocks or text blocks.
 
     TODO: replace code_language with a filter function
     """
-    from mistletoe import Document
-    from mistletoe.block_token import CodeFence, Paragraph
-    from mistletoe.span_token import LineBreak, RawText
 
     def get_paragraph_text(block: Paragraph | RawText) -> str:
         if isinstance(block, RawText):
@@ -214,8 +239,11 @@ def get_tool_with_parser(
 
 
 def normalize_function_json(
-    data: dict,
-) -> dict:
+    data: dict[str, str] | list[str],
+) -> dict[str, str] | list[dict[str, str]]:
+    if isinstance(data, list):
+        return [normalize_function_json(item) for item in data]
+
     if "function" in data and isinstance(data["function"], dict):
         if "parameters" in data["function"]:
             return {

@@ -29,7 +29,7 @@ class BaseLoop(Protocol):
         result_filter: PromptFilter | None = None,
         result_parser: ResultParser | None = None,
         stop_condition: StopCondition = condition_threshold,
-    ) -> str:
+    ) -> str | list[str]:
         pass
 
 
@@ -44,7 +44,7 @@ def loop_map(
     prompt_filter: PromptFilter | None = None,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
-) -> str:
+) -> list[str]:
     """
     Loop through a list of agents, passing the same prompt to each agent.
     """
@@ -79,8 +79,7 @@ def loop_map(
     if current_iteration == max_iterations:
         logger.warning("Max iterations reached")
 
-    # TODO: how will this work if memory is None?
-    return memory
+    return memory or []
 
 
 def loop_reduce(
@@ -112,8 +111,9 @@ def loop_reduce(
 
         if callable(prompt_filter):
             result = prompt_filter(result)
-            if result is None:
-                break  # map continues, reduce stops
+
+        if result is None:
+            break  # map continues, reduce stops
 
         result = agent(result, **context, memory=memory)
 

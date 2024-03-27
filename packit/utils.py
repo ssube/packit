@@ -35,12 +35,12 @@ def hash_dict(data: dict):
     ).decode("utf-8")
 
 
-def monotonic_delta(start: float) -> tuple[float, float]:
+def monotonic_delta(start: float, timer=monotonic) -> tuple[float, float]:
     """
     Get the time delta from a start time and the current time.
     Returns the delta and the current time.
     """
-    last = monotonic()
+    last = timer()
     return (last - start, last)
 
 

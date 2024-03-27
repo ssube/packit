@@ -11,7 +11,7 @@ def repeat_prompt_filter(
 
     memory = make_limited_memory(search_window)
 
-    def filter_fn(value: str) -> str:
+    def filter_fn(value: str) -> str | None:
         if value in memory:
             return error_prompt
 

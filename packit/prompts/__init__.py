@@ -1,14 +1,11 @@
 from random import choice
-from typing import Literal
 
+from .base import PromptTemplate
 from .mixtral import (
     prompts as mixtral_prompts,
     function_call as mixtral_function_call,
 )
 from .smaug import prompts as smaug_prompts
-
-PromptTemplateKey = Literal["converse", "extend", "function", "refine", "skip"]
-PromptTemplates = dict[PromptTemplateKey, list[str]]
 
 DEFAULT_PROMPTS = mixtral_prompts
 
@@ -17,7 +14,7 @@ def get_function_example() -> dict[str, dict[str, int]]:
     return mixtral_function_call
 
 
-def get_prompts(model: str) -> PromptTemplates:
+def get_prompts(model: str) -> PromptTemplate:
     if "mixtral" in model:
         return mixtral_prompts
     elif "smaug" in model:
@@ -26,10 +23,14 @@ def get_prompts(model: str) -> PromptTemplates:
         return DEFAULT_PROMPTS
 
 
-def get_random_prompt(key: PromptTemplateKey) -> str:
-    return choice(DEFAULT_PROMPTS[key])
+def get_random_prompt(key: str) -> str:
+    if hasattr(DEFAULT_PROMPTS, key):
+        prompts = getattr(DEFAULT_PROMPTS, key)
+        return choice(prompts)
+
+    raise KeyError(f"Prompt key '{key}' not found in default prompts.")
 
 
-def set_default_prompts(prompts: PromptTemplates):
+def set_default_prompts(prompts: PromptTemplate):
     global DEFAULT_PROMPTS
     DEFAULT_PROMPTS = prompts

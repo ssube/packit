@@ -1,3 +1,6 @@
+"""
+"""
+
 from logging import getLogger
 
 from packit.agent import Agent, AgentContext
@@ -14,8 +17,10 @@ from packit.types import (
     StopCondition,
     ToolFilter,
 )
+from packit.utils import could_be_json
 
 from .base import loop_reduce
+from .single_agent import loop_retry
 
 logger = getLogger(__name__)
 
@@ -53,34 +58,49 @@ def loop_team(
     worker_names = [worker.name for worker in workers]
     example = get_function_example()
 
+    loop_context = {
+        "coworkers": worker_names,
+        "example": example,
+        "tools": toolbox.definitions if toolbox else None,
+        **context,
+    }
+
     result = manager(
         initial_prompt + get_random_prompt("coworker") + get_random_prompt("function"),
-        example=example,
         memory=memory,
-        tools=toolbox.definitions if toolbox else None,
-        workers=worker_names,
-        **context,
+        **loop_context,
     )
 
+    def result_parser_with_tools(value: str) -> str:
+        return result_parser(value, tools=toolbox.callbacks, tool_filter=tool_filter)
+
+    def result_parser_with_retry(value: str) -> str:
+        retry_result = loop_retry(
+            manager,  # should be the same agent over again, not necessarily the manager
+            value,
+            context=loop_context,
+            max_iterations=3,
+            prompt_filter=result_parser_with_tools,
+            result_parser=result_parser_with_tools,
+            stop_condition=stop_condition,
+        )
+        if could_be_json(retry_result):
+            return result_parser_with_retry(retry_result)
+        return retry_result
+
     if callable(result_parser):
-        result = result_parser(result)
+        result = result_parser_with_retry(result)
 
     return loop_reduce(
         [manager],
         iteration_prompt
         + get_random_prompt("coworker")
         + get_random_prompt("function"),
-        context={
-            "example": example,
-            "memory": memory,
-            "tools": toolbox.definitions if toolbox else None,
-            "workers": worker_names,
-            **context,
-        },
+        context=loop_context,
         max_iterations=max_iterations,
         memory=get_memory,
         memory_maker=memory_maker,
-        prompt_filter=prompt_filter,
-        result_parser=result_parser,
+        prompt_filter=result_parser_with_retry,  # does the real prompt filter need to be included here?
+        result_parser=result_parser_with_retry,
         stop_condition=stop_condition,
     )

@@ -6,7 +6,7 @@ from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from packit.formats import format_str_or_json
 from packit.memory import make_limited_memory, memory_order_width
-from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
+from packit.prompts import DEFAULT_PROMPTS, PromptTemplate
 
 logger = getLogger(__name__)
 
@@ -54,7 +54,7 @@ class Agent:
     def invoke_retry(
         self,
         messages: list[AgentModelMessage],
-        prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
+        prompt_templates: PromptTemplate = DEFAULT_PROMPTS,
     ):
         retry = 0
         while retry < self.max_retry:
@@ -65,7 +65,7 @@ class Agent:
                 # TODO: get the rest of the response
 
             do_skip = False
-            for skip_token in prompt_templates["skip"]:
+            for skip_token in prompt_templates.skip:
                 if skip_token in result.content:
                     logger.warning(
                         "found skip token %s, skipping response: %s", skip_token, result
@@ -84,15 +84,19 @@ class Agent:
         self,
         prompt: str,
         context: AgentContext,
-        prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
+        prompt_templates: PromptTemplate = DEFAULT_PROMPTS,
     ) -> str:
         args = {}
         args.update(self.context)
         args.update(context)
         args = {k: format_str_or_json(v) for k, v in args.items()}
 
-        formatted_prompt = prompt.format(**args)
-        formatted_backstory = self.backstory.format(**args)
+        try:
+            formatted_prompt = prompt.format(**args)
+            formatted_backstory = self.backstory.format(**args)
+        except Exception as e:
+            logger.exception("Error formatting prompt: %s", prompt)
+            return f"{type(e).__name__} while formatting prompt: {str(e)}"
 
         logger.debug("Agent: %s", self.name)
         logger.debug("System: %s", formatted_backstory)

@@ -86,7 +86,7 @@ def condition_not(condition: Condition) -> Condition:
     Stop when the condition is not met.
     """
 
-    def _condition_not() -> bool:
-        return not condition()
+    def _condition_not(*args) -> bool:
+        return not condition(*args)
 
     return _condition_not

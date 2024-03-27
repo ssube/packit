@@ -1,36 +1,39 @@
+from .base import PromptTemplate
+
 function_call = {
     "function": "multiply",
     "parameters": {"a": 3, "b": 8},
 }
 
-prompts = {
-    "answers": [
-        "Your coworkers have provided the following answers: {answers}.",
+prompts = PromptTemplate(
+    answers=[
+        "Your coworkers have provided the following answers: {memory}.",
     ],
-    "converse": [
+    converse=[
         "What do you think about this?",
     ],
-    "coworker": [
-        "Your team includes coworkers named: {names}.",
+    coworker=[
+        "Your team includes coworkers named: {coworkers}.",
     ],
-    "extend": [
+    extend=[
         "How would you continue this?",
         "What would you add to this?",
         "Expand on this idea and provide more details.",
     ],
-    "function": [
+    function=[
         "Given the following JSON object, please respond with a valid function call in JSON syntax. "
-        "For example: {example}. "
-        "Do not implement the function or include code for the body of the function. Do not include any comments. "  # Only call the function once. "
+        "For example: {example}.\n"
+        "Do not implement the function or include code for the body of the function. Do not include any comments. "
+        "Only call one function at a time. "
         "Be clear and concise. Do not introduce yourself or sign the message. Only reply with valid JSON syntax. "
         "Fill in all of the parameters with valid values, according to their type and description. "
         "Make sure you fill in all of the required parameters. "
         "The available functions are: {tools}"
     ],
-    "refine": [
+    refine=[
         "Take the following text and improve on it. Fix any typos, grammatical errors, or syntax errors.",
     ],
-    "skip": [
+    skip=[
         "<|endoftext|>",
         "<|assistant|>",
         "</|assistant|>",
@@ -43,4 +46,4 @@ prompts = {
         "<s>",
         "</s>",
     ],
-}
+)
