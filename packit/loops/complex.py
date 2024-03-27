@@ -9,6 +9,7 @@ from packit.tools import Toolbox
 from packit.types import (
     MemoryFactory,
     MemoryMaker,
+    PromptFilter,
     ResultParser,
     StopCondition,
     ToolFilter,
@@ -29,12 +30,15 @@ def loop_team(
     max_iterations: int = 10,
     memory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
+    prompt_filter: PromptFilter | None = None,
     result_parser: ResultParser | None = multi_function_or_str_result,
     stop_condition: StopCondition | None = condition_threshold,
     tool_filter: ToolFilter | None = None,
 ) -> str:
     """
     Loop through a team of agents, with a manager and workers, to refine a prompt.
+
+    TODO: tool_filter should be bound within the result parser
     """
 
     context = context or {}
@@ -61,7 +65,6 @@ def loop_team(
     if callable(result_parser):
         result = result_parser(result)
 
-    # TODO: pass on tool filter
     return loop_reduce(
         [manager],
         iteration_prompt
@@ -77,6 +80,7 @@ def loop_team(
         max_iterations=max_iterations,
         memory=get_memory,
         memory_maker=memory_maker,
+        prompt_filter=prompt_filter,
         result_parser=result_parser,
         stop_condition=stop_condition,
     )

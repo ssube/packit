@@ -6,6 +6,7 @@ from packit.prompts import get_random_prompt
 from packit.types import (
     MemoryFactory,
     MemoryMaker,
+    PromptFilter,
     PromptTemplate,
     ResultParser,
     StopCondition,
@@ -25,6 +26,7 @@ def loop_prefix(
     max_iterations: int = 10,
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
+    prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate | None = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
@@ -33,9 +35,9 @@ def loop_prefix(
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
     """
 
-    def prefix_parser(value) -> str:
-        if callable(result_parser):
-            value = result_parser(value)
+    def prefix_filter(value) -> str:
+        if callable(prompt_filter):
+            value = prompt_filter(value)
 
         return prompt_template(prefix_prompt) + " " + value
 
@@ -46,7 +48,8 @@ def loop_prefix(
         max_iterations=max_iterations,
         memory=memory,
         memory_maker=memory_maker,
-        result_parser=prefix_parser,
+        prompt_filter=prefix_filter,
+        result_parser=result_parser,
         stop_condition=stop_condition,
     )
 
@@ -60,6 +63,7 @@ def loop_suffix(
     max_iterations: int = 10,
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
+    prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate | None = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
@@ -68,9 +72,9 @@ def loop_suffix(
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
     """
 
-    def suffix_parser(value) -> str:
-        if callable(result_parser):
-            value = result_parser(value)
+    def suffix_filter(value) -> str:
+        if callable(prompt_filter):
+            value = prompt_filter(value)
 
         return value + " " + prompt_template(suffix_prompt)
 
@@ -81,7 +85,8 @@ def loop_suffix(
         max_iterations=max_iterations,
         memory=memory,
         memory_maker=memory_maker,
-        result_parser=suffix_parser,
+        prompt_filter=suffix_filter,
+        result_parser=result_parser,
         stop_condition=stop_condition,
     )
 
@@ -96,6 +101,7 @@ def loop_midfix(
     max_iterations: int = 10,
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
+    prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate | None = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
@@ -104,9 +110,9 @@ def loop_midfix(
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.
     """
 
-    def midfix_parser(value) -> str:
-        if callable(result_parser):
-            value = result_parser(value)
+    def midfix_filter(value) -> str:
+        if callable(prompt_filter):
+            value = prompt_filter(value)
 
         return (
             prompt_template(prefix_prompt)
@@ -123,6 +129,7 @@ def loop_midfix(
         max_iterations=max_iterations,
         memory=memory,
         memory_maker=memory_maker,
-        result_parser=midfix_parser,
+        prompt_filter=midfix_filter,
+        result_parser=result_parser,
         stop_condition=stop_condition,
     )

@@ -12,4 +12,4 @@ class TestLoopConverse(TestCase):
         prompt = "Prompt"
 
         result = loop_converse(agents, prompt, prompt_template=lambda x: x)
-        self.assertEqual(result, "converse response 1")
+        self.assertEqual(result, "response 1")

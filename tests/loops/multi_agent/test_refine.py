@@ -12,9 +12,4 @@ class TestLoopRefine(TestCase):
         prompt = "Prompt"
 
         result = loop_refine(agents, prompt, prompt_template=lambda x: x)
-        self.assertEqual(result, "refine response 1")
-
-
-if __name__ == "__main__":
-    tests = TestLoopRefine()
-    tests.test_loop_ends()
+        self.assertEqual(result, "response 1")

@@ -1,10 +1,16 @@
-from typing import Callable
+from typing import Callable, TypeVar
 
-MemoryFactory = Callable[[], list[str]]
-MemoryMaker = Callable[[list[str], str], None]
-PromptTemplate = Callable[[str], str]
-ResultParser = Callable[[str], str]
+MemoryType = str
+PromptType = str
+SelectorType = TypeVar("SelectorType")
+
+AgentSelector = Callable[[list[SelectorType]], SelectorType]
+MemoryFactory = Callable[[], list[MemoryType]]
+MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
+PromptTemplate = Callable[[str], PromptType]
+PromptFilter = Callable[[PromptType], PromptType | None]
+ResultParser = Callable[[PromptType], PromptType]
 StopCondition = Callable[
     [int, int], bool
 ]  # TODO: kwargs and prompts and all those other things
-ToolFilter = Callable[[dict], bool]
+ToolFilter = Callable[[dict], dict | None]

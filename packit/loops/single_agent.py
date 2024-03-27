@@ -3,7 +3,13 @@ from logging import getLogger
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_or, condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
-from packit.types import MemoryFactory, MemoryMaker, ResultParser, StopCondition
+from packit.types import (
+    MemoryFactory,
+    MemoryMaker,
+    PromptFilter,
+    ResultParser,
+    StopCondition,
+)
 
 from .base import loop_reduce
 
@@ -17,6 +23,7 @@ def loop_retry(
     max_iterations: int = 10,
     memory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
+    prompt_filter: PromptFilter | None = None,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:
@@ -48,6 +55,7 @@ def loop_retry(
         max_iterations=max_iterations,
         memory=memory,
         memory_maker=memory_maker,
+        prompt_filter=prompt_filter,
         result_parser=parse_or_error,
         stop_condition=stop_condition_or_success,
     )
