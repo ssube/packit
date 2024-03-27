@@ -1,7 +1,7 @@
 from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
-from packit.loops import loop_team
+from packit.loops.legacy import loop_team
 from packit.tools import Toolbox, make_complete_tool, make_team_tools
 from packit.utils import logger_with_colors
 

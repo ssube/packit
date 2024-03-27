@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
-from packit.loops import loop_refine
+from packit.loops.multi_agent import loop_refine
 from tests.mocks import MockLLM
 
 
@@ -11,5 +11,10 @@ class TestLoopRefine(TestCase):
         agents = [Agent("test", "Test agent", {}, llm) for _ in range(2)]
         prompt = "Prompt"
 
-        result = loop_refine(agents, prompt)
-        self.assertEqual(result, "response 1")
+        result = loop_refine(agents, prompt, prompt_template=lambda x: x)
+        self.assertEqual(result, "refine response 1")
+
+
+if __name__ == "__main__":
+    tests = TestLoopRefine()
+    tests.test_loop_ends()

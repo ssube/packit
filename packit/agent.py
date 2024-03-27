@@ -1,11 +1,11 @@
 from logging import getLogger
 from os import environ
-from typing import Any
+from typing import Any, Callable
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from packit.formats import format_str_or_json
-from packit.memory import make_limited_memory
+from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import DEFAULT_PROMPTS, PromptTemplates
 
 logger = getLogger(__name__)
@@ -26,6 +26,7 @@ class Agent:
     llm: type[AgentModel]
     max_retry: int
     memory: list[AgentModelMessage] | None
+    memory_maker: Callable | None
     name: str
 
     def __init__(
@@ -35,17 +36,18 @@ class Agent:
         context,
         llm,
         max_retry=3,
-        memory=True,
-        memory_maker=make_limited_memory,
+        memory: Callable | None = make_limited_memory,
+        memory_maker: Callable | None = memory_order_width,
     ):
         self.backstory = backstory
         self.context = context
         self.llm = llm
         self.max_retry = max_retry
+        self.memory_maker = memory_maker
         self.name = name
 
         if memory:
-            self.memory = memory_maker()
+            self.memory = memory()
         else:
             self.memory = None
 
@@ -118,11 +120,12 @@ class Agent:
             logger.warning("LLM did not finish: %s", result)
 
         reply = result.content
+        reply = reply.replace("<|im_end|>", "").strip()
         logger.debug("Response: %s", reply)
 
         if self.memory is not None:
-            self.memory.append(human)
-            self.memory.append(AIMessage(content=reply))
+            self.memory_maker(self.memory, human)
+            self.memory_maker(self.memory, AIMessage(content=reply))
 
         return reply
 

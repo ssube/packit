@@ -39,7 +39,9 @@ def str_result(value: str) -> str:
     return str(value).strip()
 
 
-def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
+def json_fixups(value: str, list_result=False) -> str:
+    value = value.strip()
+
     # collapse lines
     value = value.replace("\n", "").replace("\r", "")
 
@@ -50,19 +52,28 @@ def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
         r"^[\s\w\.,:]+ \[", "", value
     )  # sometimes the output will have a leading comment, like "This is the list: []"
     value = value.replace('""', '"')  # the robots will double some JSON quotes
-
-    # if they forgot to close the array, fix that
-    if list_result and value.endswith('"}'):
-        value = value + "]"
+    value = value.replace(
+        "}{", "},{"
+    )  # the robots will sometimes forget commas between objects
 
     # if they forgot to open the array and left it out entirely, fix that
     if list_result and value.startswith('{"'):
         value = "[" + value
 
+    # if they forgot to close the array, fix that
+    # this is complicated by the fact that the ending may have multiple closing braces
+    if list_result and value.startswith("[") and value.endswith("}"):
+        value = value + "]"
+
     # remove leading/trailing whitespace
     value = value.strip()
 
     logger.debug("JSON after fixups: %s", value)
+    return value
+
+
+def json_result(value: str, list_result=False) -> list[str] | dict[str, str]:
+    value = json_fixups(value, list_result=list_result)
     return loads(value)
 
 
@@ -76,7 +87,6 @@ def function_result(
     value = value.replace(
         "\\_", "_"
     )  # some models like to escape underscores in the function name
-    value = value.replace("<|im_end|>", "")  # some models include this terminator
 
     data = json_result(value)
     data = normalize_function_json(data)
@@ -112,8 +122,9 @@ def function_result(
 def multi_function_result(
     value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
 ) -> list[str]:
+    value = json_fixups(value, list_result=True)
+
     # split JSON arrays or double line breaks
-    value = value.strip()
     if "\n\n" in value:
         calls = value.replace("\r\n", "\n").split("\n\n")
     elif value.startswith("[") and value.endswith("]"):
@@ -137,6 +148,9 @@ def multi_function_or_str_result(
     value: str, tools: ToolDict, tool_filter: ToolFilter | None = None
 ) -> str:
     try:
+        if value is None:
+            return "No result"
+
         if could_be_json(value):
             return multi_function_result(value, tools, tool_filter=tool_filter)
 
@@ -168,8 +182,6 @@ def markdown_result(
             return "\n"
 
         return "".join([get_paragraph_text(child) for child in block.children])
-
-    value = value.replace("<|im_end|>", "")  # some models include this terminator
 
     document = Document(value)
 

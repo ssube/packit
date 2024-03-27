@@ -3,12 +3,7 @@ from typing import Callable
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import Condition, condition_threshold
-from packit.prompts import (
-    DEFAULT_PROMPTS,
-    PromptTemplates,
-    get_function_example,
-    get_random_prompt,
-)
+from packit.prompts import get_function_example, get_random_prompt
 from packit.results import ToolDict, ToolFilter, multi_function_or_str_result
 
 logger = getLogger(__name__)
@@ -49,7 +44,6 @@ def loop_extend(
     context: AgentContext | None = None,
     max_iterations: int = 10,
     stop_condition: Condition = condition_threshold,
-    prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
 ) -> str:
     """
     Loop through a list of agents to extend a prompt.
@@ -79,7 +73,6 @@ def loop_refine(
     context: AgentContext | None = None,
     max_iterations: int = 10,
     stop_condition: Condition = condition_threshold,
-    prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
 ) -> str:
     """
     Loop through a list of agents to refine a prompt.
@@ -112,7 +105,6 @@ def loop_team(
     loop_prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    prompt_templates: PromptTemplates = DEFAULT_PROMPTS,
     result_parser: Callable[
         [str, ToolDict, ToolFilter], list[str]
     ] = multi_function_or_str_result,

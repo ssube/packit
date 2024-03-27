@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
-from packit.loops import loop_converse
+from packit.loops.legacy import loop_converse
 from tests.mocks import MockLLM
 
 
