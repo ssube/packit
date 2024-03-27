@@ -113,8 +113,7 @@ def function_result(
         raise ValueError(f"Error running tool {function_name}: {e}")
 
     if result_parser is None:
-        # TODO: keep?
-        return multi_function_or_str_result(tool_result, tools, tool_filter=tool_filter)
+        return tool_result
 
     return result_parser(tool_result)
 

@@ -13,7 +13,9 @@ def multiply_tool(a: int, b: int) -> int:
     return a * b
 
 
-def sum_tool(a: int, b: int, c: int = None, d: int = None, e: int = None) -> int:
+def sum_tool(
+    a: int, b: int, c: int | None = None, d: int | None = None, e: int | None = None
+) -> int:
     """Add two or more integers together.
 
     Args:
