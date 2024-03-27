@@ -1,11 +1,17 @@
 from logging import getLogger
-from typing import Callable
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_threshold
+from packit.conditions import condition_threshold
 from packit.prompts import get_random_prompt
+from packit.types import (
+    MemoryFactory,
+    MemoryMaker,
+    PromptTemplate,
+    ResultParser,
+    StopCondition,
+)
 
-from .base import loop_reduce
+from .base import BaseLoop, loop_reduce
 
 logger = getLogger(__name__)
 
@@ -15,13 +21,13 @@ def loop_prefix(
     prompt: str,
     prefix_prompt: str,
     context: AgentContext | None = None,
-    base_loop: Callable = loop_reduce,
+    base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
-    memory: Callable | None = None,
-    memory_maker: Callable | None = None,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = None,
+    memory_maker: MemoryMaker | None = None,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
@@ -50,13 +56,13 @@ def loop_suffix(
     prompt: str,
     suffix_prompt: str,
     context: AgentContext | None = None,
-    base_loop: Callable = loop_reduce,
+    base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
-    memory: Callable | None = None,
-    memory_maker: Callable | None = None,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = None,
+    memory_maker: MemoryMaker | None = None,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
@@ -86,13 +92,13 @@ def loop_midfix(
     prefix_prompt: str,
     suffix_prompt: str,
     context: AgentContext | None = None,
-    base_loop: Callable = loop_reduce,
+    base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
-    memory: Callable | None = None,
-    memory_maker: Callable | None = None,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = None,
+    memory_maker: MemoryMaker | None = None,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.

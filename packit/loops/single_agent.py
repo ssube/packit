@@ -1,9 +1,9 @@
 from logging import getLogger
-from typing import Callable
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_or, condition_threshold
+from packit.conditions import condition_or, condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
+from packit.types import MemoryFactory, MemoryMaker, ResultParser, StopCondition
 
 from .base import loop_reduce
 
@@ -15,10 +15,10 @@ def loop_retry(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = make_limited_memory,
-    memory_maker: Callable | None = memory_order_width,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = make_limited_memory,
+    memory_maker: MemoryMaker | None = memory_order_width,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt

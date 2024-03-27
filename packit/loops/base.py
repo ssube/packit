@@ -2,9 +2,13 @@ from logging import getLogger
 from typing import Callable
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_threshold
+from packit.conditions import condition_threshold
+from packit.types import MemoryFactory, MemoryMaker, ResultParser, StopCondition
 
 logger = getLogger(__name__)
+
+
+BaseLoop = Callable[[list[Agent], str], list[str] | str]
 
 
 def loop_map(
@@ -12,10 +16,10 @@ def loop_map(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = None,
-    memory_maker: Callable | None = None,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = None,
+    memory_maker: MemoryMaker | None = None,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a list of agents, passing the same prompt to each agent.
@@ -52,10 +56,10 @@ def loop_reduce(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = None,
-    memory_maker: Callable | None = None,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = None,
+    memory_maker: MemoryMaker | None = None,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a list of agents, passing the result of each agent on to the next.

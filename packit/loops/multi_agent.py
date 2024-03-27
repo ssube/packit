@@ -1,10 +1,16 @@
 from logging import getLogger
-from typing import Callable
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_threshold
+from packit.conditions import condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import get_random_prompt
+from packit.types import (
+    MemoryFactory,
+    MemoryMaker,
+    PromptTemplate,
+    ResultParser,
+    StopCondition,
+)
 
 from .builder import loop_prefix
 
@@ -16,11 +22,11 @@ def loop_converse(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = make_limited_memory,
-    memory_maker: Callable | None = memory_order_width,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = make_limited_memory,
+    memory_maker: MemoryMaker | None = memory_order_width,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     return loop_prefix(
         agents,
@@ -41,11 +47,11 @@ def loop_extend(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = make_limited_memory,
-    memory_maker: Callable | None = memory_order_width,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = make_limited_memory,
+    memory_maker: MemoryMaker | None = memory_order_width,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     return loop_prefix(
         agents,
@@ -66,11 +72,11 @@ def loop_refine(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: Callable | None = make_limited_memory,
-    memory_maker: Callable | None = memory_order_width,
-    prompt_template: Callable | None = get_random_prompt,
-    result_parser: Callable[[str], str] | None = None,
-    stop_condition: Condition = condition_threshold,
+    memory: MemoryFactory | None = make_limited_memory,
+    memory_maker: MemoryMaker | None = memory_order_width,
+    prompt_template: PromptTemplate | None = get_random_prompt,
+    result_parser: ResultParser | None = None,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     return loop_prefix(
         agents,
