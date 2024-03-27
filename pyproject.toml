@@ -11,5 +11,10 @@ skip_glob = ["*/lpw.py"]
 exclude = []
 
 [[tool.mypy.overrides]]
-module = []
+module = [
+    "coloredlogs",
+    "mistletoe",
+    "mistletoe.block_token",
+    "mistletoe.span_token",
+]
 ignore_missing_imports = true

@@ -12,6 +12,7 @@
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "env": {
+          "DEBUG": "true",
           "PACKIT_DRIVER": "ollama",
           "PYTHONPATH": "${workspaceFolder}",
           "OLLAMA_NUM_CTX":"2048",
