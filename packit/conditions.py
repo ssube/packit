@@ -1,28 +1,7 @@
 from time import monotonic
-from typing import Callable
+from typing import Any, Callable
 
 Condition = Callable[[], bool]
-
-
-def condition_counter(max: int, current: int) -> bool:
-    """
-    Stop when the current count is equal to the max count.
-    """
-    return current < max
-
-
-def condition_counter_mean(max: int, *currents: int) -> bool:
-    """
-    Stop when the mean of the current counts is equal to the max count.
-    """
-    return sum(currents) / len(currents) < max
-
-
-def condition_counter_sum(max_sum: int, *currents: int) -> bool:
-    """
-    Stop when the sum of the current counts is equal to the max sum.
-    """
-    return sum(currents) < max_sum
 
 
 def condition_keyword(keyword: str, current: str) -> bool:
@@ -32,18 +11,31 @@ def condition_keyword(keyword: str, current: str) -> bool:
     return keyword in current
 
 
+def condition_list_once(items: list[Any]) -> Callable[[int, int], bool]:
+    """
+    Stop when all items in the list have been iterated over once.
+    """
+
+    max_length = len(items)
+
+    def _condition_list_once(_max_threshold: int, current: int) -> bool:
+        return current >= max_length
+
+    return _condition_list_once
+
+
 def condition_length(max_length: int, current: str) -> bool:
     """
     Stop when the current prompt reaches a certain length.
     """
-    return len(current) < max_length
+    return len(current) > max_length
 
 
 def condition_timeout(max_time: int, _current: int, timer=monotonic) -> bool:
     """
     Stop when the time exceeds the max time.
     """
-    return timer() < max_time
+    return timer() > max_time
 
 
 def condition_threshold(max_threshold: int, current: int) -> bool:
