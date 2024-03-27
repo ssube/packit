@@ -1,7 +1,7 @@
 from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
-from packit.loops.legacy import loop_team
+from packit.loops import loop_team
 from packit.tools import Toolbox, make_complete_tool, make_team_tools
 from packit.utils import logger_with_colors
 
@@ -69,8 +69,6 @@ for task in tasks:
     loop_team(
         manager,
         coworkers,
-        toolbox.definitions,
-        toolbox.callbacks,
         (
             "Using your team, complete the following task: {task}. "
             "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
@@ -88,6 +86,7 @@ for task in tasks:
             "task": task,
         },
         stop_condition=complete_or_threshold,
+        toolbox=toolbox,
         tool_filter=tool_filter,
     )
 

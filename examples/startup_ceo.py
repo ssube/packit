@@ -1,7 +1,7 @@
 from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
-from packit.loops.legacy import loop_team
+from packit.loops import loop_team
 from packit.memory import make_limited_memory
 from packit.prompts import get_function_example, get_random_prompt
 from packit.results import multi_function_result
@@ -64,7 +64,7 @@ def recruit_coworker(role: str, team: str, background: str) -> Agent:
             f"You are a {background} You are working at a cutting-edge startup company developing amazing products.",
             {},
             llm,
-            memory=get_shared_memory,
+            # memory=get_shared_memory,
         )
     )
     return f"Recruited a new {role}."
@@ -233,8 +233,6 @@ for product in products:
         loop_team(
             ceo,
             coworkers,
-            toolbox.definitions,
-            toolbox.callbacks,
             context={
                 "budget": budget,
                 "product": product,
@@ -246,15 +244,17 @@ for product in products:
                 "If you need more information or assistance, ask a question to your coworkers. "
                 "When you are satisfied with the development, use the complete tool to finish the product."
             ),
-            loop_prompt=(
+            iteration_prompt=(
                 "You are trying to complete development of the product: {product}. "
                 "You can delegate tasks to your coworkers to help with the development. Keep track of the tasks and their progress. "
                 "If you need more information or assistance, ask a question to your coworkers. "
                 "" + get_budget_prompt() + ""
                 "When you are satisfied with the development, use the complete tool to finish the product. "
                 "Make sure to finish the product before you exhaust your budget. "
+                "Your progress so far is: {memory}. "
             ),
             stop_condition=complete_or_threshold,
+            toolbox=toolbox,
             tool_filter=tool_filter,
         )
 

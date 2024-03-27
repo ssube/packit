@@ -1,7 +1,7 @@
 from random import choice
 
 from packit.agent import Agent, agent_easy_connect
-from packit.loops.legacy import loop_converse
+from packit.loops import loop_converse
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)

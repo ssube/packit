@@ -3,14 +3,14 @@ from random import randint
 from packit.agent import Agent, agent_easy_connect
 from packit.prompts import get_function_example, get_random_prompt
 from packit.results import bool_result, function_result
-from packit.tools import multiply_tool, prepare_tools, sum_tool
+from packit.tools import Toolbox, multiply_tool, sum_tool
 from packit.utils import logger_with_colors
 
 # Set up logging
 logger = logger_with_colors(__name__)
 
 # Set up some basic tools
-tools, tool_dict = prepare_tools(
+toolbox = Toolbox(
     [
         multiply_tool,
         sum_tool,
@@ -54,13 +54,13 @@ logger.info("Question: %s", question)
 result = tech_support(
     question + get_random_prompt("function"),
     example=get_function_example(),
-    tools=tools,
+    tools=toolbox.definitions,
 )
 logger.info("Raw result: %s", result)
 
 result = function_result(
     result,
-    tool_dict,
+    toolbox.callbacks,
 )
 logger.info("Multiply result: %s", result)
 logger.info("Correct result: %s", a * b)

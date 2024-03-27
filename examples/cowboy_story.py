@@ -5,7 +5,7 @@ N cowboys are sitting around a fire, each telling part of an ever-growing story.
 from random import choice, randint
 
 from packit.agent import Agent, agent_easy_connect
-from packit.loops.legacy import loop_extend
+from packit.loops import loop_extend
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)

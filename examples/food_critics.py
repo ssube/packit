@@ -7,7 +7,7 @@ from packit.formats import format_bullet_list
 from packit.panel import Panel
 from packit.utils import logger_with_colors
 
-logger = logger_with_colors(__name__)
+logger = logger_with_colors(__name__, level="DEBUG")
 
 # Inputs
 backstories = {
