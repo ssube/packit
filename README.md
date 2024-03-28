@@ -134,8 +134,6 @@ for task in tasks:
     loop_team(
         manager,
         coworkers,
-        toolbox.definitions,
-        toolbox.callbacks,
         initial_prompt=(
             "Using your team, complete the following task: {task}. "
             "If you need help from an expert or more information, ask a question or delegate a task to your coworkers. "
@@ -154,6 +152,7 @@ for task in tasks:
         },
         stop_condition=complete_or_threshold,
         tool_filter=tool_filter,
+        toolbox=toolbox,
     )
 
     if complete_condition():
