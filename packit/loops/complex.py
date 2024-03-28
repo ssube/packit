@@ -72,7 +72,14 @@ def loop_team(
     )
 
     def result_parser_with_tools(value: str) -> str:
-        return result_parser(value, tools=toolbox.callbacks, tool_filter=tool_filter)
+        if callable(result_parser):
+            return result_parser(
+                value,
+                tools=toolbox.callbacks if toolbox else None,
+                tool_filter=tool_filter,
+            )
+
+        return value
 
     def result_parser_with_retry(value: str) -> str:
         retry_result = loop_retry(
@@ -84,12 +91,13 @@ def loop_team(
             result_parser=result_parser_with_tools,
             stop_condition=stop_condition,
         )
+
         if could_be_json(retry_result):
             return result_parser_with_retry(retry_result)
+
         return retry_result
 
-    if callable(result_parser):
-        result = result_parser_with_retry(result)
+    result = result_parser_with_retry(result)
 
     return loop_reduce(
         [manager],

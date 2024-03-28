@@ -26,7 +26,7 @@ def loop_converse(
     memory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:
@@ -53,7 +53,7 @@ def loop_extend(
     memory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:
@@ -80,7 +80,7 @@ def loop_refine(
     memory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:

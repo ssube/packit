@@ -1,7 +1,7 @@
 from time import monotonic
 from typing import Any, Callable
 
-Condition = Callable[[], bool]
+Condition = Callable[[int, int], bool]
 
 
 def condition_keyword(keyword: str, current: str) -> bool:

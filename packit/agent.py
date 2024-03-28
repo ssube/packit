@@ -1,6 +1,6 @@
 from logging import getLogger
 from os import environ
-from typing import Any, Callable
+from typing import Any, Callable, Protocol
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
@@ -15,15 +15,15 @@ AgentContext = dict[str, str]
 AgentModelMessage = HumanMessage | SystemMessage
 
 
-class AgentModel:
-    def invoke(self, prompt, **kwargs):
+class AgentModel(Protocol):
+    def invoke(self, prompts: list[AgentModelMessage], **kwargs):
         pass
 
 
 class Agent:
     backstory: str
     context: AgentContext
-    llm: type[AgentModel]
+    llm: AgentModel
     max_retry: int
     memory: list[AgentModelMessage] | None
     memory_maker: Callable | None
@@ -127,7 +127,7 @@ class Agent:
         reply = reply.replace("<|im_end|>", "").strip()
         logger.debug("Response: %s", reply)
 
-        if self.memory is not None:
+        if self.memory and self.memory_maker:
             self.memory_maker(self.memory, human)
             self.memory_maker(self.memory, AIMessage(content=reply))
 

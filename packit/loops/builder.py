@@ -27,7 +27,7 @@ def loop_prefix(
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:
@@ -64,7 +64,7 @@ def loop_suffix(
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:
@@ -102,7 +102,7 @@ def loop_midfix(
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = get_random_prompt,
+    prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
 ) -> str:

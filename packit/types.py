@@ -4,7 +4,7 @@ MemoryType = str
 PromptType = str
 SelectorType = TypeVar("SelectorType")
 
-AgentSelector = Callable[[list[SelectorType]], SelectorType]
+AgentSelector = Callable[[list[SelectorType], int], SelectorType]
 MemoryFactory = Callable[[], list[MemoryType]]
 MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
 PromptTemplate = Callable[[str], PromptType]

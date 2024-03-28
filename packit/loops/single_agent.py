@@ -40,7 +40,11 @@ def loop_retry(
         nonlocal success
 
         try:
-            parsed = result_parser(value)
+            if callable(result_parser):
+                parsed = result_parser(value)
+            else:
+                parsed = value
+
             success = True
             return parsed
         except Exception as e:
@@ -65,5 +69,8 @@ def loop_retry(
 
     if success:
         return result
-    elif last_error is not None:
-        raise last_error
+
+    if last_error is None:
+        raise ValueError("Failed to parse result")
+
+    raise last_error

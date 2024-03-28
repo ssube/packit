@@ -21,7 +21,7 @@ class BaseLoop(Protocol):
         self,
         agents: list[Agent],
         prompt: str,
-        agent_selector: AgentSelector | None = select_loop,
+        agent_selector: AgentSelector = select_loop,
         context: AgentContext | None = None,
         max_iterations: int = 10,
         memory: MemoryFactory | None = None,
@@ -36,7 +36,7 @@ class BaseLoop(Protocol):
 def loop_map(
     agents: list[Agent],
     prompt: str,
-    agent_selector: AgentSelector | None = select_loop,
+    agent_selector: AgentSelector = select_loop,
     context: AgentContext | None = None,
     max_iterations: int = 10,
     memory: MemoryFactory | None = None,
@@ -85,7 +85,7 @@ def loop_map(
 def loop_reduce(
     agents: list[Agent],
     prompt: str,
-    agent_selector: AgentSelector | None = select_loop,
+    agent_selector: AgentSelector = select_loop,
     context: AgentContext | None = None,
     max_iterations: int = 10,
     memory: MemoryFactory | None = None,

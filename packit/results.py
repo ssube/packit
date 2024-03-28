@@ -102,6 +102,10 @@ def function_result(
     data = json_result(value, fix_filter=fix_filter)
     data = normalize_function_json(data)
 
+    if isinstance(data, list):
+        # TODO: should this be allowed without going through one of the multi-function wrappers?
+        raise ValueError("Cannot run multiple functions at once")
+
     if "function" not in data:
         raise ValueError("No function specified")
 
@@ -127,9 +131,10 @@ def function_result(
         return result_parser(tool_result)
 
     # TODO: remove, return tool_result directly
-    return multi_function_result(
+    multi_result = multi_function_result(
         tool_result, tools, tool_filter=tool_filter, fix_filter=fix_filter
     )
+    return "\n".join(multi_result)
 
 
 def multi_function_result(
