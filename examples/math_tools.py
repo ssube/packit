@@ -13,7 +13,7 @@ from packit.tools import (
 from packit.utils import logger_with_colors
 
 # Set up logging
-logger = logger_with_colors(__name__, level="DEBUG")
+logger = logger_with_colors(__name__)
 
 # Set up some basic tools, with a few extras that should not be used
 toolbox = Toolbox(

@@ -7,7 +7,7 @@ from packit.formats import format_bullet_list
 from packit.panel import Panel
 from packit.utils import logger_with_colors
 
-logger = logger_with_colors(__name__, level="DEBUG")
+logger = logger_with_colors(__name__)
 
 # Inputs
 backstories = {
@@ -27,10 +27,6 @@ entrees = [
     "noodles",
     "rice",
 ]
-
-prompts = {
-    "entree": "Do you think {entree} is a good dish? Reply with a one word answer, yes or no.",
-}
 
 decisions = {
     True: "good",
@@ -54,7 +50,10 @@ panel = Panel(panel_weights)
 
 # Rate each of the entreés
 for entree in entrees:
-    decision, reasons = panel(prompts["entree"], entree=entree)
+    decision, reasons = panel(
+        "Do you think {entree} is a good dish? Reply with a one word answer, yes or no.",
+        entree=entree,
+    )
     logger.info(
         f"The critics decided that {entree} is {decisions[decision]} because:\n{format_bullet_list(reasons.values())}"
     )

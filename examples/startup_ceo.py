@@ -8,7 +8,7 @@ from packit.results import multi_function_result
 from packit.tools import Toolbox, make_complete_tool, make_team_tools
 from packit.utils import logger_with_colors
 
-logger = logger_with_colors(__name__, level="DEBUG")
+logger = logger_with_colors(__name__)
 
 # Set up the available LLMs
 llms = {
