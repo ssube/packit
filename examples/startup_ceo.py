@@ -2,7 +2,6 @@ from packit.agent import Agent, agent_easy_connect
 from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
-from packit.memory import make_limited_memory
 from packit.results import multi_function_result
 from packit.toolbox import Toolbox
 from packit.tools import make_complete_tool, make_team_tools
@@ -19,21 +18,12 @@ llms = {
     ),
 }
 
-# Set up shared memory
-memory = make_limited_memory(100)
-
-
-def get_shared_memory():
-    return memory
-
-
 # Set up the CEO
 ceo = Agent(
     "CEO",
     "You are the CEO of a cutting-edge startup company developing amazing products.",
     {},
     llms["manager"],
-    memory=get_shared_memory,
 )
 
 # Prepare a tool to recruit new coworkers
@@ -64,7 +54,6 @@ def recruit_coworker(role: str, team: str, background: str) -> Agent:
             f"You are a {background} You are working at a cutting-edge startup company developing amazing products.",
             {},
             llm,
-            # memory=get_shared_memory,
         )
     )
     return f"Recruited a new {role}."
@@ -208,7 +197,7 @@ for product in products:
     )
     logger.info("Recruiting result: %s", recruiting)
 
-    multi_function_result(recruiting, recruiting_toolbox.callbacks)
+    multi_function_result(recruiting, recruiting_toolbox)
     logger.info("Coworkers: %s", [coworker.name for coworker in coworkers])
 
     # Reset the budget for each project

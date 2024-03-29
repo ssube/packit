@@ -7,9 +7,13 @@ from mistletoe import Document
 from mistletoe.block_token import CodeFence, Paragraph
 from mistletoe.span_token import LineBreak, RawText
 
+from packit.toolbox import Toolbox
 from packit.utils import could_be_json
 
 logger = getLogger(__name__)
+
+
+ToolFilter = Callable[[dict], str | None]
 
 
 def bool_result(value: str) -> bool:
@@ -85,13 +89,9 @@ def json_result(
     return loads(value)
 
 
-ToolFilter = Callable[[dict], str | None]
-ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
-
-
 def function_result(
     value: str,
-    tools: ToolDict,
+    toolbox: Toolbox,
     tool_filter: ToolFilter | None = None,
     fix_filter=json_fixups,
 ) -> str:
@@ -110,12 +110,12 @@ def function_result(
         raise ValueError("No function specified")
 
     function_name = data["function"]
-    if function_name not in tools:
+    if function_name not in toolbox.list_tools():
         raise ValueError(f"Unknown tool {function_name}")
 
     logger.debug("Using tool: %s", data)
     function_params = data.get("parameters", {})
-    tool_function, result_parser = get_tool_with_parser(tools[function_name])
+    tool_function, result_parser = get_tool_with_parser(toolbox.get_tool(function_name))
 
     if tool_filter is not None:
         filter_result = tool_filter(data)
@@ -135,7 +135,7 @@ def function_result(
 
 def multi_function_result(
     value: str,
-    tools: ToolDict,
+    toolbox: Toolbox,
     tool_filter: ToolFilter | None = None,
     fix_filter=json_fixups,
 ) -> list[str]:
@@ -157,7 +157,7 @@ def multi_function_result(
     for call in calls:
         try:
             results.append(
-                function_result(call, tools, tool_filter=tool_filter, fix_filter=None)
+                function_result(call, toolbox, tool_filter=tool_filter, fix_filter=None)
             )
         except Exception as e:
             logger.exception("Error calling function")
@@ -168,7 +168,7 @@ def multi_function_result(
 
 def multi_function_or_str_result(
     value: str,
-    tools: ToolDict,
+    toolbox: Toolbox,
     tool_filter: ToolFilter | None = None,
     fix_filter=json_fixups,
 ) -> str:
@@ -178,7 +178,7 @@ def multi_function_or_str_result(
 
         if could_be_json(value):
             results = multi_function_result(
-                value, tools, tool_filter=tool_filter, fix_filter=fix_filter
+                value, toolbox, tool_filter=tool_filter, fix_filter=fix_filter
             )
             return "\n".join([str_result(result) for result in results])
 

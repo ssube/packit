@@ -74,7 +74,7 @@ def loop_team(
         if callable(result_parser):
             return result_parser(
                 value,
-                tools=toolbox.callbacks if toolbox else None,
+                toolbox=toolbox,
                 tool_filter=tool_filter,
             )
 

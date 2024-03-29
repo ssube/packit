@@ -104,7 +104,7 @@ class Agent:
             if "examples" not in args:
                 args["example"] = format_str_or_json(prompt_library.function_example)
             if "tools" not in args:
-                args["tools"] = format_str_or_json(toolbox.definitions)
+                args["tools"] = format_str_or_json(toolbox.list_definitions())
 
         try:
             formatted_prompt = prompt.format(**args)

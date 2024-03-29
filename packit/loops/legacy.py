@@ -4,9 +4,11 @@ from typing import Callable
 from packit.agent import Agent, AgentContext
 from packit.conditions import Condition, condition_threshold
 from packit.prompts import get_function_example, get_random_prompt
-from packit.results import ToolDict, ToolFilter, multi_function_or_str_result
+from packit.results import ToolFilter, multi_function_or_str_result
 
 logger = getLogger(__name__)
+
+ToolDict = dict[str, Callable | tuple[Callable, Callable | None]]
 
 
 def loop_converse(
