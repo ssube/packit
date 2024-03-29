@@ -43,3 +43,10 @@ class TestLoopRetry(TestCase):
 
         with self.assertRaises(ValueError):
             loop_retry(agent, "test", result_parser=result_parser)
+
+    def test_without_parser(self):
+        llm = MockLLM(["test 1", "test 2", "test 3"])
+        agent = Agent("test", "Test agent", {}, llm)
+
+        result = loop_retry(agent, "test")
+        self.assertEqual(result, "test 1")

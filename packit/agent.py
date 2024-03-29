@@ -1,12 +1,14 @@
 from logging import getLogger
 from os import environ
-from typing import Any, Callable, Protocol
+from typing import Any, Protocol
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 from packit.formats import format_str_or_json
 from packit.memory import make_limited_memory, memory_order_width
-from packit.prompts import DEFAULT_PROMPTS, PromptTemplate
+from packit.prompts import DEFAULT_PROMPTS, PromptLibrary, get_random_prompt
+from packit.toolbox import Toolbox
+from packit.types import MemoryFactory, MemoryMaker, PromptTemplate
 
 logger = getLogger(__name__)
 
@@ -26,8 +28,9 @@ class Agent:
     llm: AgentModel
     max_retry: int
     memory: list[AgentModelMessage] | None
-    memory_maker: Callable | None
+    memory_maker: MemoryMaker | None
     name: str
+    toolbox: Toolbox | None
 
     def __init__(
         self,
@@ -36,8 +39,9 @@ class Agent:
         context,
         llm,
         max_retry=3,
-        memory: Callable | None = make_limited_memory,
-        memory_maker: Callable | None = memory_order_width,
+        memory: MemoryFactory | None = make_limited_memory,
+        memory_maker: MemoryMaker | None = memory_order_width,
+        toolbox: Toolbox | None = None,
     ):
         self.backstory = backstory
         self.context = context
@@ -45,6 +49,7 @@ class Agent:
         self.max_retry = max_retry
         self.memory_maker = memory_maker
         self.name = name
+        self.toolbox = toolbox
 
         if memory:
             self.memory = memory()
@@ -54,7 +59,7 @@ class Agent:
     def invoke_retry(
         self,
         messages: list[AgentModelMessage],
-        prompt_templates: PromptTemplate = DEFAULT_PROMPTS,
+        prompt_library: PromptLibrary = DEFAULT_PROMPTS,
     ):
         retry = 0
         while retry < self.max_retry:
@@ -65,7 +70,7 @@ class Agent:
                 # TODO: get the rest of the response
 
             do_skip = False
-            for skip_token in prompt_templates.skip:
+            for skip_token in prompt_library.skip:
                 if skip_token in result.content:
                     logger.warning(
                         "found skip token %s, skipping response: %s", skip_token, result
@@ -84,12 +89,22 @@ class Agent:
         self,
         prompt: str,
         context: AgentContext,
-        prompt_templates: PromptTemplate = DEFAULT_PROMPTS,
+        prompt_library: PromptLibrary = DEFAULT_PROMPTS,
+        prompt_template: PromptTemplate = get_random_prompt,
+        toolbox: Toolbox | None = None,
     ) -> str:
         args = {}
         args.update(self.context)
         args.update(context)
         args = {k: format_str_or_json(v) for k, v in args.items()}
+
+        toolbox = toolbox or self.toolbox
+        if toolbox:
+            prompt = prompt + " " + prompt_template("function")
+            if "examples" not in args:
+                args["example"] = format_str_or_json(prompt_library.function_example)
+            if "tools" not in args:
+                args["tools"] = format_str_or_json(toolbox.definitions)
 
         try:
             formatted_prompt = prompt.format(**args)
@@ -98,6 +113,7 @@ class Agent:
             logger.exception("Error formatting prompt: %s", prompt)
             return f"{type(e).__name__} while formatting prompt: {str(e)}"
 
+        # log the formatted prompts and construct langchain messages
         logger.debug("Agent: %s", self.name)
         logger.debug("System: %s", formatted_backstory)
         logger.debug("Prompt: %s", formatted_prompt)
@@ -105,8 +121,8 @@ class Agent:
         system = SystemMessage(content=formatted_backstory)
         human = HumanMessage(content=formatted_prompt)
 
-        if self.memory is not None:
-            # logger.debug("Memory: %s", self.memory)
+        # add the memory to the messages if there are any memories to add
+        if self.memory:
             messages = [
                 system,
                 *self.memory,
@@ -118,7 +134,7 @@ class Agent:
                 human,
             ]
 
-        result = self.invoke_retry(messages, prompt_templates=prompt_templates)
+        result = self.invoke_retry(messages, prompt_library=prompt_library)
 
         if not self.response_complete(result):
             logger.warning("LLM did not finish: %s", result)
@@ -127,7 +143,8 @@ class Agent:
         reply = reply.replace("<|im_end|>", "").strip()
         logger.debug("Response: %s", reply)
 
-        if self.memory and self.memory_maker:
+        # these need explicit not-None checks because memory can be an empty list
+        if self.memory is not None and self.memory_maker is not None:
             self.memory_maker(self.memory, human)
             self.memory_maker(self.memory, AIMessage(content=reply))
 
@@ -142,8 +159,10 @@ class Agent:
 
         return False
 
-    def __call__(self, prompt: str, **kwargs: Any) -> str:
-        return self.invoke(prompt, kwargs)
+    def __call__(
+        self, prompt: str, toolbox: Toolbox | None = None, **kwargs: Any
+    ) -> str:
+        return self.invoke(prompt, kwargs, toolbox=toolbox)
 
 
 def agent_easy_connect(

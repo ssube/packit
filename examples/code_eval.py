@@ -5,9 +5,9 @@ Warning: This example can be dangerous if unsupervised. Make sure to validate th
 """
 
 from packit.agent import Agent, agent_easy_connect
-from packit.prompts import get_function_example, get_random_prompt
-from packit.results import function_result, markdown_result
-from packit.tools import Toolbox
+from packit.loops import loop_tool
+from packit.results import markdown_result
+from packit.toolbox import Toolbox
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -86,14 +86,7 @@ for task, usage in zip(task_prompts, usage_prompts):
         toolbox = Toolbox([*new_tools, create_python_tool])
 
         # Get the factorial of a random number
-        result = programmer(
-            usage + get_random_prompt("function"),
-            example=get_function_example(),
-            tools=toolbox.definitions,
-        )
-
-        logger.info("Raw result: %s", result)
-        result = function_result(result, toolbox.callbacks)
+        result = loop_tool(programmer, usage, toolbox=toolbox)
         logger.info("Result: %s", result)
     except Exception:
         logger.exception("Error running generated code")

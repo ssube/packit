@@ -1,7 +1,7 @@
 from packit.agent import Agent, agent_easy_connect
-from packit.prompts import get_function_example, get_random_prompt
-from packit.results import function_result
-from packit.tools import Toolbox, lowercase_tool, titlecase_tool, uppercase_tool
+from packit.loops import loop_tool
+from packit.toolbox import Toolbox
+from packit.tools import lowercase_tool, titlecase_tool, uppercase_tool
 from packit.utils import logger_with_colors
 
 # Set up logging
@@ -38,17 +38,10 @@ inputs = [
 ]
 
 for input in inputs:
-    result = agent(
-        "Convert the following string into title case: {input}. "
-        + get_random_prompt("function"),
-        input=input,
-        example=get_function_example(),
-        tools=toolbox.definitions,
-    )
-    logger.info("Raw result: %s", result)
-
-    result = function_result(
-        result,
-        toolbox.callbacks,
+    result = loop_tool(
+        agent,
+        "Convert the following string into title case: {input}. ",
+        context={"input": input},
+        toolbox=toolbox,
     )
     logger.info("Title case result: %s", result)

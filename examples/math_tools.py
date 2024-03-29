@@ -1,15 +1,9 @@
 from random import randint
 
 from packit.agent import Agent, agent_easy_connect
-from packit.prompts import get_function_example, get_random_prompt
-from packit.results import function_result
-from packit.tools import (
-    Toolbox,
-    lowercase_tool,
-    multiply_tool,
-    sum_tool,
-    uppercase_tool,
-)
+from packit.loops import loop_tool
+from packit.toolbox import Toolbox
+from packit.tools import lowercase_tool, multiply_tool, sum_tool, uppercase_tool
 from packit.utils import logger_with_colors
 
 # Set up logging
@@ -40,18 +34,11 @@ b = randint(1, 100)
 logger.info("Multiplying: %s * %s", a, b)
 
 # Do some multiplication
-result = agent(
-    "Multiply {a} by {b}. " + get_random_prompt("function"),
-    a=a,
-    b=b,
-    example=get_function_example(),
-    tools=toolbox.definitions,
-)
-logger.info("Raw result: %s", result)
-
-result = function_result(
-    result,
-    toolbox.callbacks,
+result = loop_tool(
+    agent,
+    "Multiply {a} by {b}.",
+    context={"a": a, "b": b},
+    toolbox=toolbox,
 )
 logger.info("Multiply result: %s", result)
 logger.info("Correct result: %s", a * b)
@@ -61,17 +48,11 @@ for i in range(2, 6):
     numbers = [randint(1, 100) for _ in range(i)]
     logger.info("Summing: %s", numbers)
 
-    result = agent(
-        "Sum up the following numbers: {numbers}. " + get_random_prompt("function"),
-        numbers=numbers,
-        example=get_function_example(),
-        tools=toolbox.definitions,
-    )
-    logger.info("Raw result: %s", result)
-
-    result = function_result(
-        result,
-        toolbox.callbacks,
+    result = loop_tool(
+        agent,
+        "Sum up the following numbers: {numbers}.",
+        context={"numbers": numbers},
+        toolbox=toolbox,
     )
     logger.info("Sum result: %s", result)
     logger.info("Correct result: %s", sum(numbers))

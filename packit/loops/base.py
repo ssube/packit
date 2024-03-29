@@ -4,11 +4,13 @@ from typing import Protocol
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold
 from packit.selectors import select_loop
+from packit.toolbox import Toolbox
 from packit.types import (
     AgentSelector,
     MemoryFactory,
     MemoryMaker,
     PromptFilter,
+    PromptTemplate,
     ResultParser,
     StopCondition,
 )
@@ -26,9 +28,11 @@ class BaseLoop(Protocol):
         max_iterations: int = 10,
         memory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
+        prompt_template: PromptTemplate | None = None,
         result_filter: PromptFilter | None = None,
         result_parser: ResultParser | None = None,
         stop_condition: StopCondition = condition_threshold,
+        toolbox: Toolbox | None = None,
     ) -> str | list[str]:
         pass
 
@@ -42,8 +46,10 @@ def loop_map(
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
+    prompt_template: PromptTemplate | None = None,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> list[str]:
     """
     Loop through a list of agents, passing the same prompt to each agent.
@@ -66,7 +72,13 @@ def loop_map(
         if agent_prompt is None:
             continue  # map continues, reduce stops
 
-        result = agent(agent_prompt, **context, memory=memory)
+        result = agent(
+            agent_prompt,
+            **context,
+            memory=memory,
+            prompt_template=prompt_template,
+            toolbox=toolbox
+        )
 
         if callable(result_parser):
             result = result_parser(result)
@@ -91,8 +103,10 @@ def loop_reduce(
     memory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
+    prompt_template: PromptTemplate | None = None,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     """
     Loop through a list of agents, passing the result of each agent on to the next.
@@ -115,7 +129,13 @@ def loop_reduce(
         if result is None:
             break  # map continues, reduce stops
 
-        result = agent(result, **context, memory=memory)
+        result = agent(
+            result,
+            **context,
+            memory=memory,
+            prompt_template=prompt_template,
+            toolbox=toolbox
+        )
 
         if callable(result_parser):
             result = result_parser(result)

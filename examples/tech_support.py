@@ -1,9 +1,10 @@
 from random import randint
 
 from packit.agent import Agent, agent_easy_connect
-from packit.prompts import get_function_example, get_random_prompt
-from packit.results import bool_result, function_result
-from packit.tools import Toolbox, multiply_tool, sum_tool
+from packit.loops import loop_tool
+from packit.results import bool_result
+from packit.toolbox import Toolbox
+from packit.tools import multiply_tool, sum_tool
 from packit.utils import logger_with_colors
 
 # Set up logging
@@ -34,6 +35,7 @@ tech_support = Agent(
     "You are an expert in technical support and helping coworkers call the right functions to solve their problems.",
     {},
     function_llm,
+    toolbox=toolbox,
 )
 
 # Pick two random numbers
@@ -51,17 +53,7 @@ question = manager(
 logger.info("Question: %s", question)
 
 # Ask the tech support agent to solve the problem
-result = tech_support(
-    question + get_random_prompt("function"),
-    example=get_function_example(),
-    tools=toolbox.definitions,
-)
-logger.info("Raw result: %s", result)
-
-result = function_result(
-    result,
-    toolbox.callbacks,
-)
+result = loop_tool(tech_support, question, toolbox=toolbox)
 logger.info("Multiply result: %s", result)
 logger.info("Correct result: %s", a * b)
 

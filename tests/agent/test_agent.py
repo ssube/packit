@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
-from packit.prompts import PromptTemplate
+from packit.prompts import PromptLibrary
 from tests.mocks import MockLLM
 
 
@@ -16,7 +16,7 @@ class TestAgent(TestCase):
         llm = MockLLM(["<skip>", "prompt"])
         agent = Agent("name", "backstory", {"context": "context"}, llm)
         result = agent.invoke_retry(
-            ["prompt"], prompt_templates=PromptTemplate(skip=["<skip>"])
+            ["prompt"], prompt_library=PromptLibrary(skip=["<skip>"])
         )
         self.assertEqual(result.content, "prompt")
         self.assertTrue(result.response_metadata["done"])

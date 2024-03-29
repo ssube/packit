@@ -3,9 +3,9 @@ from packit.conditions import condition_or, condition_threshold
 from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
 from packit.memory import make_limited_memory
-from packit.prompts import get_function_example, get_random_prompt
 from packit.results import multi_function_result
-from packit.tools import Toolbox, make_complete_tool, make_team_tools
+from packit.toolbox import Toolbox
+from packit.tools import make_complete_tool, make_team_tools
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -128,13 +128,8 @@ def delegate_with_notice(
         task
         + team_tools_notice
         + get_budget_prompt()
-        + get_coworker_prompt(excluding=[coworker])
-        + get_random_prompt("function"),
-        context={
-            **context,
-            "example": get_function_example(),
-            "tools": toolbox.definitions,
-        },
+        + get_coworker_prompt(excluding=[coworker]),
+        context=context,
     )
     recursion_level -= 1
     return result
@@ -168,13 +163,8 @@ def question_with_notice(
         question
         + team_tools_notice
         + get_budget_prompt()
-        + get_coworker_prompt(excluding=[coworker])
-        + get_random_prompt("function"),
-        context={
-            **context,
-            "example": get_function_example(),
-            "tools": toolbox.definitions,
-        },
+        + get_coworker_prompt(excluding=[coworker]),
+        context=context,
     )
     recursion_level -= 1
     return result
@@ -212,12 +202,9 @@ for product in products:
     recruiting = ceo(
         "Using the recruit coworker tool, recruit up to 6 coworkers to help develop {product}. "
         "Each coworker should have a unique role with an inspiring background. "
-        "Assign each coworker to one of the following teams: {teams}. "
-        " " + get_random_prompt("function"),
-        example=get_function_example(),
+        "Assign each coworker to one of the following teams: {teams}.",
         product=product,
         teams=list(llms.keys()),
-        tools=recruiting_toolbox.definitions,
     )
     logger.info("Recruiting result: %s", recruiting)
 

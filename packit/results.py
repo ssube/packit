@@ -130,11 +130,7 @@ def function_result(
     if callable(result_parser):
         return result_parser(tool_result)
 
-    # TODO: remove, return tool_result directly
-    multi_result = multi_function_result(
-        tool_result, tools, tool_filter=tool_filter, fix_filter=fix_filter
-    )
-    return "\n".join(multi_result)
+    return tool_result
 
 
 def multi_function_result(
@@ -184,7 +180,7 @@ def multi_function_or_str_result(
             results = multi_function_result(
                 value, tools, tool_filter=tool_filter, fix_filter=fix_filter
             )
-            return "\n".join(results)
+            return "\n".join([str_result(result) for result in results])
 
         return str_result(value)
     except Exception as e:

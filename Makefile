@@ -23,6 +23,11 @@ test:
 	python -m coverage xml -i
 	python -m coverage report -i
 
+coverage-report:
+	python -m coverage html -i
+	python -m coverage xml -i
+	python -m coverage report -i
+
 package: package-dist package-upload
 
 package-dist:

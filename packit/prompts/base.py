@@ -1,26 +1,30 @@
 from typing import List
 
-PromptTemplateValue = List[str]
+PromptGroup = List[str]
 
 
-class PromptTemplate:
-    answers: PromptTemplateValue
-    converse: PromptTemplateValue
-    coworker: PromptTemplateValue
-    extend: PromptTemplateValue
-    function: PromptTemplateValue
-    refine: PromptTemplateValue
-    skip: PromptTemplateValue
+class PromptLibrary:
+    answers: PromptGroup
+    converse: PromptGroup
+    coworker: PromptGroup
+    extend: PromptGroup
+    function: PromptGroup
+    refine: PromptGroup
+    skip: PromptGroup
+
+    # things that are not prompt groups
+    function_example: dict
 
     def __init__(
         self,
-        answers: PromptTemplateValue | None = None,
-        converse: PromptTemplateValue | None = None,
-        coworker: PromptTemplateValue | None = None,
-        extend: PromptTemplateValue | None = None,
-        function: PromptTemplateValue | None = None,
-        refine: PromptTemplateValue | None = None,
-        skip: PromptTemplateValue | None = None,
+        answers: PromptGroup | None = None,
+        converse: PromptGroup | None = None,
+        coworker: PromptGroup | None = None,
+        extend: PromptGroup | None = None,
+        function: PromptGroup | None = None,
+        refine: PromptGroup | None = None,
+        skip: PromptGroup | None = None,
+        function_example: dict | None = None,
     ) -> None:
         self.answers = answers or []
         self.converse = converse or []
@@ -29,3 +33,5 @@ class PromptTemplate:
         self.function = function or []
         self.refine = refine or []
         self.skip = skip or []
+
+        self.function_example = function_example or {}

@@ -3,6 +3,7 @@ from typing import Any
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
+from packit.loops import loop_retry
 from packit.results import bool_result
 
 logger = getLogger(__name__)
@@ -23,15 +24,10 @@ class Panel:
 
         for agent, weight in zip(self.agents, self.weights):
             for i in range(weight):
-                result = agent.invoke(prompt, context)
-                retry = 0
-                while retry < max_retry:
-                    try:
-                        results[f"{agent.name}-{i}"] = parse_result(result)
-                        break
-                    except Exception:
-                        logger.exception("Error parsing result")
-                        retry += 1
+                result = loop_retry(
+                    agent, prompt, context=context, result_parser=parse_result
+                )
+                results[f"{agent.name}-{i}"] = result
 
         return results
 

@@ -3,6 +3,7 @@ from logging import getLogger
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold
 from packit.prompts import get_random_prompt
+from packit.toolbox import Toolbox
 from packit.types import (
     MemoryFactory,
     MemoryMaker,
@@ -30,6 +31,7 @@ def loop_prefix(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
@@ -51,6 +53,7 @@ def loop_prefix(
         prompt_filter=prefix_filter,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )
 
 
@@ -67,6 +70,7 @@ def loop_suffix(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
@@ -88,6 +92,7 @@ def loop_suffix(
         prompt_filter=suffix_filter,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )
 
 
@@ -105,6 +110,7 @@ def loop_midfix(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.
@@ -132,4 +138,5 @@ def loop_midfix(
         prompt_filter=midfix_filter,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )

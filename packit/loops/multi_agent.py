@@ -4,6 +4,7 @@ from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import get_random_prompt
+from packit.toolbox import Toolbox
 from packit.types import (
     MemoryFactory,
     MemoryMaker,
@@ -29,6 +30,7 @@ def loop_converse(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     return loop_prefix(
         agents,
@@ -42,6 +44,7 @@ def loop_converse(
         prompt_template=prompt_template,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )
 
 
@@ -56,6 +59,7 @@ def loop_extend(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     return loop_prefix(
         agents,
@@ -69,6 +73,7 @@ def loop_extend(
         prompt_template=prompt_template,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )
 
 
@@ -83,6 +88,7 @@ def loop_refine(
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
+    toolbox: Toolbox | None = None,
 ) -> str:
     return loop_prefix(
         agents,
@@ -96,4 +102,5 @@ def loop_refine(
         prompt_template=prompt_template,
         result_parser=result_parser,
         stop_condition=stop_condition,
+        toolbox=toolbox,
     )

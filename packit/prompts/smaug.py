@@ -1,11 +1,11 @@
-from .base import PromptTemplate
+from .base import PromptLibrary
 
 function_call = {
     "function": "multiply",
     "parameters": {"a": 3, "b": 8},
 }
 
-prompts = PromptTemplate(
+prompts = PromptLibrary(
     answers=[
         "Your coworkers have provided the following answers: {memory}.",
     ],
@@ -29,6 +29,7 @@ prompts = PromptTemplate(
         "Make sure you fill in all of the required parameters. "
         "The available functions are: {tools}"
     ],
+    function_example=function_call,
     refine=[
         "Take the following text and improve on it. Fix any typos, grammatical errors, or syntax errors.",
     ],

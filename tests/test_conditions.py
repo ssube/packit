@@ -10,6 +10,7 @@ from packit.conditions import (
     condition_threshold,
     condition_threshold_mean,
     condition_threshold_sum,
+    condition_timeout,
 )
 
 
@@ -113,3 +114,11 @@ class TestConditionThresholdSum(TestCase):
 
     def test_condition_threshold_sum_false(self):
         self.assertEqual(condition_threshold_sum(4, 3, 1), False)
+
+
+class TestConditionTimeout(TestCase):
+    def test_condition_timeout_true(self):
+        self.assertEqual(condition_timeout(5, 5, timer=lambda: 10), True)
+
+    def test_condition_timeout_false(self):
+        self.assertEqual(condition_timeout(5, 5, timer=lambda: 1), False)
