@@ -39,6 +39,7 @@ blue_team = [
 # Prepare communication tools for both teams
 _, red_question_tool = make_team_tools(red_team)
 red_question_tool.__name__ = "red_question_tool"
+
 _, blue_question_tool = make_team_tools(blue_team)
 blue_question_tool.__name__ = "blue_question_tool"
 
@@ -86,10 +87,10 @@ tool_filter, clear_filter = repeat_tool_filter(
 prompt = (
     "You are the team leader assigned to the red team. You must get in touch with the blue team and ask them to fix "
     "the network. Only one member of the red team is allowed to use the blue question tool to ask the blue team "
-    "questions. You cannot choose which member has the tool, they have already been assigned. You must find out "
-    "which team member can communicate with the blue team and ask them to ask the blue team to fix the network. "
-    "The red question tool can only ask questions of the red team. The blue question tool can only ask questions of "
-    "the blue team. The fix network tool can only be used by the blue team. Coworker names are case sensitive. Good luck! "
+    "questions. You cannot choose which member has the tool, they have already been assigned. You must find out which "
+    "team member can communicate with the blue team and ask them to ask the blue team to fix the network. The red "
+    "question tool can only ask questions of the red team. The blue question tool can only ask questions of the blue "
+    "team. The fix network tool can only be used by the blue team. Coworker names are case sensitive. Good luck! "
 )
 result = loop_team(
     red_team[0],

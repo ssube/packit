@@ -1,4 +1,4 @@
-from .adapter import RuleState, StateRule
+from .adapter import GenericRule, RuleState
 
 
 def make_rule(
@@ -7,24 +7,24 @@ def make_rule(
     action: str | None = None,
     context: str | None = None,
     state: RuleState = RuleState.ALLOW,
-) -> StateRule:
+) -> GenericRule:
     """
     Create a rule for an agent to perform an action on a resource.
     """
 
     criteria = {}
 
-    # TODO: automatically get name from agents here
-    if subject:
-        criteria["subject"] = subject
-
-    if resource:
-        criteria["resource"] = resource
+    if context:
+        criteria.update(context)
 
     if action:
         criteria["action"] = action
 
-    if context:
-        criteria.update(context)
+    if resource:
+        criteria["resource"] = resource
+
+    # TODO: automatically get name from agents here
+    if subject:
+        criteria["subject"] = subject
 
     return (criteria, state)

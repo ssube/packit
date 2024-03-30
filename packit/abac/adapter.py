@@ -16,7 +16,7 @@ class ABACAdapter(Protocol):
         pass
 
 
-StateRule = tuple[Any, RuleState]
+GenericRule = tuple[Any, RuleState]
 SubsetRule = tuple[dict[str, str], RuleState]
 
 
