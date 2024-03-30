@@ -1,7 +1,8 @@
-from enum import Enum
 from typing import Callable
 
 from langchain_core.utils.function_calling import convert_to_openai_tool
+
+from packit.abac import ABACAdapter, ABACAttributes, RuleState
 
 
 class Toolbox:
@@ -25,7 +26,7 @@ class Toolbox:
             self.callbacks[name] = tool
             self.definitions.append(convert_to_openai_tool(tool))
 
-    def get_definition(self, name: str, **kwargs):
+    def get_definition(self, name: str, abac: ABACAttributes = {}):
         """
         Return the tool definition.
         """
@@ -36,21 +37,21 @@ class Toolbox:
 
         raise KeyError(name)
 
-    def get_tool(self, name: str, **kwargs):
+    def get_tool(self, name: str, abac: ABACAttributes = {}):
         """
         Return the tool callback.
         """
 
         return self.callbacks[name]
 
-    def list_definitions(self, **kwargs):
+    def list_definitions(self, abac: ABACAttributes = {}):
         """
         Return the tool definitions.
         """
 
         return list(self.definitions)
 
-    def list_tools(self, **kwargs):
+    def list_tools(self, abac: ABACAttributes = {}):
         """
         Return the tool definitions.
         """
@@ -58,106 +59,60 @@ class Toolbox:
         return list(self.callbacks.keys())
 
 
-class RuleState(str, Enum):
-    ALLOW = "allow"
-    DENY = "deny"
-    SKIP = None
-
-
-ToolboxRule = tuple[dict[str, str], RuleState]
-
-
 class RestrictedToolbox(Toolbox):
     """
     Container for tools with restricted access.
     """
 
-    default_state: RuleState
-    rules: list[ToolboxRule]
+    abac: ABACAdapter
 
     def __init__(
         self,
         tools: list[Callable],
-        rules: list[ToolboxRule],
-        default_state=RuleState.DENY,
+        abac: ABACAdapter,
     ):
         """
         Initialize the toolbox with a list of tools and rules.
         """
 
         super().__init__(tools)
-        self.default_state = default_state
-        self.rules = rules
+        self.abac = abac
 
-    def check_rule(
-        self, rule: ToolboxRule, **kwargs: dict[str, str]
-    ) -> RuleState | None:
-        """
-        Check if the agent has access to the tool.
-        """
-
-        criteria, state = rule
-
-        if criteria.items() <= kwargs.items():
-            return state
-
-        return None
-
-    def check_rules(self, tool: str, **kwargs):
-        """
-        Check if the agent has access to the tool.
-        """
-
-        kwargs_with_tool = {**kwargs, "tool": tool}
-        rule_checks = [self.check_rule(rule, **kwargs_with_tool) for rule in self.rules]
-
-        # filter relevant rules
-        relevant_checks = [check for check in rule_checks if check is not None]
-
-        if len(relevant_checks) > 0:
-            if any(check for check in relevant_checks if check == RuleState.DENY):
-                return RuleState.DENY
-
-            if all(check for check in relevant_checks if check == RuleState.ALLOW):
-                return RuleState.ALLOW
-
-        return self.default_state
-
-    def get_definition(self, name: str, **kwargs):
+    def get_definition(self, name: str, abac: ABACAttributes = {}):
         """
         Return the tool definition.
         """
 
-        if self.check_rules(name, **kwargs) != RuleState.ALLOW:
+        if self.abac.check({"resource": name, **abac}) != RuleState.ALLOW:
             raise ValueError(f"Access denied for tool {name}.")
 
-        return super().get_definition(name, **kwargs)
+        return super().get_definition(name, abac=abac)
 
-    def get_tool(self, name: str, **kwargs):
+    def get_tool(self, name: str, abac: ABACAttributes = {}):
         """
         Return the tool callback.
         """
 
-        if self.check_rules(name, **kwargs) != RuleState.ALLOW:
+        if self.abac.check({"resource": name, **abac}) != RuleState.ALLOW:
             raise ValueError(f"Access denied for tool {name}.")
 
-        return super().get_tool(name, **kwargs)
+        return super().get_tool(name, abac=abac)
 
-    def list_definitions(self, **kwargs):
+    def list_definitions(self, abac: ABACAttributes = {}):
         return [
             definition
-            for definition in super().list_definitions(**kwargs)
-            if self.check_rules(definition["function"]["name"], **kwargs)
+            for definition in super().list_definitions(abac=abac)
+            if self.abac.check({"resource": definition["function"]["name"], **abac})
             == RuleState.ALLOW
         ]
 
-    def list_tools(self, **kwargs):
+    def list_tools(self, abac: ABACAttributes = {}):
         """
         Return the tool definitions.
         """
 
         return [
             name
-            for name in super().list_tools(**kwargs)
-            if self.check_rules(name, **kwargs) == RuleState.ALLOW
+            for name in super().list_tools(abac=abac)
+            if self.abac.check({"resource": name, **abac}) == RuleState.ALLOW
         ]

@@ -7,7 +7,7 @@ from tests.mocks import MockLLM
 
 class TestLoopRetry(TestCase):
     def test_immediate_success(self):
-        def result_parser(value):
+        def result_parser(value, **kwargs):
             return value
 
         llm = MockLLM(["test 1", "test 2", "test 3"])
@@ -19,7 +19,7 @@ class TestLoopRetry(TestCase):
     def test_eventual_success(self):
         counter = 0
 
-        def result_parser(value):
+        def result_parser(value, **kwargs):
             nonlocal counter
 
             if counter > 0:
@@ -35,7 +35,7 @@ class TestLoopRetry(TestCase):
         self.assertEqual(result, "test 2")
 
     def test_eventual_exhaustion(self):
-        def result_parser(value):
+        def result_parser(value, **kwargs):
             raise ValueError("Test error")
 
         llm = MockLLM(["test 1", "test 2", "test 3"])

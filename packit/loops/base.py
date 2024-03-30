@@ -81,7 +81,12 @@ def loop_map(
         )
 
         if callable(result_parser):
-            result = result_parser(result)
+            result = result_parser(
+                result,
+                abac={
+                    "subject": agent.name,
+                },
+            )
 
         if callable(memory_maker):
             memory_maker(memory, result)
@@ -138,7 +143,12 @@ def loop_reduce(
         )
 
         if callable(result_parser):
-            result = result_parser(result)
+            result = result_parser(
+                result,
+                abac={
+                    "subject": agent.name,
+                },
+            )
 
         if callable(memory_maker):
             memory_maker(memory, result)

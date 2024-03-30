@@ -6,10 +6,9 @@ logger = getLogger(__name__)
 def make_complete_tool():
     """
     Make a tool to complete tasks and exit the loop.
-
-    TODO: provide a way to access the task answer.
     """
     complete = False
+    result = None
 
     def complete_tool(answer: str) -> str:
         """
@@ -19,7 +18,10 @@ def make_complete_tool():
             answer: The answer to the task.
         """
         nonlocal complete
+        nonlocal result
+
         complete = True
+        result = answer
 
         logger.info("Answer: %s", answer)
         return "Task complete."
@@ -30,8 +32,11 @@ def make_complete_tool():
         """
         return complete
 
+    def get_result() -> str:
+        return result
+
     def reset_complete() -> None:
         nonlocal complete
         complete = False
 
-    return complete_tool, complete_condition, reset_complete
+    return complete_tool, complete_condition, get_result, reset_complete

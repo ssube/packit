@@ -70,17 +70,15 @@ def loop_team(
         **loop_context,
     )
 
-    def result_parser_with_tools(value: str) -> str:
+    def result_parser_with_tools(value: str, **kwargs) -> str:
         if callable(result_parser):
             return result_parser(
-                value,
-                toolbox=toolbox,
-                tool_filter=tool_filter,
+                value, toolbox=toolbox, tool_filter=tool_filter, **kwargs
             )
 
         return value
 
-    def result_parser_with_retry(value: str) -> str:
+    def result_parser_with_retry(value: str, **kwargs) -> str:
         retry_result = loop_retry(
             manager,  # should be the same agent over again, not necessarily the manager
             value,
@@ -89,10 +87,11 @@ def loop_team(
             prompt_filter=result_parser_with_tools,
             result_parser=result_parser_with_tools,
             stop_condition=stop_condition,
+            toolbox=toolbox,
         )
 
         if could_be_json(retry_result):
-            return result_parser_with_retry(retry_result)
+            return result_parser_with_retry(retry_result, **kwargs)
 
         return retry_result
 

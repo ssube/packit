@@ -7,7 +7,9 @@ from mistletoe import Document
 from mistletoe.block_token import CodeFence, Paragraph
 from mistletoe.span_token import LineBreak, RawText
 
+from packit.abac import ABACAttributes
 from packit.toolbox import Toolbox
+from packit.types import ResultParser
 from packit.utils import could_be_json
 
 logger = getLogger(__name__)
@@ -16,7 +18,7 @@ logger = getLogger(__name__)
 ToolFilter = Callable[[dict], str | None]
 
 
-def bool_result(value: str) -> bool:
+def bool_result(value: str, **kwargs) -> bool:
     value = value.replace("Rating:", "")
     value = value.replace("Rank:", "")
     value = value.strip()
@@ -35,7 +37,7 @@ def bool_result(value: str) -> bool:
     return value.lower() == "yes"
 
 
-def int_result(value: str) -> int:
+def int_result(value: str, **kwargs) -> int:
     value = value.replace("Rating:", "")
     value = value.replace("Rank:", "")
     value = value.strip()
@@ -43,11 +45,11 @@ def int_result(value: str) -> int:
     return int(value)
 
 
-def str_result(value: str) -> str:
+def str_result(value: str, **kwargs) -> str:
     return str(value).strip()
 
 
-def json_fixups(value: str, list_result=False) -> str:
+def json_fixups(value: str, list_result=False, **kwargs) -> str:
     value = value.strip()
 
     # collapse lines
@@ -81,7 +83,7 @@ def json_fixups(value: str, list_result=False) -> str:
 
 
 def json_result(
-    value: str, list_result=False, fix_filter=json_fixups
+    value: str, list_result=False, fix_filter=json_fixups, *kwargs
 ) -> list[str] | dict[str, str]:
     if callable(fix_filter):
         value = fix_filter(value, list_result=list_result)
@@ -92,8 +94,10 @@ def json_result(
 def function_result(
     value: str,
     toolbox: Toolbox,
-    tool_filter: ToolFilter | None = None,
+    abac: ABACAttributes = {},
     fix_filter=json_fixups,
+    result_parser: ResultParser | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     value = value.replace(
         "\\_", "_"
@@ -110,25 +114,25 @@ def function_result(
         raise ValueError("No function specified")
 
     function_name = data["function"]
-    if function_name not in toolbox.list_tools():
+    if function_name not in toolbox.list_tools(abac):
         raise ValueError(f"Unknown tool {function_name}")
 
     logger.debug("Using tool: %s", data)
     function_params = data.get("parameters", {})
-    tool_function, result_parser = get_tool_with_parser(toolbox.get_tool(function_name))
 
     if tool_filter is not None:
         filter_result = tool_filter(data)
         if filter_result is not None:
             return filter_result
 
+    tool = toolbox.get_tool(function_name, abac)
     try:
-        tool_result = tool_function(**function_params)
+        tool_result = tool(**function_params)
     except Exception as e:
         raise ValueError(f"Error running tool {function_name}: {e}")
 
     if callable(result_parser):
-        return result_parser(tool_result)
+        return result_parser(tool_result, abac=abac)
 
     return tool_result
 
@@ -136,8 +140,10 @@ def function_result(
 def multi_function_result(
     value: str,
     toolbox: Toolbox,
-    tool_filter: ToolFilter | None = None,
+    abac: ABACAttributes = {},
     fix_filter=json_fixups,
+    result_parser: ResultParser | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> list[str]:
     if fix_filter:
         value = fix_filter(value, list_result=True)
@@ -157,7 +163,14 @@ def multi_function_result(
     for call in calls:
         try:
             results.append(
-                function_result(call, toolbox, tool_filter=tool_filter, fix_filter=None)
+                function_result(
+                    call,
+                    toolbox,
+                    abac=abac,
+                    fix_filter=None,
+                    result_parser=result_parser,
+                    tool_filter=tool_filter,
+                )
             )
         except Exception as e:
             logger.exception("Error calling function")
@@ -169,8 +182,10 @@ def multi_function_result(
 def multi_function_or_str_result(
     value: str,
     toolbox: Toolbox,
-    tool_filter: ToolFilter | None = None,
+    abac: ABACAttributes = {},
     fix_filter=json_fixups,
+    result_parser: ResultParser | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     try:
         if value is None:
@@ -178,7 +193,12 @@ def multi_function_or_str_result(
 
         if could_be_json(value):
             results = multi_function_result(
-                value, toolbox, tool_filter=tool_filter, fix_filter=fix_filter
+                value,
+                toolbox,
+                abac=abac,
+                fix_filter=fix_filter,
+                result_parser=result_parser,
+                tool_filter=tool_filter,
             )
             return "\n".join([str_result(result) for result in results])
 
@@ -229,16 +249,7 @@ def markdown_result(
         raise ValueError("Invalid block type")
 
 
-# region internal utils
-def get_tool_with_parser(
-    tool: Callable | tuple[Callable, Callable | None]
-) -> tuple[Callable, Callable | None]:
-    if isinstance(tool, tuple):
-        return tool
-
-    return tool, None
-
-
+# region json utils
 def normalize_function_json(
     data: dict[str, str] | list[str],
 ) -> dict[str, str] | list[dict[str, str]]:

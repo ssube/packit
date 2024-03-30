@@ -39,13 +39,15 @@ def loop_retry(
     last_error: Exception | None = None
     success: bool = False
 
-    def parse_or_error(value) -> str:
+    def parse_or_error(value, abac=None) -> str:
         nonlocal last_error
         nonlocal success
 
         try:
             if callable(result_parser):
-                parsed = result_parser(value)
+                parsed = result_parser(
+                    value, abac={"subject": agent.name, **(abac or {})}
+                )
             else:
                 parsed = value
 
@@ -94,10 +96,11 @@ def loop_tool(
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
     """
 
-    def result_parser_with_tools(value: str) -> str:
+    def result_parser_with_tools(value: str, abac=None) -> str:
         if callable(result_parser):
             return result_parser(
                 value,
+                abac=abac,
                 toolbox=toolbox,
                 tool_filter=None,
             )

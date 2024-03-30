@@ -22,7 +22,7 @@ coworker_names = [coworker.name for coworker in coworkers]
 
 
 # Prepare a tool to complete tasks and exit the loop
-complete_tool, complete_condition, reset_complete = make_complete_tool()
+complete_tool, complete_condition, get_result, reset_complete = make_complete_tool()
 complete_or_threshold = condition_or(complete_condition, condition_threshold)
 
 
@@ -92,6 +92,6 @@ for task in tasks:
     )
 
     if complete_condition():
-        logger.info("Task complete.")
+        logger.info("Task complete: %s", get_result())
     else:
         logger.error("Task incomplete.")

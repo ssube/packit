@@ -2,6 +2,8 @@ from packit.agent import Agent
 
 
 def make_team_tools(team: list[Agent]):
+    names = [agent.name for agent in team]
+
     def delegate_tool(
         coworker: str, task: str, context: dict[str, str] | None = None
     ) -> str:
@@ -19,7 +21,7 @@ def make_team_tools(team: list[Agent]):
             if agent.name == coworker:
                 return agent(task, **context)
 
-        return "I'm sorry, that coworker does not exist."
+        return f"I'm sorry, that coworker does not exist. Available coworkers: {', '.join(names)}."
 
     def question_tool(
         coworker: str, question: str, context: dict[str, str] | None = None
@@ -38,6 +40,6 @@ def make_team_tools(team: list[Agent]):
             if agent.name == coworker:
                 return agent(question, **context)
 
-        return "I'm sorry, that coworker does not exist."
+        return f"I'm sorry, that coworker does not exist. Available coworkers: {', '.join(names)}."
 
     return delegate_tool, question_tool

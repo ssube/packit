@@ -60,7 +60,7 @@ def recruit_coworker(role: str, team: str, background: str) -> Agent:
 
 
 # Prepare a tool to complete tasks and exit the loop
-complete_tool, complete_condition, reset_complete = make_complete_tool()
+complete_tool, complete_condition, get_result, reset_complete = make_complete_tool()
 complete_or_threshold = condition_or(complete_condition, condition_threshold)
 
 
@@ -235,3 +235,4 @@ for product in products:
         )
 
     logger.info("Product development complete: %s", product)
+    logger.info("Product development result: %s", get_result())

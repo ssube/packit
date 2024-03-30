@@ -16,7 +16,7 @@ class TestTeamTools(TestCase):
         self.assertEqual(delegate("Alice", "Do some work"), "Alice")
         self.assertEqual(
             delegate("Larry", "Do some work"),
-            "I'm sorry, that coworker does not exist.",
+            "I'm sorry, that coworker does not exist. Available coworkers: Alice, Bob.",
         )
 
     def test_question_valid_coworker(self):
@@ -29,5 +29,5 @@ class TestTeamTools(TestCase):
         self.assertEqual(question("Alice", "Do some work"), "Alice")
         self.assertEqual(
             question("Larry", "Do some work"),
-            "I'm sorry, that coworker does not exist.",
+            "I'm sorry, that coworker does not exist. Available coworkers: Alice, Bob.",
         )
