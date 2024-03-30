@@ -148,6 +148,7 @@ def loop_reduce(
                 abac={
                     "subject": agent.name,
                 },
+                toolbox=toolbox,
             )
 
         if callable(memory_maker):

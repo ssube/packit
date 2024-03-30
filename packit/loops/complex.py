@@ -4,10 +4,10 @@
 from logging import getLogger
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import condition_threshold
+from packit.conditions import condition_not, condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import get_random_prompt
-from packit.results import multi_function_or_str_result
+from packit.results import multi_function_or_str_result, recursive_result
 from packit.toolbox import Toolbox
 from packit.types import (
     MemoryFactory,
@@ -21,7 +21,6 @@ from packit.types import (
 from packit.utils import could_be_json
 
 from .base import loop_reduce
-from .single_agent import loop_retry
 
 logger = getLogger(__name__)
 
@@ -70,32 +69,11 @@ def loop_team(
         **loop_context,
     )
 
-    def result_parser_with_tools(value: str, **kwargs) -> str:
-        if callable(result_parser):
-            return result_parser(
-                value, toolbox=toolbox, tool_filter=tool_filter, **kwargs
-            )
+    not_json_condition = condition_not(could_be_json)
+    recursive_result_parser = recursive_result(result_parser, not_json_condition)
 
-        return value
-
-    def result_parser_with_retry(value: str, **kwargs) -> str:
-        retry_result = loop_retry(
-            manager,  # should be the same agent over again, not necessarily the manager
-            value,
-            context=loop_context,
-            max_iterations=3,
-            prompt_filter=result_parser_with_tools,
-            result_parser=result_parser_with_tools,
-            stop_condition=stop_condition,
-            toolbox=toolbox,
-        )
-
-        if could_be_json(retry_result):
-            return result_parser_with_retry(retry_result, **kwargs)
-
-        return retry_result
-
-    result = result_parser_with_retry(result)
+    # TODO: wrap with retry loop, with the correct agent
+    result = recursive_result_parser(result, toolbox, tool_filter=tool_filter)
 
     return loop_reduce(
         [manager],
@@ -104,9 +82,9 @@ def loop_team(
         max_iterations=max_iterations,
         memory=get_memory,
         memory_maker=memory_maker,
-        prompt_filter=result_parser_with_retry,  # does the real prompt filter need to be included here?
+        prompt_filter=prompt_filter,
         prompt_template=prompt_template,
-        result_parser=result_parser_with_retry,
+        result_parser=recursive_result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
     )

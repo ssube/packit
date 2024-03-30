@@ -39,15 +39,13 @@ def loop_retry(
     last_error: Exception | None = None
     success: bool = False
 
-    def parse_or_error(value, abac=None) -> str:
+    def parse_or_error(value, **kwargs) -> str:
         nonlocal last_error
         nonlocal success
 
         try:
             if callable(result_parser):
-                parsed = result_parser(
-                    value, abac={"subject": agent.name, **(abac or {})}
-                )
+                parsed = result_parser(value, **kwargs)
             else:
                 parsed = value
 

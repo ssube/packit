@@ -78,12 +78,19 @@ class RestrictedToolbox(Toolbox):
         super().__init__(tools)
         self.abac = abac
 
+    def check_tool(self, name: str, abac: ABACAttributes = {}) -> bool:
+        """
+        Check if the agent has access to the tool.
+        """
+
+        return self.abac.check({"resource": name, **abac}) == RuleState.ALLOW
+
     def get_definition(self, name: str, abac: ABACAttributes = {}):
         """
         Return the tool definition.
         """
 
-        if self.abac.check({"resource": name, **abac}) != RuleState.ALLOW:
+        if not self.check_tool(name, abac):
             raise ValueError(f"Access denied for tool {name}.")
 
         return super().get_definition(name, abac=abac)
@@ -93,7 +100,7 @@ class RestrictedToolbox(Toolbox):
         Return the tool callback.
         """
 
-        if self.abac.check({"resource": name, **abac}) != RuleState.ALLOW:
+        if not self.check_tool(name, abac):
             raise ValueError(f"Access denied for tool {name}.")
 
         return super().get_tool(name, abac=abac)
@@ -102,8 +109,7 @@ class RestrictedToolbox(Toolbox):
         return [
             definition
             for definition in super().list_definitions(abac=abac)
-            if self.abac.check({"resource": definition["function"]["name"], **abac})
-            == RuleState.ALLOW
+            if self.check_tool(definition["function"]["name"], abac)
         ]
 
     def list_tools(self, abac: ABACAttributes = {}):
@@ -114,5 +120,5 @@ class RestrictedToolbox(Toolbox):
         return [
             name
             for name in super().list_tools(abac=abac)
-            if self.abac.check({"resource": name, **abac}) == RuleState.ALLOW
+            if self.check_tool(name, abac)
         ]

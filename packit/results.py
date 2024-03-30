@@ -93,10 +93,10 @@ def json_result(
 
 def function_result(
     value: str,
-    toolbox: Toolbox,
     abac: ABACAttributes = {},
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
+    toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
     value = value.replace(
@@ -132,17 +132,23 @@ def function_result(
         raise ValueError(f"Error running tool {function_name}: {e}")
 
     if callable(result_parser):
-        return result_parser(tool_result, abac=abac)
+        return result_parser(
+            tool_result,
+            abac=abac,
+            fix_filter=fix_filter,
+            toolbox=toolbox,
+            tool_filter=tool_filter,
+        )
 
     return tool_result
 
 
 def multi_function_result(
     value: str,
-    toolbox: Toolbox,
     abac: ABACAttributes = {},
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
+    toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> list[str]:
     if fix_filter:
@@ -165,10 +171,10 @@ def multi_function_result(
             results.append(
                 function_result(
                     call,
-                    toolbox,
                     abac=abac,
                     fix_filter=None,
                     result_parser=result_parser,
+                    toolbox=toolbox,
                     tool_filter=tool_filter,
                 )
             )
@@ -194,10 +200,10 @@ def multi_function_or_str_result(
         if could_be_json(value):
             results = multi_function_result(
                 value,
-                toolbox,
                 abac=abac,
                 fix_filter=fix_filter,
                 result_parser=result_parser,
+                toolbox=toolbox,
                 tool_filter=tool_filter,
             )
             return "\n".join([str_result(result) for result in results])
@@ -247,6 +253,38 @@ def markdown_result(
         ]
     else:
         raise ValueError("Invalid block type")
+
+
+def recursive_result(
+    result_parser: ResultParser | None = None,
+    stop_condition: Callable = lambda *args: False,
+):
+    def inner(
+        value: str,
+        toolbox: Toolbox,
+        abac: ABACAttributes = {},
+        fix_filter=json_fixups,
+        tool_filter: ToolFilter | None = None,
+    ) -> str:
+        """
+        Recursively parse the result, until the stop condition is met.
+        """
+
+        result = value
+
+        while not stop_condition(result):
+            result = result_parser(
+                result,
+                abac=abac,
+                fix_filter=fix_filter,
+                result_parser=result_parser,
+                toolbox=toolbox,
+                tool_filter=tool_filter,
+            )
+
+        return result
+
+    return inner
 
 
 # region json utils
