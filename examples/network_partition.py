@@ -14,7 +14,7 @@ from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
 
-# Set up some experts in different fields
+# Set up some network experts and assign them to teams
 llm = agent_easy_connect(model="mixtral", temperature=0.25)
 team_size = 4
 red_team = [
