@@ -13,7 +13,7 @@ ABACAttributes = dict[str, str]
 
 class ABACAdapter(Protocol):
     def check(self, attributes: ABACAttributes) -> RuleState:
-        pass
+        pass  # pragma: no cover
 
 
 GenericRule = tuple[Any, RuleState]

@@ -52,9 +52,10 @@ def loop_retry(
             success = True
             return parsed
         except Exception as e:
-            logger.warning(e)
+            logger.exception("Error parsing result: %s", value)
             last_error = e
-            return str(e)
+            # TODO: check this conversion
+            return f"There was an error with your last response, please try again: {e}"
 
     stop_condition_or_success = condition_or(stop_condition, lambda *args: success)
 
@@ -94,13 +95,17 @@ def loop_tool(
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
     """
 
-    def result_parser_with_tools(value: str, abac=None) -> str:
+    outer_toolbox = toolbox
+
+    def result_parser_with_tools(
+        value: str, abac=None, toolbox=None, tool_filter=None
+    ) -> str:
         if callable(result_parser):
             return result_parser(
                 value,
                 abac=abac,
-                toolbox=toolbox,
-                tool_filter=None,
+                toolbox=toolbox or outer_toolbox,
+                tool_filter=tool_filter,
             )
 
         return value

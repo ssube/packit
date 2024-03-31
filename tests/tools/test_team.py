@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
+from packit.errors import ToolError
 from packit.tools import make_team_tools
 from tests.mocks import MockLLM
 
@@ -14,10 +15,8 @@ class TestTeamTools(TestCase):
         ]
         delegate, _question = make_team_tools(agents)
         self.assertEqual(delegate("Alice", "Do some work"), "Alice")
-        self.assertEqual(
-            delegate("Larry", "Do some work"),
-            "I'm sorry, that coworker does not exist. Available coworkers: Alice, Bob.",
-        )
+        with self.assertRaises(ToolError):
+            delegate("Larry", "Do some work")
 
     def test_question_valid_coworker(self):
         llm = MockLLM(["Alice", "Bob"])
@@ -27,7 +26,5 @@ class TestTeamTools(TestCase):
         ]
         _delegate, question = make_team_tools(agents)
         self.assertEqual(question("Alice", "Do some work"), "Alice")
-        self.assertEqual(
-            question("Larry", "Do some work"),
-            "I'm sorry, that coworker does not exist. Available coworkers: Alice, Bob.",
-        )
+        with self.assertRaises(ToolError):
+            question("Larry", "Do some work")

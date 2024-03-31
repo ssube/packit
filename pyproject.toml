@@ -1,6 +1,11 @@
 [tool.black]
 force-exclude = '''/(diffusion_original|lpw).py'''
 
+[tool.coverage.run]
+omit = [
+    "packit/loops/legacy.py",
+]
+
 [tool.isort]
 profile = "black"
 force_to_top = ".logging"

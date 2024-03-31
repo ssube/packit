@@ -34,7 +34,7 @@ class BaseLoop(Protocol):
         stop_condition: StopCondition = condition_threshold,
         toolbox: Toolbox | None = None,
     ) -> str | list[str]:
-        pass
+        pass  # pragma: no cover
 
 
 def loop_map(
@@ -80,6 +80,9 @@ def loop_map(
             toolbox=toolbox
         )
 
+        if callable(memory_maker):
+            memory_maker(memory, result)
+
         if callable(result_parser):
             result = result_parser(
                 result,
@@ -87,9 +90,6 @@ def loop_map(
                     "subject": agent.name,
                 },
             )
-
-        if callable(memory_maker):
-            memory_maker(memory, result)
 
         current_iteration += 1
 
@@ -142,6 +142,9 @@ def loop_reduce(
             toolbox=toolbox
         )
 
+        if callable(memory_maker):
+            memory_maker(memory, result)
+
         if callable(result_parser):
             result = result_parser(
                 result,
@@ -150,9 +153,6 @@ def loop_reduce(
                 },
                 toolbox=toolbox,
             )
-
-        if callable(memory_maker):
-            memory_maker(memory, result)
 
         current_iteration += 1
 

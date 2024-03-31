@@ -4,10 +4,10 @@
 from logging import getLogger
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import condition_not, condition_threshold
+from packit.conditions import condition_threshold
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import get_random_prompt
-from packit.results import multi_function_or_str_result, recursive_result
+from packit.results import multi_function_or_str_result
 from packit.toolbox import Toolbox
 from packit.types import (
     MemoryFactory,
@@ -18,7 +18,6 @@ from packit.types import (
     StopCondition,
     ToolFilter,
 )
-from packit.utils import could_be_json
 
 from .base import loop_reduce
 
@@ -69,11 +68,15 @@ def loop_team(
         **loop_context,
     )
 
-    not_json_condition = condition_not(could_be_json)
-    recursive_result_parser = recursive_result(result_parser, not_json_condition)
-
     # TODO: wrap with retry loop, with the correct agent
-    result = recursive_result_parser(result, toolbox, tool_filter=tool_filter)
+    result = result_parser(
+        result,
+        abac={
+            "subject": manager.name,
+        },
+        toolbox=toolbox,
+        tool_filter=tool_filter,
+    )
 
     return loop_reduce(
         [manager],
@@ -84,7 +87,7 @@ def loop_team(
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
         prompt_template=prompt_template,
-        result_parser=recursive_result_parser,
+        result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
     )

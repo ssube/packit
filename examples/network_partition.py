@@ -6,16 +6,18 @@ from random import choice
 
 from packit.abac import SubsetABAC, make_rule
 from packit.agent import Agent, agent_easy_connect
+from packit.conditions import condition_not
 from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
+from packit.results import multi_function_or_str_result, recursive_result
 from packit.toolbox import RestrictedToolbox
 from packit.tools import make_complete_tool, make_team_tools
-from packit.utils import logger_with_colors
+from packit.utils import could_be_json, logger_with_colors
 
 logger = logger_with_colors(__name__)
 
 # Set up some network experts and assign them to teams
-llm = agent_easy_connect(model="mixtral", temperature=0.25)
+llm = agent_easy_connect(model="nous-hermes2-mixtral", temperature=0.25)
 team_size = 4
 red_team = [
     Agent(
@@ -36,11 +38,19 @@ blue_team = [
     for i in range(team_size)
 ]
 
+# Set up a recursive tool parser
+not_json_condition = condition_not(could_be_json)
+recursive_result_parser = recursive_result(
+    multi_function_or_str_result, not_json_condition
+)
+
 # Prepare communication tools for both teams
-_, red_question_tool = make_team_tools(red_team)
+_, red_question_tool = make_team_tools(red_team, result_parser=recursive_result_parser)
 red_question_tool.__name__ = "red_question_tool"
 
-_, blue_question_tool = make_team_tools(blue_team)
+_, blue_question_tool = make_team_tools(
+    blue_team, result_parser=recursive_result_parser
+)
 blue_question_tool.__name__ = "blue_question_tool"
 
 # Prepare a tool to complete tasks and exit the loop
@@ -78,6 +88,10 @@ toolbox = RestrictedToolbox(
     abac,
 )
 
+# Attach the toolbox to the agents
+for agent in red_team + blue_team:
+    agent.toolbox = toolbox
+
 # Set up a repeated tool filter
 tool_filter, clear_filter = repeat_tool_filter(
     "You have recently used that tool with the same parameters, please try something else."
@@ -99,6 +113,7 @@ result = loop_team(
     iteration_prompt=prompt,
     toolbox=toolbox,
     tool_filter=tool_filter,
+    result_parser=recursive_result_parser,
     stop_condition=complete_condition,
 )
 logger.info("Result: %s", result)

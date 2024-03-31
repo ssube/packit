@@ -8,6 +8,7 @@ from mistletoe.block_token import CodeFence, Paragraph
 from mistletoe.span_token import LineBreak, RawText
 
 from packit.abac import ABACAttributes
+from packit.errors import ToolError
 from packit.toolbox import Toolbox
 from packit.types import ResultParser
 from packit.utils import could_be_json
@@ -115,7 +116,7 @@ def function_result(
 
     function_name = data["function"]
     if function_name not in toolbox.list_tools(abac):
-        raise ValueError(f"Unknown tool {function_name}")
+        raise ToolError(f"Unknown tool {function_name}", None, value, function_name)
 
     logger.debug("Using tool: %s", data)
     function_params = data.get("parameters", {})
@@ -129,7 +130,9 @@ def function_result(
     try:
         tool_result = tool(**function_params)
     except Exception as e:
-        raise ValueError(f"Error running tool {function_name}: {e}")
+        raise ToolError(
+            f"Error running tool {function_name}: {e}", None, value, function_name
+        )
 
     if callable(result_parser):
         return result_parser(
@@ -179,8 +182,8 @@ def multi_function_result(
                 )
             )
         except Exception as e:
-            logger.exception("Error calling function")
-            results.append(f"Error: {e}")
+            logger.exception("Error calling tool: %s", call)
+            raise e
 
     return results
 
@@ -193,25 +196,21 @@ def multi_function_or_str_result(
     result_parser: ResultParser | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
-    try:
-        if value is None:
-            return "No result"
+    if value is None:
+        return "No result"
 
-        if could_be_json(value):
-            results = multi_function_result(
-                value,
-                abac=abac,
-                fix_filter=fix_filter,
-                result_parser=result_parser,
-                toolbox=toolbox,
-                tool_filter=tool_filter,
-            )
-            return "\n".join([str_result(result) for result in results])
+    if could_be_json(value):
+        results = multi_function_result(
+            value,
+            abac=abac,
+            fix_filter=fix_filter,
+            result_parser=result_parser,
+            toolbox=toolbox,
+            tool_filter=tool_filter,
+        )
+        return "\n".join([str_result(result) for result in results])
 
-        return str_result(value)
-    except Exception as e:
-        logger.exception("Error calling function")
-        return f"Error: {e}"
+    return str_result(value)
 
 
 MarkdownBlock = Literal["code", "text"]
@@ -261,9 +260,9 @@ def recursive_result(
 ):
     def inner(
         value: str,
-        toolbox: Toolbox,
         abac: ABACAttributes = {},
         fix_filter=json_fixups,
+        toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
     ) -> str:
         """

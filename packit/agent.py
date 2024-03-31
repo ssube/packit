@@ -19,7 +19,7 @@ AgentModelMessage = HumanMessage | SystemMessage
 
 class AgentModel(Protocol):
     def invoke(self, prompts: list[AgentModelMessage], **kwargs):
-        pass
+        pass  # pragma: no cover
 
 
 class Agent:
@@ -93,6 +93,8 @@ class Agent:
         prompt_template: PromptTemplate = get_random_prompt,
         toolbox: Toolbox | None = None,
     ) -> str:
+        from packit.errors import PromptError
+
         args = {}
         args.update(self.context)
         args.update(context)
@@ -118,7 +120,9 @@ class Agent:
             formatted_backstory = self.backstory.format(**args)
         except Exception as e:
             logger.exception("Error formatting prompt: %s", prompt)
-            return f"{type(e).__name__} while formatting prompt: {str(e)}"
+            raise PromptError(
+                f"{type(e).__name__} while formatting prompt: {str(e)}", self, prompt
+            )
 
         # log the formatted prompts and construct langchain messages
         logger.debug("Agent: %s", self.name)

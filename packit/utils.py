@@ -19,7 +19,7 @@ def logger_with_colors(name: str, level="INFO"):
         from coloredlogs import install
 
         install(level=level)
-    except ImportError:
+    except ImportError:  # pragma: no cover
         pass
 
     return getLogger(name)
