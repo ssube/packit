@@ -53,8 +53,3 @@ class TestToolError(TestCase):
         )
 
         self.assertEqual(result, "I'm sorry, here is a fixed response.")
-
-
-if __name__ == "__main__":
-    test = TestToolError()
-    test.test_agent_error()

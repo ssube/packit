@@ -235,12 +235,9 @@ def markdown_result(
 
     document = Document(value)
 
-    if len(document.children) == 1:
-        return [get_paragraph_text(document.children[0])]
-
     if block_type == "code":
         return [
-            block.content
+            block.content.strip()
             for block in document.children
             if isinstance(block, CodeFence) and block.info_string == code_language
         ]

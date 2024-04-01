@@ -2,8 +2,6 @@ from py_abac import PDP, Request
 
 from packit.types import ABACAdapter, ABACAttributes, RuleState
 
-REQUIRED_ATTRIBUTES = ["subject", "resource", "action"]
-
 
 class PDPABAC(ABACAdapter):
     pdp: PDP
