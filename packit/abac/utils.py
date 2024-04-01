@@ -1,4 +1,4 @@
-from .adapter import GenericRule, RuleState
+from .subset import GenericRule, RuleState
 
 
 def make_rule(

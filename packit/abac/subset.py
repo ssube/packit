@@ -1,20 +1,6 @@
-from enum import Enum
-from typing import Any, Protocol
+from typing import Any
 
-
-class RuleState(str, Enum):
-    ALLOW = "allow"
-    DENY = "deny"
-    SKIP = None
-
-
-ABACAttributes = dict[str, str]
-
-
-class ABACAdapter(Protocol):
-    def check(self, attributes: ABACAttributes) -> RuleState:
-        pass  # pragma: no cover
-
+from packit.types import ABACAdapter, ABACAttributes, RuleState
 
 GenericRule = tuple[Any, RuleState]
 SubsetRule = tuple[dict[str, str], RuleState]

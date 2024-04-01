@@ -37,17 +37,14 @@ class TestToolError(TestCase):
         def error_tool():
             raise ValueError("Error")
 
-        recursive_result_parser = recursive_result(
-            multi_function_or_str_result, condition_not(could_be_json)
-        )
-        delegate_tool, question_tool = make_team_tools(
-            [agent_0, agent_1], result_parser=recursive_result_parser
-        )
-
+        delegate_tool, question_tool = make_team_tools([agent_0, agent_1])
         toolbox = Toolbox([delegate_tool, question_tool, error_tool])
         agent_0.toolbox = toolbox
         agent_1.toolbox = toolbox
 
+        recursive_result_parser = recursive_result(
+            multi_function_or_str_result, condition_not(could_be_json)
+        )
         result = loop_tool(
             agent_0,
             "prompt",
@@ -56,3 +53,8 @@ class TestToolError(TestCase):
         )
 
         self.assertEqual(result, "I'm sorry, here is a fixed response.")
+
+
+if __name__ == "__main__":
+    test = TestToolError()
+    test.test_agent_error()

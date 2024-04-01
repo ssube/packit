@@ -11,6 +11,7 @@ from packit.types import (
     PromptTemplate,
     ResultParser,
     StopCondition,
+    ToolFilter,
 )
 
 from .base import BaseLoop, loop_reduce
@@ -32,6 +33,7 @@ def loop_prefix(
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
@@ -54,6 +56,7 @@ def loop_prefix(
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     )
 
 
@@ -71,6 +74,7 @@ def loop_suffix(
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
@@ -93,6 +97,7 @@ def loop_suffix(
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     )
 
 
@@ -111,6 +116,7 @@ def loop_midfix(
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     """
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.
@@ -139,4 +145,5 @@ def loop_midfix(
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     )

@@ -2,6 +2,7 @@ from logging import getLogger
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_or, condition_threshold
+from packit.context import loopum
 from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
 from packit.toolbox import Toolbox
@@ -39,44 +40,59 @@ def loop_retry(
     last_error: Exception | None = None
     success: bool = False
 
-    def parse_or_error(value, **kwargs) -> str:
-        nonlocal last_error
-        nonlocal success
-
-        try:
-            if callable(result_parser):
-                parsed = result_parser(value, **kwargs)
-            else:
-                parsed = value
-
-            success = True
-            return parsed
-        except Exception as e:
-            logger.exception("Error parsing result: %s", value)
-            last_error = e
-            # TODO: check this conversion
-            return f"There was an error with your last response, please try again: {e}"
-
-    stop_condition_or_success = condition_or(stop_condition, lambda *args: success)
-
-    # loop until the prompt succeeds
-    result = loop_reduce(
-        agents=[agent],
-        prompt=prompt,
-        context=context,
+    with loopum(
         max_iterations=max_iterations,
-        memory=memory,
+        memory_factory=memory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
-        result_parser=parse_or_error,
-        stop_condition=stop_condition_or_success,
+        result_parser=result_parser,
+        stop_condition=stop_condition,
         toolbox=toolbox,
-    )
+    ) as loop_context:
 
-    if success:
-        return result
+        def parse_or_error(value, **kwargs) -> str:
+            nonlocal last_error
+            nonlocal success
 
-    raise last_error
+            try:
+                if callable(loop_context.result_parser):
+                    parsed = loop_context.result_parser(value, **kwargs)
+                else:
+                    parsed = value
+
+                success = True
+                return parsed
+            except Exception as e:
+                logger.exception("Error parsing result: %s", value)
+                last_error = e
+                # TODO: check this conversion
+                return (
+                    f"There was an error with your last response, please try again: {e}"
+                )
+
+        stop_condition_or_success = condition_or(
+            loop_context.stop_condition, lambda *args: success
+        )
+
+        # loop until the prompt succeeds
+        result = loop_reduce(
+            agents=[agent],
+            prompt=prompt,
+            context=context,
+            max_iterations=loop_context.max_iterations,
+            memory=loop_context.memory_factory,
+            memory_maker=loop_context.memory_maker,
+            prompt_filter=loop_context.prompt_filter,
+            result_parser=parse_or_error,
+            stop_condition=stop_condition_or_success,
+            toolbox=loop_context.toolbox,
+            save_context=False,
+        )
+
+        if success:
+            return result
+
+        raise last_error
 
 
 def loop_tool(

@@ -90,4 +90,5 @@ def loop_team(
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     )

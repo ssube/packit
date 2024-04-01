@@ -45,12 +45,10 @@ recursive_result_parser = recursive_result(
 )
 
 # Prepare communication tools for both teams
-_, red_question_tool = make_team_tools(red_team, result_parser=recursive_result_parser)
+_, red_question_tool = make_team_tools(red_team)
 red_question_tool.__name__ = "red_question_tool"
 
-_, blue_question_tool = make_team_tools(
-    blue_team, result_parser=recursive_result_parser
-)
+_, blue_question_tool = make_team_tools(blue_team)
 blue_question_tool.__name__ = "blue_question_tool"
 
 # Prepare a tool to complete tasks and exit the loop
