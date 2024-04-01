@@ -78,6 +78,8 @@ def loop_map(
     ) as loop_context:
         if callable(loop_context.memory_factory):
             memory = loop_context.memory_factory()
+        else:
+            memory = None
 
         current_iteration = 0
 
@@ -119,7 +121,7 @@ def loop_map(
         if current_iteration == loop_context.max_iterations:
             logger.warning("Max iterations reached")
 
-        return memory or []
+        return list(memory) or []
 
 
 def loop_reduce(
@@ -158,6 +160,8 @@ def loop_reduce(
     ) as loop_context:
         if callable(loop_context.memory_factory):
             memory = loop_context.memory_factory()
+        else:
+            memory = None
 
         current_iteration = 0
         result = prompt

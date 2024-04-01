@@ -196,9 +196,6 @@ def multi_function_or_str_result(
     result_parser: ResultParser | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
-    if value is None:
-        return "No result"
-
     if could_be_json(value):
         results = multi_function_result(
             value,

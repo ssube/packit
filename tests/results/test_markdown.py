@@ -47,9 +47,3 @@ This is a text block.
                 "This is a text block.",
             ],
         )
-
-
-if __name__ == "__main__":
-    test = TestMarkdown()
-    test.test_markdown()
-    print("Test passed")

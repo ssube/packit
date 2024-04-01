@@ -44,10 +44,13 @@ def monotonic_delta(start: float, timer=monotonic) -> tuple[float, float]:
     return (last - start, last)
 
 
-def could_be_json(data: str) -> bool:
+def could_be_json(data: str | None) -> bool:
     """
     Check if a string could be JSON.
     """
+    if data is None:
+        return False
+
     data = data.strip()
     return (data.startswith("{") or data.startswith("[")) and (
         data.endswith("}") or data.endswith("]")
