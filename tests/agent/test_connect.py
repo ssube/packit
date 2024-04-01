@@ -25,6 +25,8 @@ class TestConnect(TestCase):
         def side_effect(key, default=None):
             if key == "PACKIT_DRIVER":
                 return "openai"
+            elif key == "OPENAI_API_KEY":
+                return "test"
 
             return default
 
@@ -34,3 +36,16 @@ class TestConnect(TestCase):
         self.assertIsNotNone(llm)
         self.assertEqual(llm.model_name, "gpt-4")
         self.assertEqual(llm.temperature, 0.25)
+
+    @patch("os.environ.get")
+    def test_connect_unknown(self, mock_get):
+        def side_effect(key, default=None):
+            if key == "PACKIT_DRIVER":
+                return "unknown"
+
+            return default
+
+        mock_get.side_effect = side_effect
+
+        with self.assertRaises(ValueError):
+            agent_easy_connect()

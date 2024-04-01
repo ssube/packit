@@ -39,7 +39,7 @@ class Agent:
         context,
         llm,
         max_retry=3,
-        memory: MemoryFactory | None = make_limited_memory,
+        memory_factory: MemoryFactory | None = make_limited_memory,
         memory_maker: MemoryMaker | None = memory_order_width,
         toolbox: Toolbox | None = None,
     ):
@@ -51,8 +51,8 @@ class Agent:
         self.name = name
         self.toolbox = toolbox
 
-        if memory:
-            self.memory = memory()
+        if memory_factory:
+            self.memory = memory_factory()
         else:
             self.memory = None
 

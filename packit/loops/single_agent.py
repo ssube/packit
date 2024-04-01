@@ -1,4 +1,5 @@
 from logging import getLogger
+from random import randint
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_or, condition_threshold
@@ -25,7 +26,7 @@ def loop_retry(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: MemoryFactory | None = make_limited_memory,
+    memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
     result_parser: ResultParser | None = None,
@@ -42,17 +43,20 @@ def loop_retry(
 
     with loopum(
         max_iterations=max_iterations,
-        memory_factory=memory,
+        memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
     ) as loop_context:
+        closure_tag = randint(0, 1000000)
 
         def parse_or_error(value, **kwargs) -> str:
             nonlocal last_error
             nonlocal success
+
+            logger.debug("closure_tag: %s", closure_tag)
 
             try:
                 if callable(loop_context.result_parser):
@@ -80,7 +84,7 @@ def loop_retry(
             prompt=prompt,
             context=context,
             max_iterations=loop_context.max_iterations,
-            memory=loop_context.memory_factory,
+            memory_factory=loop_context.memory_factory,
             memory_maker=loop_context.memory_maker,
             prompt_filter=loop_context.prompt_filter,
             result_parser=parse_or_error,
@@ -100,7 +104,7 @@ def loop_tool(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    memory: MemoryFactory | None = make_limited_memory,
+    memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
     result_parser: ResultParser | None = multi_function_or_str_result,
@@ -131,7 +135,7 @@ def loop_tool(
         prompt,
         context=context,
         max_iterations=max_iterations,
-        memory=memory,
+        memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
         result_parser=result_parser_with_tools,
@@ -145,7 +149,7 @@ def loop_tool(
             result,
             context=context,
             max_iterations=max_iterations,
-            memory=memory,
+            memory_factory=memory_factory,
             memory_maker=memory_maker,
             prompt_filter=prompt_filter,
             result_parser=result_parser_with_tools,

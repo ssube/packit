@@ -3,7 +3,7 @@ from typing import Protocol
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold
-from packit.context import DEFAULT_MAX_ITERATIONS, LoopContext, loopum
+from packit.context import DEFAULT_MAX_ITERATIONS, loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
@@ -28,7 +28,6 @@ class BaseLoop(Protocol):
         context: AgentContext | None = None,
         agent_selector: AgentSelector = select_loop,
         max_iterations: int = DEFAULT_MAX_ITERATIONS,
-        loop_context: LoopContext | None = None,
         memory_factory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
         prompt_template: PromptTemplate | None = None,
@@ -46,7 +45,6 @@ def loop_map(
     prompt: str,
     context: AgentContext | None = None,
     agent_selector: AgentSelector = select_loop,
-    loop_context: LoopContext | None = None,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
@@ -130,7 +128,7 @@ def loop_reduce(
     context: AgentContext | None = None,
     agent_selector: AgentSelector = select_loop,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
-    memory: MemoryFactory | None = None,
+    memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate | None = None,
@@ -148,7 +146,7 @@ def loop_reduce(
     with loopum(
         agent_selector=agent_selector,
         max_iterations=max_iterations,
-        memory_factory=memory,
+        memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
         prompt_template=prompt_template,
@@ -159,9 +157,9 @@ def loop_reduce(
         save_context=save_context,
     ) as loop_context:
         if callable(loop_context.memory_factory):
-            memory = loop_context.memory_factory()
+            memory_factory = loop_context.memory_factory()
         else:
-            memory = None
+            memory_factory = None
 
         current_iteration = 0
         result = prompt
@@ -180,13 +178,13 @@ def loop_reduce(
             result = agent(
                 result,
                 **context,
-                memory=memory,
+                memory=memory_factory,
                 prompt_template=loop_context.prompt_template,
                 toolbox=loop_context.toolbox,
             )
 
             if callable(loop_context.memory_maker):
-                loop_context.memory_maker(memory, result)
+                loop_context.memory_maker(memory_factory, result)
 
             if callable(loop_context.result_parser):
                 result = loop_context.result_parser(

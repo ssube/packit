@@ -35,6 +35,8 @@ class TestAgent(TestCase):
 
     def test_invoke_without_memory(self):
         llm = MockLLM(["prompt"])
-        agent = Agent("name", "backstory", {}, llm, memory=None, memory_maker=None)
+        agent = Agent(
+            "name", "backstory", {}, llm, memory_factory=None, memory_maker=None
+        )
         result = agent.invoke("prompt", {})
         self.assertEqual(result, "prompt")

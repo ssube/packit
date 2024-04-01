@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest.mock import Mock
 
 from packit.agent import Agent
 from packit.conditions import condition_not
@@ -34,10 +35,17 @@ class TestToolError(TestCase):
             ),
         )
 
+        mock_0 = Mock(agent_0)
+        mock_0.name = agent_0.name
+        mock_0.side_effect = agent_0
+        mock_1 = Mock(agent_1)
+        mock_1.name = agent_1.name
+        mock_1.side_effect = agent_1
+
         def error_tool():
             raise ValueError("Error")
 
-        delegate_tool, question_tool = make_team_tools([agent_0, agent_1])
+        delegate_tool, question_tool = make_team_tools([mock_0, mock_1])
         toolbox = Toolbox([delegate_tool, question_tool, error_tool])
         agent_0.toolbox = toolbox
         agent_1.toolbox = toolbox

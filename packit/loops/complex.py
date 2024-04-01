@@ -1,5 +1,4 @@
-"""
-"""
+""" """
 
 from logging import getLogger
 
@@ -32,7 +31,7 @@ def loop_team(
     context: AgentContext | None = None,
     toolbox: Toolbox | None = None,
     max_iterations: int = 10,
-    memory: MemoryFactory | None = make_limited_memory,
+    memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate = get_random_prompt,
@@ -48,11 +47,11 @@ def loop_team(
 
     context = context or {}
 
-    if callable(memory):
-        memory = memory()
+    if callable(memory_factory):
+        memory_factory = memory_factory()
 
     def get_memory():
-        return memory
+        return memory_factory
 
     # prep names and tools
     worker_names = [worker.name for worker in workers]
@@ -64,7 +63,7 @@ def loop_team(
 
     result = manager(
         initial_prompt + get_random_prompt("coworker"),
-        memory=memory,
+        memory=memory_factory,
         **loop_context,
     )
 
@@ -83,7 +82,7 @@ def loop_team(
         iteration_prompt + get_random_prompt("coworker"),
         context=loop_context,
         max_iterations=max_iterations,
-        memory=get_memory,
+        memory_factory=get_memory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
         prompt_template=prompt_template,
