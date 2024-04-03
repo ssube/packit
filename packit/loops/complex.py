@@ -19,6 +19,7 @@ from packit.types import (
 )
 
 from .base import loop_reduce
+from .single_agent import loop_retry
 
 logger = getLogger(__name__)
 
@@ -41,8 +42,6 @@ def loop_team(
 ) -> str:
     """
     Loop through a team of agents, with a manager and workers, to refine a prompt.
-
-    TODO: tool_filter should be bound within the result parser
     """
 
     context = context or {}
@@ -61,26 +60,26 @@ def loop_team(
         **context,
     }
 
-    result = manager(
+    result = loop_retry(
+        manager,
         initial_prompt + get_random_prompt("coworker"),
-        memory=memory_factory,
-        **loop_context,
-    )
-
-    # TODO: wrap with retry loop, with the correct agent
-    result = result_parser(
-        result,
-        abac={
-            "subject": manager.name,
-        },
+        context=loop_context,
+        max_iterations=max_iterations,
+        memory_factory=get_memory,
+        memory_maker=memory_maker,
+        prompt_filter=prompt_filter,
+        prompt_template=prompt_template,
+        result_parser=result_parser,
+        stop_condition=stop_condition,
         toolbox=toolbox,
         tool_filter=tool_filter,
     )
 
     return loop_reduce(
         [manager],
-        iteration_prompt + get_random_prompt("coworker"),
+        result + iteration_prompt + get_random_prompt("coworker"),
         context=loop_context,
+        agent_invoke=loop_retry,
         max_iterations=max_iterations,
         memory_factory=get_memory,
         memory_maker=memory_maker,

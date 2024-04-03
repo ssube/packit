@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
+from packit.errors import PromptError
 from packit.prompts import PromptLibrary
 from tests.mocks import MockLLM
 
@@ -40,3 +41,9 @@ class TestAgent(TestCase):
         )
         result = agent.invoke("prompt", {})
         self.assertEqual(result, "prompt")
+
+    def test_invoke_missing_key(self):
+        llm = MockLLM(["prompt"])
+        agent = Agent("name", "backstory", {}, llm)
+        with self.assertRaises(PromptError):
+            _ = agent.invoke("{key} prompt", {})

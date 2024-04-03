@@ -11,8 +11,10 @@ from packit.types import (
     MemoryFactory,
     MemoryMaker,
     PromptFilter,
+    PromptTemplate,
     ResultParser,
     StopCondition,
+    ToolFilter,
 )
 from packit.utils import could_be_json
 
@@ -29,9 +31,12 @@ def loop_retry(
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
+    prompt_template: PromptTemplate | None = None,
     result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
+    tool_filter: ToolFilter | None = None,
+    memory: list[str] | None = None,  # TODO: remove
 ) -> str:
     """
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt
@@ -46,9 +51,11 @@ def loop_retry(
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
+        prompt_template=prompt_template,
         result_parser=result_parser,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     ) as loop_context:
         closure_tag = randint(0, 1000000)
 
@@ -87,9 +94,11 @@ def loop_retry(
             memory_factory=loop_context.memory_factory,
             memory_maker=loop_context.memory_maker,
             prompt_filter=loop_context.prompt_filter,
+            prompt_template=loop_context.prompt_template,
             result_parser=parse_or_error,
             stop_condition=stop_condition_or_success,
             toolbox=loop_context.toolbox,
+            tool_filter=loop_context.tool_filter,
             save_context=False,
         )
 
@@ -110,6 +119,7 @@ def loop_tool(
     result_parser: ResultParser | None = multi_function_or_str_result,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
+    tool_filter: ToolFilter | None = None,
 ) -> str:
     """
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
@@ -141,6 +151,7 @@ def loop_tool(
         result_parser=result_parser_with_tools,
         stop_condition=stop_condition,
         toolbox=toolbox,
+        tool_filter=tool_filter,
     )
 
     while could_be_json(result):
@@ -155,6 +166,7 @@ def loop_tool(
             result_parser=result_parser_with_tools,
             stop_condition=stop_condition,
             toolbox=toolbox,
+            tool_filter=tool_filter,
         )
 
     return result

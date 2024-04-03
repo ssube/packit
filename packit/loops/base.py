@@ -7,6 +7,7 @@ from packit.context import DEFAULT_MAX_ITERATIONS, loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
+    AgentInvoke,
     AgentSelector,
     MemoryFactory,
     MemoryMaker,
@@ -20,12 +21,30 @@ from packit.types import (
 logger = getLogger(__name__)
 
 
+def invoke_agent(
+    agent: Agent,
+    prompt: str,
+    context: AgentContext,
+    memory: list[str] | None = None,
+    prompt_template: PromptTemplate | None = None,
+    toolbox: Toolbox | None = None,
+) -> str:
+    return agent(
+        prompt,
+        **context,
+        memory=memory,
+        prompt_template=prompt_template,
+        toolbox=toolbox,
+    )
+
+
 class BaseLoop(Protocol):
     def __call__(
         self,
         agents: list[Agent],
         prompt: str,
         context: AgentContext | None = None,
+        agent_invoke: AgentInvoke = invoke_agent,
         agent_selector: AgentSelector = select_loop,
         max_iterations: int = DEFAULT_MAX_ITERATIONS,
         memory_factory: MemoryFactory | None = None,
@@ -44,6 +63,7 @@ def loop_map(
     agents: list[Agent],
     prompt: str,
     context: AgentContext | None = None,
+    agent_invoke: AgentInvoke = invoke_agent,
     agent_selector: AgentSelector = select_loop,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
@@ -93,9 +113,10 @@ def loop_map(
             if agent_prompt is None:
                 continue  # map continues, reduce stops
 
-            result = agent(
+            result = agent_invoke(
+                agent,
                 agent_prompt,
-                **context,
+                context=context,
                 memory=memory,
                 prompt_template=loop_context.prompt_template,
                 toolbox=loop_context.toolbox,
@@ -126,6 +147,7 @@ def loop_reduce(
     agents: list[Agent],
     prompt: str,
     context: AgentContext | None = None,
+    agent_invoke: AgentInvoke = invoke_agent,
     agent_selector: AgentSelector = select_loop,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
@@ -175,9 +197,10 @@ def loop_reduce(
             if result is None:
                 break  # map continues, reduce stops
 
-            result = agent(
+            result = agent_invoke(
+                agent,
                 result,
-                **context,
+                context=context,
                 memory=memory_factory,
                 prompt_template=loop_context.prompt_template,
                 toolbox=loop_context.toolbox,

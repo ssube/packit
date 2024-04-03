@@ -25,8 +25,6 @@ class TestConnect(TestCase):
         def side_effect(key, default=None):
             if key == "PACKIT_DRIVER":
                 return "openai"
-            elif key == "OPENAI_API_KEY":
-                return "test"
 
             return default
 

@@ -63,9 +63,9 @@ def json_fixups(value: str, list_result=False, **kwargs) -> str:
         r"^[\s\w\.,:]+ \[", "", value
     )  # sometimes the output will have a leading comment, like "This is the list: []"
     value = value.replace('""', '"')  # the robots will double some JSON quotes
-    # value = value.replace(
-    #     "}{", "},{"
-    # )  # the robots will sometimes forget commas between objects
+    value = value.replace(
+        "}{", "},{"
+    )  # the robots will sometimes forget commas between objects
 
     # if they forgot to open the array and left it out entirely, fix that
     if list_result and value.startswith('{"'):

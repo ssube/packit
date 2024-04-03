@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Callable, Protocol, TypeVar
+from typing import Any, Callable, Protocol, TypeVar
 
 # primitives and type vars
 MemoryType = str
@@ -22,6 +22,7 @@ class ABACAdapter(Protocol):
 
 
 # Loop types
+AgentInvoke = Callable[[Any, str, dict], str]
 AgentSelector = Callable[[list[SelectorType], int], SelectorType]
 MemoryFactory = Callable[[], list[MemoryType]]
 MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
