@@ -1,9 +1,14 @@
 from contextlib import contextmanager
+from logging import getLogger
+from random import randint
 from threading import local
 
+from packit.agent import invoke_agent
+from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
     ABACAttributes,
+    AgentInvoker,
     AgentSelector,
     MemoryFactory,
     MemoryMaker,
@@ -18,6 +23,8 @@ DEFAULT_MAX_ITERATIONS = 10
 DEFAULT_MAX_RECURSION = 10
 LOOP_CONTEXT_ATTR = "loop_context"
 
+logger = getLogger(__name__)
+
 thread_context = local()
 
 
@@ -28,6 +35,7 @@ class LoopContext:
 
     # context
     abac_context: ABACAttributes | None
+    agent_invoker: AgentInvoker | None
     agent_selector: AgentSelector | None
     memory_factory: MemoryFactory | None
     memory_maker: MemoryMaker | None
@@ -38,12 +46,16 @@ class LoopContext:
     toolbox: Toolbox | None
     tool_filter: ToolFilter | None
 
+    # other
+    tag: int
+
     def __init__(
         self,
         max_iterations: int = DEFAULT_MAX_ITERATIONS,
         max_recursion: int = DEFAULT_MAX_RECURSION,
         abac_context: ABACAttributes | None = None,
-        agent_selector: AgentSelector | None = None,
+        agent_invoker: AgentInvoker = invoke_agent,
+        agent_selector: AgentSelector = select_loop,
         memory_factory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
         prompt_filter: PromptFilter | None = None,
@@ -56,6 +68,7 @@ class LoopContext:
         self.max_iterations = max_iterations
         self.max_recursion = max_recursion
         self.abac_context = abac_context
+        self.agent_invoker = agent_invoker
         self.agent_selector = agent_selector
         self.memory_factory = memory_factory
         self.memory_maker = memory_maker
@@ -65,6 +78,7 @@ class LoopContext:
         self.stop_condition = stop_condition
         self.toolbox = toolbox
         self.tool_filter = tool_filter
+        self.tag = randint(0, 1000000)
 
 
 def get_loop_context() -> LoopContext | None:
@@ -81,7 +95,8 @@ def inherit_loop_context(
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
-    agent_selector: AgentSelector | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -96,6 +111,7 @@ def inherit_loop_context(
             max_iterations=max_iterations,
             max_recursion=max_recursion,
             abac_context=abac_context or parent_context.abac_context,
+            agent_invoker=agent_invoker or parent_context.agent_invoker,
             agent_selector=agent_selector or parent_context.agent_selector,
             memory_factory=memory_factory or parent_context.memory_factory,
             memory_maker=memory_maker or parent_context.memory_maker,
@@ -111,6 +127,7 @@ def inherit_loop_context(
             max_iterations=max_iterations,
             max_recursion=max_recursion,
             abac_context=abac_context,
+            agent_invoker=agent_invoker,
             agent_selector=agent_selector,
             memory_factory=memory_factory,
             memory_maker=memory_maker,
@@ -127,7 +144,8 @@ def push_loop_context(
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
-    agent_selector: AgentSelector | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -148,6 +166,7 @@ def push_loop_context(
         max_iterations=max_iterations,
         max_recursion=max_recursion,
         abac_context=abac_context,
+        agent_invoker=agent_invoker,
         agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
@@ -184,7 +203,8 @@ def loopum(
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
-    agent_selector: AgentSelector | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -202,6 +222,7 @@ def loopum(
         max_iterations=max_iterations,
         max_recursion=max_recursion,
         abac_context=abac_context,
+        agent_invoker=agent_invoker,
         agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
@@ -214,7 +235,9 @@ def loopum(
         save_context=save_context,
     )
     try:
+        logger.debug("entering loop context: %s", context.tag)
         yield context
     finally:
         if save_context:
+            logger.debug("leaving loop context: %s", context.tag)
             pop_loop_context()

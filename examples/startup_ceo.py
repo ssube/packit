@@ -213,14 +213,14 @@ for product in products:
                 "budget": budget,
                 "product": product,
             },
-            initial_prompt=(
+            prompt=(
                 "Come up with a compelling idea for {product} and plan the development process. "
                 "Break down the development process into tasks and assign them to your coworkers. "
                 "Keep track of the tasks and their progress. "
                 "If you need more information or assistance, ask a question to your coworkers. "
                 "When you are satisfied with the development, use the complete tool to finish the product."
             ),
-            iteration_prompt=(
+            loop_prompt=(
                 "You are trying to complete development of the product: {product}. "
                 "You can delegate tasks to your coworkers to help with the development. Keep track of the tasks and their progress. "
                 "If you need more information or assistance, ask a question to your coworkers. "

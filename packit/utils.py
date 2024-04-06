@@ -55,3 +55,10 @@ def could_be_json(data: str | None) -> bool:
     return (data.startswith("{") or data.startswith("[")) and (
         data.endswith("}") or data.endswith("]")
     )
+
+
+def make_list(value):
+    if isinstance(value, list):
+        return value
+
+    return [value]

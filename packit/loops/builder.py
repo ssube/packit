@@ -1,18 +1,24 @@
 from logging import getLogger
 
-from packit.agent import Agent, AgentContext
+from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_threshold
 from packit.prompts import get_random_prompt
+from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
+    ABACAttributes,
+    AgentInvoker,
+    AgentSelector,
     MemoryFactory,
     MemoryMaker,
     PromptFilter,
     PromptTemplate,
+    PromptType,
     ResultParser,
     StopCondition,
     ToolFilter,
 )
+from packit.utils import make_list
 
 from .base import BaseLoop, loop_reduce
 
@@ -20,12 +26,15 @@ logger = getLogger(__name__)
 
 
 def loop_prefix(
-    agents: list[Agent],
-    prompt: str,
-    prefix_prompt: str,
+    agents: Agent | list[Agent],
+    prompt: PromptType,
+    prefix_prompt: PromptType = "",
     context: AgentContext | None = None,
     base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -39,6 +48,8 @@ def loop_prefix(
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
     """
 
+    agents = make_list(agents)
+
     def prefix_filter(value) -> str:
         if callable(prompt_filter):
             value = prompt_filter(value)
@@ -50,6 +61,9 @@ def loop_prefix(
         prompt,
         context=context,
         max_iterations=max_iterations,
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
+        agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prefix_filter,
@@ -61,12 +75,15 @@ def loop_prefix(
 
 
 def loop_suffix(
-    agents: list[Agent],
-    prompt: str,
-    suffix_prompt: str,
+    agents: Agent | list[Agent],
+    prompt: PromptType,
+    suffix_prompt: PromptType = "",
     context: AgentContext | None = None,
     base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -80,6 +97,8 @@ def loop_suffix(
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
     """
 
+    agents = make_list(agents)
+
     def suffix_filter(value) -> str:
         if callable(prompt_filter):
             value = prompt_filter(value)
@@ -91,6 +110,9 @@ def loop_suffix(
         prompt,
         context=context,
         max_iterations=max_iterations,
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
+        agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=suffix_filter,
@@ -102,13 +124,16 @@ def loop_suffix(
 
 
 def loop_midfix(
-    agents: list[Agent],
-    prompt: str,
-    prefix_prompt: str,
-    suffix_prompt: str,
+    agents: Agent | list[Agent],
+    prompt: PromptType,
+    prefix_prompt: PromptType = "",
+    suffix_prompt: PromptType = "",
     context: AgentContext | None = None,
     base_loop: BaseLoop = loop_reduce,
     max_iterations: int = 10,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -121,6 +146,8 @@ def loop_midfix(
     """
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.
     """
+
+    agents = make_list(agents)
 
     def midfix_filter(value) -> str:
         if callable(prompt_filter):
@@ -139,6 +166,9 @@ def loop_midfix(
         prompt,
         context=context,
         max_iterations=max_iterations,
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
+        agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=midfix_filter,

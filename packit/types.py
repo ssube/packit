@@ -22,7 +22,7 @@ class ABACAdapter(Protocol):
 
 
 # Loop types
-AgentInvoke = Callable[[Any, str, dict], str]
+AgentInvoker = Callable[[Any, str, dict], str]
 AgentSelector = Callable[[list[SelectorType], int], SelectorType]
 MemoryFactory = Callable[[], list[MemoryType]]
 MemoryMaker = Callable[[list[MemoryType], MemoryType], None]

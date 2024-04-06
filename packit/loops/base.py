@@ -1,69 +1,58 @@
 from logging import getLogger
 from typing import Protocol
 
-from packit.agent import Agent, AgentContext
+from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_threshold
 from packit.context import DEFAULT_MAX_ITERATIONS, loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
-    AgentInvoke,
+    ABACAttributes,
+    AgentInvoker,
     AgentSelector,
     MemoryFactory,
     MemoryMaker,
     PromptFilter,
     PromptTemplate,
+    PromptType,
     ResultParser,
     StopCondition,
     ToolFilter,
 )
+from packit.utils import make_list
 
 logger = getLogger(__name__)
-
-
-def invoke_agent(
-    agent: Agent,
-    prompt: str,
-    context: AgentContext,
-    memory: list[str] | None = None,
-    prompt_template: PromptTemplate | None = None,
-    toolbox: Toolbox | None = None,
-) -> str:
-    return agent(
-        prompt,
-        **context,
-        memory=memory,
-        prompt_template=prompt_template,
-        toolbox=toolbox,
-    )
 
 
 class BaseLoop(Protocol):
     def __call__(
         self,
-        agents: list[Agent],
-        prompt: str,
+        agents: Agent | list[Agent],
+        prompt: PromptType,
         context: AgentContext | None = None,
-        agent_invoke: AgentInvoke = invoke_agent,
+        abac_context: ABACAttributes | None = None,
+        agent_invoke: AgentInvoker = invoke_agent,
         agent_selector: AgentSelector = select_loop,
         max_iterations: int = DEFAULT_MAX_ITERATIONS,
         memory_factory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
+        prompt_filter: PromptFilter | None = None,
         prompt_template: PromptTemplate | None = None,
-        result_filter: PromptFilter | None = None,
         result_parser: ResultParser | None = None,
         stop_condition: StopCondition = condition_threshold,
         toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
+        save_context: bool = True,
     ) -> str | list[str]:
         pass  # pragma: no cover
 
 
 def loop_map(
-    agents: list[Agent],
-    prompt: str,
+    agents: Agent | list[Agent],
+    prompt: PromptType,
     context: AgentContext | None = None,
-    agent_invoke: AgentInvoke = invoke_agent,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
@@ -80,8 +69,12 @@ def loop_map(
     Loop through a list of agents, passing the same prompt to each agent.
     """
 
+    agents = make_list(agents)
     context = context or {}
+
     with loopum(
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
         agent_selector=agent_selector,
         max_iterations=max_iterations,
         memory_factory=memory_factory,
@@ -113,7 +106,7 @@ def loop_map(
             if agent_prompt is None:
                 continue  # map continues, reduce stops
 
-            result = agent_invoke(
+            result = agent_invoker(
                 agent,
                 agent_prompt,
                 context=context,
@@ -145,9 +138,10 @@ def loop_map(
 
 def loop_reduce(
     agents: list[Agent],
-    prompt: str,
+    prompt: PromptType,
     context: AgentContext | None = None,
-    agent_invoke: AgentInvoke = invoke_agent,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
     max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
@@ -164,8 +158,12 @@ def loop_reduce(
     Loop through a list of agents, passing the result of each agent on to the next.
     """
 
+    agents = make_list(agents)
     context = context or {}
+
     with loopum(
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
         agent_selector=agent_selector,
         max_iterations=max_iterations,
         memory_factory=memory_factory,
@@ -197,7 +195,7 @@ def loop_reduce(
             if result is None:
                 break  # map continues, reduce stops
 
-            result = agent_invoke(
+            result = agent_invoker(
                 agent,
                 result,
                 context=context,

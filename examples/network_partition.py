@@ -107,8 +107,8 @@ prompt = (
 result = loop_team(
     red_team[0],
     red_team,
-    initial_prompt=prompt,
-    iteration_prompt=prompt,
+    prompt=prompt,
+    loop_prompt=prompt,
     toolbox=toolbox,
     tool_filter=tool_filter,
     result_parser=recursive_result_parser,

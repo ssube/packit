@@ -1,17 +1,22 @@
 from logging import getLogger
 from random import randint
 
-from packit.agent import Agent, AgentContext
+from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_or, condition_threshold
 from packit.context import loopum
 from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
+from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
+    ABACAttributes,
+    AgentInvoker,
+    AgentSelector,
     MemoryFactory,
     MemoryMaker,
     PromptFilter,
     PromptTemplate,
+    PromptType,
     ResultParser,
     StopCondition,
     ToolFilter,
@@ -25,9 +30,12 @@ logger = getLogger(__name__)
 
 def loop_retry(
     agent: Agent,
-    prompt: str,
+    prompt: PromptType,
     context: AgentContext | None = None,
     max_iterations: int = 10,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
@@ -48,6 +56,9 @@ def loop_retry(
 
     with loopum(
         max_iterations=max_iterations,
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
+        agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
@@ -91,6 +102,9 @@ def loop_retry(
             prompt=prompt,
             context=context,
             max_iterations=loop_context.max_iterations,
+            abac_context=loop_context.abac_context,
+            agent_invoker=loop_context.agent_invoker,
+            agent_selector=loop_context.agent_selector,
             memory_factory=loop_context.memory_factory,
             memory_maker=loop_context.memory_maker,
             prompt_filter=loop_context.prompt_filter,
@@ -110,9 +124,12 @@ def loop_retry(
 
 def loop_tool(
     agent: Agent,
-    prompt: str,
+    prompt: PromptType,
     context: AgentContext | None = None,
     max_iterations: int = 10,
+    abac_context: ABACAttributes | None = None,
+    agent_invoker: AgentInvoker = invoke_agent,
+    agent_selector: AgentSelector = select_loop,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
@@ -145,6 +162,9 @@ def loop_tool(
         prompt,
         context=context,
         max_iterations=max_iterations,
+        abac_context=abac_context,
+        agent_invoker=agent_invoker,
+        agent_selector=agent_selector,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
@@ -160,6 +180,9 @@ def loop_tool(
             result,
             context=context,
             max_iterations=max_iterations,
+            abac_context=abac_context,
+            agent_invoker=agent_invoker,
+            agent_selector=agent_selector,
             memory_factory=memory_factory,
             memory_maker=memory_maker,
             prompt_filter=prompt_filter,

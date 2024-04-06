@@ -23,6 +23,9 @@ def get_prompts(model: str) -> PromptLibrary:
 
 
 def get_random_prompt(key: str) -> str:
+    if key == "":
+        return ""
+
     if hasattr(DEFAULT_PROMPTS, key):
         prompts = getattr(DEFAULT_PROMPTS, key)
         return choice(prompts)

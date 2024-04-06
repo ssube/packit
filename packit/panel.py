@@ -25,7 +25,11 @@ class Panel:
         for agent, weight in zip(self.agents, self.weights):
             for i in range(weight):
                 result = loop_retry(
-                    agent, prompt, context=context, result_parser=parse_result
+                    agent,
+                    prompt,
+                    context=context,
+                    result_parser=parse_result,
+                    max_iterations=max_retry,
                 )
                 results[f"{agent.name}-{i}"] = result
 

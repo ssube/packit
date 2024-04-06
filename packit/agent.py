@@ -212,3 +212,24 @@ def agent_easy_connect(
         )
     else:
         raise ValueError(f"Unknown driver: {driver}")
+
+
+def invoke_agent(
+    agent: Agent,
+    prompt: str,
+    context: AgentContext,
+    memory: list[str] | None = None,
+    prompt_template: PromptTemplate | None = None,
+    toolbox: Toolbox | None = None,
+) -> str:
+    """
+    Invoke an agent with a prompt and context.
+    This is provided as a loose function to allow for use in loop context and parameters.
+    """
+    return agent(
+        prompt,
+        **context,
+        memory=memory,
+        prompt_template=prompt_template,
+        toolbox=toolbox,
+    )
