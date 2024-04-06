@@ -5,6 +5,7 @@ from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
 from packit.loops import loop_retry
 from packit.results import bool_result
+from packit.types import ResultParser
 
 logger = getLogger(__name__)
 
@@ -18,7 +19,10 @@ class Panel:
         self.weights = list(agents.values())
 
     def sample(
-        self, prompt: str, context: AgentContext, max_retry=3, parse_result=bool_result
+        self,
+        prompt: str,
+        context: AgentContext,
+        result_parser: ResultParser = bool_result,
     ) -> dict[str, str]:
         results = {}
 
@@ -28,8 +32,7 @@ class Panel:
                     agent,
                     prompt,
                     context=context,
-                    result_parser=parse_result,
-                    max_iterations=max_retry,
+                    result_parser=result_parser,
                 )
                 results[f"{agent.name}-{i}"] = result
 
@@ -43,7 +46,7 @@ class Panel:
         decision_condition=condition_threshold_mean,
         min_threshold: float = 0.5,
     ) -> tuple[bool, dict[str, str]]:
-        results = self.sample(prompt, context, parse_result=parse_result)
+        results = self.sample(prompt, context, result_parser=parse_result)
         values = list(results.values())
 
         return decision_condition(min_threshold, *values), results

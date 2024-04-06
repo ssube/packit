@@ -21,6 +21,12 @@ class ABACAdapter(Protocol):
         pass  # pragma: no cover
 
 
+class StopCondition(Protocol):
+    # TODO: kwargs and prompts and all those other things
+    def __call__(self, max: int, current: int) -> bool:
+        pass  # pragma: no cover
+
+
 # Loop types
 AgentInvoker = Callable[[Any, str, dict], str]
 AgentSelector = Callable[[list[SelectorType], int], SelectorType]
@@ -29,7 +35,4 @@ MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
 PromptTemplate = Callable[[str], PromptType]
 PromptFilter = Callable[[PromptType], PromptType | None]
 ResultParser = Callable[[PromptType], PromptType]
-StopCondition = Callable[
-    [int, int], bool
-]  # TODO: kwargs and prompts and all those other things
 ToolFilter = Callable[[dict], dict | None]

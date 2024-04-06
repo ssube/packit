@@ -19,8 +19,6 @@ from packit.types import (
     ToolFilter,
 )
 
-DEFAULT_MAX_ITERATIONS = 10
-DEFAULT_MAX_RECURSION = 10
 LOOP_CONTEXT_ATTR = "loop_context"
 
 logger = getLogger(__name__)
@@ -29,10 +27,6 @@ thread_context = local()
 
 
 class LoopContext:
-    # default limits
-    max_iterations: int
-    max_recursion: int
-
     # context
     abac_context: ABACAttributes | None
     agent_invoker: AgentInvoker | None
@@ -47,12 +41,11 @@ class LoopContext:
     tool_filter: ToolFilter | None
 
     # other
+    depth: int
     tag: int
 
     def __init__(
         self,
-        max_iterations: int = DEFAULT_MAX_ITERATIONS,
-        max_recursion: int = DEFAULT_MAX_RECURSION,
         abac_context: ABACAttributes | None = None,
         agent_invoker: AgentInvoker = invoke_agent,
         agent_selector: AgentSelector = select_loop,
@@ -64,9 +57,8 @@ class LoopContext:
         stop_condition: StopCondition | None = None,
         toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
+        context_depth: int = 0,
     ):
-        self.max_iterations = max_iterations
-        self.max_recursion = max_recursion
         self.abac_context = abac_context
         self.agent_invoker = agent_invoker
         self.agent_selector = agent_selector
@@ -78,6 +70,9 @@ class LoopContext:
         self.stop_condition = stop_condition
         self.toolbox = toolbox
         self.tool_filter = tool_filter
+
+        # other
+        self.depth = context_depth
         self.tag = randint(0, 1000000)
 
 
@@ -92,8 +87,6 @@ def get_loop_context() -> LoopContext | None:
 
 def inherit_loop_context(
     parent_context: LoopContext | None = None,
-    max_iterations: int = DEFAULT_MAX_ITERATIONS,
-    max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
@@ -108,8 +101,6 @@ def inherit_loop_context(
 ) -> LoopContext:
     if parent_context:
         return LoopContext(
-            max_iterations=max_iterations,
-            max_recursion=max_recursion,
             abac_context=abac_context or parent_context.abac_context,
             agent_invoker=agent_invoker or parent_context.agent_invoker,
             agent_selector=agent_selector or parent_context.agent_selector,
@@ -121,11 +112,10 @@ def inherit_loop_context(
             stop_condition=stop_condition or parent_context.stop_condition,
             toolbox=toolbox or parent_context.toolbox,
             tool_filter=tool_filter or parent_context.tool_filter,
+            context_depth=parent_context.depth + 1,
         )
     else:
         return LoopContext(
-            max_iterations=max_iterations,
-            max_recursion=max_recursion,
             abac_context=abac_context,
             agent_invoker=agent_invoker,
             agent_selector=agent_selector,
@@ -141,8 +131,6 @@ def inherit_loop_context(
 
 
 def push_loop_context(
-    max_iterations: int = DEFAULT_MAX_ITERATIONS,
-    max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
@@ -163,8 +151,6 @@ def push_loop_context(
     current_context = get_loop_context()
     new_context = inherit_loop_context(
         parent_context=current_context,
-        max_iterations=max_iterations,
-        max_recursion=max_recursion,
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
@@ -200,8 +186,6 @@ def pop_loop_context() -> LoopContext | None:
 
 @contextmanager
 def loopum(
-    max_iterations: int = DEFAULT_MAX_ITERATIONS,
-    max_recursion: int = DEFAULT_MAX_RECURSION,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
@@ -219,8 +203,6 @@ def loopum(
     Context manager for setting loop context at the beginning of a loop and clearing it at the end.
     """
     context = push_loop_context(
-        max_iterations=max_iterations,
-        max_recursion=max_recursion,
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
@@ -235,9 +217,13 @@ def loopum(
         save_context=save_context,
     )
     try:
-        logger.debug("entering loop context: %s", context.tag)
+        logger.debug(
+            "entering loop context: depth %s, tag %s", context.depth, context.tag
+        )
         yield context
     finally:
         if save_context:
-            logger.debug("leaving loop context: %s", context.tag)
+            logger.debug(
+                "leaving loop context: depth %s, tag %s", context.depth, context.tag
+            )
             pop_loop_context()

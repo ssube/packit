@@ -3,7 +3,7 @@ from typing import Protocol
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_threshold
-from packit.context import DEFAULT_MAX_ITERATIONS, loopum
+from packit.context import loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
@@ -33,7 +33,6 @@ class BaseLoop(Protocol):
         abac_context: ABACAttributes | None = None,
         agent_invoke: AgentInvoker = invoke_agent,
         agent_selector: AgentSelector = select_loop,
-        max_iterations: int = DEFAULT_MAX_ITERATIONS,
         memory_factory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
         prompt_filter: PromptFilter | None = None,
@@ -54,7 +53,6 @@ def loop_map(
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
-    max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -76,7 +74,6 @@ def loop_map(
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
-        max_iterations=max_iterations,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
@@ -94,9 +91,7 @@ def loop_map(
 
         current_iteration = 0
 
-        while not loop_context.stop_condition(
-            loop_context.max_iterations, current_iteration
-        ):
+        while not loop_context.stop_condition(current=current_iteration):
             agent = loop_context.agent_selector(agents, current_iteration)
             agent_prompt = prompt
 
@@ -130,9 +125,6 @@ def loop_map(
 
             current_iteration += 1
 
-        if current_iteration == loop_context.max_iterations:
-            logger.warning("Max iterations reached")
-
         return list(memory) or []
 
 
@@ -143,7 +135,6 @@ def loop_reduce(
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
-    max_iterations: int = DEFAULT_MAX_ITERATIONS,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -165,7 +156,6 @@ def loop_reduce(
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
-        max_iterations=max_iterations,
         memory_factory=memory_factory,
         memory_maker=memory_maker,
         prompt_filter=prompt_filter,
@@ -184,9 +174,7 @@ def loop_reduce(
         current_iteration = 0
         result = prompt
 
-        while not loop_context.stop_condition(
-            loop_context.max_iterations, current_iteration
-        ):
+        while not loop_context.stop_condition(current=current_iteration):
             agent = loop_context.agent_selector(agents, current_iteration)
 
             if callable(loop_context.prompt_filter):
@@ -218,8 +206,5 @@ def loop_reduce(
                 )
 
             current_iteration += 1
-
-        if current_iteration == loop_context.max_iterations:
-            logger.warning("Max iterations reached")
 
         return result

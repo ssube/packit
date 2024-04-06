@@ -32,7 +32,6 @@ def loop_retry(
     agent: Agent,
     prompt: PromptType,
     context: AgentContext | None = None,
-    max_iterations: int = 10,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
@@ -55,7 +54,6 @@ def loop_retry(
     success: bool = False
 
     with loopum(
-        max_iterations=max_iterations,
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
@@ -93,7 +91,7 @@ def loop_retry(
                 )
 
         stop_condition_or_success = condition_or(
-            loop_context.stop_condition, lambda *args: success
+            loop_context.stop_condition, lambda *args, **kwargs: success
         )
 
         # loop until the prompt succeeds
@@ -101,7 +99,6 @@ def loop_retry(
             agents=[agent],
             prompt=prompt,
             context=context,
-            max_iterations=loop_context.max_iterations,
             abac_context=loop_context.abac_context,
             agent_invoker=loop_context.agent_invoker,
             agent_selector=loop_context.agent_selector,
@@ -126,7 +123,6 @@ def loop_tool(
     agent: Agent,
     prompt: PromptType,
     context: AgentContext | None = None,
-    max_iterations: int = 10,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_loop,
@@ -161,7 +157,6 @@ def loop_tool(
         agent,
         prompt,
         context=context,
-        max_iterations=max_iterations,
         abac_context=abac_context,
         agent_invoker=agent_invoker,
         agent_selector=agent_selector,
@@ -179,7 +174,6 @@ def loop_tool(
             agent,
             result,
             context=context,
-            max_iterations=max_iterations,
             abac_context=abac_context,
             agent_invoker=agent_invoker,
             agent_selector=agent_selector,
