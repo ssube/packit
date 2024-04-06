@@ -26,7 +26,7 @@ def make_complete_tool():
         logger.info("Answer: %s", answer)
         return "Task complete."
 
-    def complete_condition(*args) -> bool:
+    def complete_condition(*args, **kwargs) -> bool:
         """
         Stop when the task is complete.
         """

@@ -250,7 +250,7 @@ def markdown_result(
 
 def recursive_result(
     result_parser: ResultParser | None = None,
-    stop_condition: Callable = lambda *args: False,
+    stop_condition: Callable = lambda *args, **kwargs: False,
 ):
     def inner(
         value: str,

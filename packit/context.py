@@ -76,6 +76,13 @@ class LoopContext:
         self.tag = randint(0, 1000000)
 
 
+def count_loop_contexts() -> int:
+    if hasattr(thread_context, LOOP_CONTEXT_ATTR):
+        return len(getattr(thread_context, LOOP_CONTEXT_ATTR))
+
+    return 0
+
+
 def get_loop_context() -> LoopContext | None:
     if hasattr(thread_context, LOOP_CONTEXT_ATTR):
         contexts = getattr(thread_context, LOOP_CONTEXT_ATTR)
@@ -216,14 +223,16 @@ def loopum(
         tool_filter=tool_filter,
         save_context=save_context,
     )
-    try:
+    if save_context:
+        depth = count_loop_contexts()
         logger.debug(
-            "entering loop context: depth %s, tag %s", context.depth, context.tag
+            "entering loop context: depth %s/%s, tag %s", context.depth, depth, context.tag
         )
+    try:
         yield context
     finally:
         if save_context:
             logger.debug(
-                "leaving loop context: depth %s, tag %s", context.depth, context.tag
+                "leaving loop context: depth %s/%s, tag %s", context.depth, depth, context.tag
             )
             pop_loop_context()
