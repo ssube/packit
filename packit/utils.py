@@ -62,3 +62,10 @@ def make_list(value):
         return value
 
     return [value]
+
+
+def head_list(value):
+    if isinstance(value, list):
+        return value[0]
+
+    return value

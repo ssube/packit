@@ -21,7 +21,7 @@ from packit.types import (
     StopCondition,
     ToolFilter,
 )
-from packit.utils import could_be_json
+from packit.utils import could_be_json, head_list
 
 from .base import loop_reduce
 
@@ -29,7 +29,7 @@ logger = getLogger(__name__)
 
 
 def loop_retry(
-    agent: Agent,
+    agents: Agent | list[Agent],
     prompt: PromptType,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
@@ -49,6 +49,8 @@ def loop_retry(
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt
     will be repeated with the error message.
     """
+
+    agent = head_list(agents)
 
     last_error: Exception | None = None
     success: bool = False
@@ -120,7 +122,7 @@ def loop_retry(
 
 
 def loop_tool(
-    agent: Agent,
+    agents: Agent | list[Agent],
     prompt: PromptType,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
@@ -137,6 +139,8 @@ def loop_tool(
     """
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
     """
+
+    agent = head_list(agents)
 
     outer_toolbox = toolbox
 

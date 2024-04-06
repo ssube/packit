@@ -25,7 +25,7 @@ logger = getLogger(__name__)
 
 
 def loop_converse(
-    agents: list[Agent],
+    agents: Agent | list[Agent],
     prompt: str,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
@@ -60,7 +60,7 @@ def loop_converse(
 
 
 def loop_extend(
-    agents: list[Agent],
+    agents: Agent | list[Agent],
     prompt: str,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
@@ -95,7 +95,7 @@ def loop_extend(
 
 
 def loop_refine(
-    agents: list[Agent],
+    agents: Agent | list[Agent],
     prompt: str,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
