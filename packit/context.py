@@ -226,13 +226,19 @@ def loopum(
     if save_context:
         depth = count_loop_contexts()
         logger.debug(
-            "entering loop context: depth %s/%s, tag %s", context.depth, depth, context.tag
+            "entering loop context: depth %s/%s, tag %s",
+            context.depth,
+            depth,
+            context.tag,
         )
     try:
         yield context
     finally:
         if save_context:
             logger.debug(
-                "leaving loop context: depth %s/%s, tag %s", context.depth, depth, context.tag
+                "leaving loop context: depth %s/%s, tag %s",
+                context.depth,
+                depth,
+                context.tag,
             )
             pop_loop_context()

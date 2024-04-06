@@ -42,11 +42,11 @@ class Panel:
         self,
         prompt: str,
         context: AgentContext,
-        parse_result=bool_result,
+        result_parser=bool_result,
         decision_condition=condition_threshold_mean,
         min_threshold: float = 0.5,
     ) -> tuple[bool, dict[str, str]]:
-        results = self.sample(prompt, context, result_parser=parse_result)
+        results = self.sample(prompt, context, result_parser=result_parser)
         values = list(results.values())
 
         return decision_condition(min_threshold, *values), results
