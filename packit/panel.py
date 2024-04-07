@@ -45,7 +45,7 @@ class Panel:
     ) -> dict[str, str]:
         results = {}
 
-        with trace(self.name, "panel") as (report_args, report_output):
+        with trace(self.name, "packit.panel") as (report_args, report_output):
             report_args(prompt, context)
 
             for agent, weight in zip(self.agents, self.weights):

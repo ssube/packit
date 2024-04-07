@@ -1,8 +1,10 @@
 from contextlib import contextmanager
 from json import dumps
 from logging import getLogger
+from os import environ
 
 from opentelemetry.semconv.ai import SpanAttributes, TraceloopSpanKindValues
+from traceloop.sdk import Traceloop
 from traceloop.sdk.decorators import _should_send_prompts
 from traceloop.sdk.tracing import get_tracer
 from traceloop.sdk.tracing.tracing import (
@@ -17,6 +19,20 @@ logger = getLogger(__name__)
 
 def snake_case(name: str) -> str:
     return camel_to_snake(name).replace(" ", "_").lower()
+
+
+def init() -> bool:
+    if TracerWrapper.verify_initialized():
+        logger.debug("traceloop SDK already initialized")
+        return True
+
+    disable_batch = environ.get("TRACELOOP_DISABLE_BATCH", "false").lower() == "true"
+    logger.debug(
+        "initializing traceloop SDK, %s batching",
+        "without" if disable_batch else "with",
+    )
+
+    Traceloop.init(disable_batch=disable_batch)
 
 
 @contextmanager

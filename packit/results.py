@@ -10,6 +10,7 @@ from mistletoe.span_token import LineBreak, RawText
 from packit.abac import ABACAttributes
 from packit.errors import ToolError
 from packit.toolbox import Toolbox
+from packit.tracing import trace
 from packit.types import ResultParser
 from packit.utils import could_be_json
 
@@ -128,7 +129,10 @@ def function_result(
 
     tool = toolbox.get_tool(function_name, abac)
     try:
-        tool_result = tool(**function_params)
+        with trace(function_name, "packit.tool") as (report_args, report_output):
+            report_args(**function_params)
+            tool_result = tool(**function_params)
+            report_output(tool_result)
     except Exception as e:
         raise ToolError(
             f"Error running tool {function_name}: {e}", None, value, function_name

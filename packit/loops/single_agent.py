@@ -8,6 +8,7 @@ from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
+from packit.tracing import trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -68,57 +69,58 @@ def loop_retry(
         toolbox=toolbox,
         tool_filter=tool_filter,
     ) as loop_context:
-        closure_tag = randint(0, 1000000)
+        with trace("retry", "packit.loop") as (report_args, report_output):
+            report_args(agent, prompt, context)
+            closure_tag = randint(0, 1000000)
 
-        def parse_or_error(value, **kwargs) -> str:
-            nonlocal last_error
-            nonlocal success
+            def parse_or_error(value, **kwargs) -> str:
+                nonlocal last_error
+                nonlocal success
 
-            logger.debug("closure_tag: %s", closure_tag)
+                logger.debug("closure_tag: %s", closure_tag)
 
-            try:
-                if callable(loop_context.result_parser):
-                    parsed = loop_context.result_parser(value, **kwargs)
-                else:
-                    parsed = value
+                try:
+                    if callable(loop_context.result_parser):
+                        parsed = loop_context.result_parser(value, **kwargs)
+                    else:
+                        parsed = value
 
-                success = True
-                return parsed
-            except Exception as e:
-                logger.exception("Error parsing result: %s", value)
-                last_error = e
-                # TODO: check this conversion
-                return (
-                    f"There was an error with your last response, please try again: {e}"
-                )
+                    success = True
+                    return parsed
+                except Exception as e:
+                    logger.exception("Error parsing result: %s", value)
+                    last_error = e
+                    # TODO: check this conversion
+                    return f"There was an error with your last response, please try again: {e}"
 
-        stop_condition_or_success = condition_or(
-            loop_context.stop_condition, lambda *args, **kwargs: success
-        )
+            stop_condition_or_success = condition_or(
+                loop_context.stop_condition, lambda *args, **kwargs: success
+            )
 
-        # loop until the prompt succeeds
-        result = loop_reduce(
-            agents=[agent],
-            prompt=prompt,
-            context=context,
-            abac_context=loop_context.abac_context,
-            agent_invoker=loop_context.agent_invoker,
-            agent_selector=loop_context.agent_selector,
-            memory_factory=loop_context.memory_factory,
-            memory_maker=loop_context.memory_maker,
-            prompt_filter=loop_context.prompt_filter,
-            prompt_template=loop_context.prompt_template,
-            result_parser=parse_or_error,
-            stop_condition=stop_condition_or_success,
-            toolbox=loop_context.toolbox,
-            tool_filter=loop_context.tool_filter,
-            save_context=False,
-        )
+            # loop until the prompt succeeds
+            result = loop_reduce(
+                agents=agent,
+                prompt=prompt,
+                context=context,
+                abac_context=loop_context.abac_context,
+                agent_invoker=loop_context.agent_invoker,
+                agent_selector=loop_context.agent_selector,
+                memory_factory=loop_context.memory_factory,
+                memory_maker=loop_context.memory_maker,
+                prompt_filter=loop_context.prompt_filter,
+                prompt_template=loop_context.prompt_template,
+                result_parser=parse_or_error,
+                stop_condition=stop_condition_or_success,
+                toolbox=loop_context.toolbox,
+                tool_filter=loop_context.tool_filter,
+                save_context=False,
+            )
 
-        if success:
-            return result
+            if success:
+                report_output(result)
+                return result
 
-        raise last_error
+            raise last_error
 
 
 def loop_tool(
@@ -142,41 +144,27 @@ def loop_tool(
 
     agent = head_list(agents)
 
-    outer_toolbox = toolbox
+    with trace("tool", "packit.loop") as (report_args, report_output):
+        report_args(agent, prompt, context)
 
-    def result_parser_with_tools(
-        value: str, abac=None, toolbox=None, tool_filter=None
-    ) -> str:
-        if callable(result_parser):
-            return result_parser(
-                value,
-                abac=abac,
-                toolbox=toolbox or outer_toolbox,
-                tool_filter=tool_filter,
-            )
+        outer_toolbox = toolbox
 
-        return value
+        def result_parser_with_tools(
+            value: str, abac=None, toolbox=None, tool_filter=None
+        ) -> str:
+            if callable(result_parser):
+                return result_parser(
+                    value,
+                    abac=abac,
+                    toolbox=toolbox or outer_toolbox,
+                    tool_filter=tool_filter,
+                )
 
-    result = loop_retry(
-        agent,
-        prompt,
-        context=context,
-        abac_context=abac_context,
-        agent_invoker=agent_invoker,
-        agent_selector=agent_selector,
-        memory_factory=memory_factory,
-        memory_maker=memory_maker,
-        prompt_filter=prompt_filter,
-        result_parser=result_parser_with_tools,
-        stop_condition=stop_condition,
-        toolbox=toolbox,
-        tool_filter=tool_filter,
-    )
+            return value
 
-    while could_be_json(result):
         result = loop_retry(
             agent,
-            result,
+            prompt,
             context=context,
             abac_context=abac_context,
             agent_invoker=agent_invoker,
@@ -190,4 +178,22 @@ def loop_tool(
             tool_filter=tool_filter,
         )
 
-    return result
+        while could_be_json(result):
+            result = loop_retry(
+                agent,
+                result,
+                context=context,
+                abac_context=abac_context,
+                agent_invoker=agent_invoker,
+                agent_selector=agent_selector,
+                memory_factory=memory_factory,
+                memory_maker=memory_maker,
+                prompt_filter=prompt_filter,
+                result_parser=result_parser_with_tools,
+                stop_condition=stop_condition,
+                toolbox=toolbox,
+                tool_filter=tool_filter,
+            )
+
+        report_output(result)
+        return result

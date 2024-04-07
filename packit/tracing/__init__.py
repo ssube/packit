@@ -17,19 +17,16 @@ def set_tracer(fn: Callable | str):
 
             tracer = trace
         elif fn == "traceloop":
-            from .traceloop import trace
-
             # if the user has requested traceloop, import and initialize it
             try:
-                from traceloop.sdk import Traceloop
+                from .traceloop import init, trace
 
-                Traceloop.init(disable_batch=True)
+                init()
+                tracer = trace
             except ImportError:
                 raise ImportError(
                     "To use the traceloop integration, you must install the traceloop SDK."
                 )
-
-            tracer = trace
         else:
             raise ValueError(f"Unknown tracer integration name: {fn}")
     elif callable(fn):
@@ -39,6 +36,6 @@ def set_tracer(fn: Callable | str):
 
 
 @contextmanager
-def trace(name: str, kind: str = "task"):
+def trace(name: str, kind: str = "packit.task"):
     with tracer(name, kind) as reporters:
         yield reporters

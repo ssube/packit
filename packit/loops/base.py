@@ -6,6 +6,7 @@ from packit.conditions import condition_threshold
 from packit.context import loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
+from packit.tracing import trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -84,52 +85,57 @@ def loop_map(
         tool_filter=tool_filter,
         save_context=save_context,
     ) as loop_context:
-        if callable(loop_context.memory_factory):
-            memory = loop_context.memory_factory()
-        else:
-            memory = None
+        with trace("map", "packit.loop") as (report_args, report_output):
+            report_args(agents, prompt, context)
 
-        current_iteration = 0
+            if callable(loop_context.memory_factory):
+                memory = loop_context.memory_factory()
+            else:
+                memory = None
 
-        while not loop_context.stop_condition(current=current_iteration):
-            agent = loop_context.agent_selector(agents, current_iteration)
-            agent_prompt = prompt
+            current_iteration = 0
 
-            if callable(loop_context.prompt_filter):
-                agent_prompt = loop_context.prompt_filter(agent_prompt)
+            while not loop_context.stop_condition(current=current_iteration):
+                agent = loop_context.agent_selector(agents, current_iteration)
+                agent_prompt = prompt
 
-            if agent_prompt is None:
-                continue  # map continues, reduce stops
+                if callable(loop_context.prompt_filter):
+                    agent_prompt = loop_context.prompt_filter(agent_prompt)
 
-            result = agent_invoker(
-                agent,
-                agent_prompt,
-                context=context,
-                memory=memory,
-                prompt_template=loop_context.prompt_template,
-                toolbox=loop_context.toolbox,
-            )
+                if agent_prompt is None:
+                    continue  # map continues, reduce stops
 
-            if callable(loop_context.memory_maker):
-                loop_context.memory_maker(memory, result)
-
-            if callable(loop_context.result_parser):
-                result = loop_context.result_parser(
-                    result,
-                    abac={
-                        "subject": agent.name,
-                    },
+                result = agent_invoker(
+                    agent,
+                    agent_prompt,
+                    context=context,
+                    memory=memory,
+                    prompt_template=loop_context.prompt_template,
                     toolbox=loop_context.toolbox,
-                    tool_filter=loop_context.tool_filter,
                 )
 
-            current_iteration += 1
+                if callable(loop_context.memory_maker):
+                    loop_context.memory_maker(memory, result)
 
-        return list(memory) or []
+                if callable(loop_context.result_parser):
+                    result = loop_context.result_parser(
+                        result,
+                        abac={
+                            "subject": agent.name,
+                        },
+                        toolbox=loop_context.toolbox,
+                        tool_filter=loop_context.tool_filter,
+                    )
+
+                current_iteration += 1
+
+            result = list(memory) or []
+            report_output(result)
+            return result
 
 
 def loop_reduce(
-    agents: list[Agent],
+    agents: Agent | list[Agent],
     prompt: PromptType,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
@@ -166,45 +172,49 @@ def loop_reduce(
         tool_filter=tool_filter,
         save_context=save_context,
     ) as loop_context:
-        if callable(loop_context.memory_factory):
-            memory_factory = loop_context.memory_factory()
-        else:
-            memory_factory = None
+        with trace("reduce", "packit.loop") as (report_args, report_output):
+            report_args(agents, prompt, context)
 
-        current_iteration = 0
-        result = prompt
+            if callable(loop_context.memory_factory):
+                memory_factory = loop_context.memory_factory()
+            else:
+                memory_factory = None
 
-        while not loop_context.stop_condition(current=current_iteration):
-            agent = loop_context.agent_selector(agents, current_iteration)
+            current_iteration = 0
+            result = prompt
 
-            if callable(loop_context.prompt_filter):
-                result = loop_context.prompt_filter(result)
+            while not loop_context.stop_condition(current=current_iteration):
+                agent = loop_context.agent_selector(agents, current_iteration)
 
-            if result is None:
-                break  # map continues, reduce stops
+                if callable(loop_context.prompt_filter):
+                    result = loop_context.prompt_filter(result)
 
-            result = agent_invoker(
-                agent,
-                result,
-                context=context,
-                memory=memory_factory,
-                prompt_template=loop_context.prompt_template,
-                toolbox=loop_context.toolbox,
-            )
+                if result is None:
+                    break  # map continues, reduce stops
 
-            if callable(loop_context.memory_maker):
-                loop_context.memory_maker(memory_factory, result)
-
-            if callable(loop_context.result_parser):
-                result = loop_context.result_parser(
+                result = agent_invoker(
+                    agent,
                     result,
-                    abac={
-                        "subject": agent.name,
-                    },
+                    context=context,
+                    memory=memory_factory,
+                    prompt_template=loop_context.prompt_template,
                     toolbox=loop_context.toolbox,
-                    tool_filter=loop_context.tool_filter,
                 )
 
-            current_iteration += 1
+                if callable(loop_context.memory_maker):
+                    loop_context.memory_maker(memory_factory, result)
 
-        return result
+                if callable(loop_context.result_parser):
+                    result = loop_context.result_parser(
+                        result,
+                        abac={
+                            "subject": agent.name,
+                        },
+                        toolbox=loop_context.toolbox,
+                        tool_filter=loop_context.tool_filter,
+                    )
+
+                current_iteration += 1
+
+            report_output(result)
+            return result

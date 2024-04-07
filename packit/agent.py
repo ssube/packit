@@ -96,7 +96,7 @@ class Agent:
     ) -> str:
         from packit.errors import PromptError
 
-        with trace(self.name, "agent") as (report_args, report_output):
+        with trace(self.name, "packit.agent") as (report_args, report_output):
             report_args(prompt, context, prompt_template)
 
             args = {}

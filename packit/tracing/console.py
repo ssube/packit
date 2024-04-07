@@ -5,7 +5,7 @@ logger = getLogger(__name__)
 
 
 @contextmanager
-def trace(name: str, kind: str = "task"):
+def trace(name: str, kind: str = "packit.task"):
     span_name = f"{kind}.{name}"
     logger.debug("tracing span %s", span_name)
 
