@@ -5,6 +5,7 @@ from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
 from packit.loops import loop_retry
 from packit.results import bool_result
+from packit.tracing import trace
 from packit.types import ResultParser
 
 logger = getLogger(__name__)
@@ -26,15 +27,20 @@ class Panel:
     ) -> dict[str, str]:
         results = {}
 
-        for agent, weight in zip(self.agents, self.weights):
-            for i in range(weight):
-                result = loop_retry(
-                    agent,
-                    prompt,
-                    context=context,
-                    result_parser=result_parser,
-                )
-                results[f"{agent.name}-{i}"] = result
+        with trace(self.name, "panel") as (report_args, report_output):
+            report_args(prompt, context)
+
+            for agent, weight in zip(self.agents, self.weights):
+                for i in range(weight):
+                    result = loop_retry(
+                        agent,
+                        prompt,
+                        context=context,
+                        result_parser=result_parser,
+                    )
+                    results[f"{agent.name}-{i}"] = result
+
+            report_output(results)
 
         return results
 

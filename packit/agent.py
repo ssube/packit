@@ -8,6 +8,7 @@ from packit.formats import format_str_or_json
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import DEFAULT_PROMPTS, PromptLibrary, get_random_prompt
 from packit.toolbox import Toolbox
+from packit.tracing import set_tracer, trace
 from packit.types import MemoryFactory, MemoryMaker, PromptTemplate
 
 logger = getLogger(__name__)
@@ -95,71 +96,79 @@ class Agent:
     ) -> str:
         from packit.errors import PromptError
 
-        args = {}
-        args.update(self.context)
-        args.update(context)
-        args = {k: format_str_or_json(v) for k, v in args.items()}
+        with trace(self.name, "agent") as (report_args, report_output):
+            report_args(prompt, context, prompt_template)
 
-        toolbox = toolbox or self.toolbox
-        if toolbox:
-            prompt = prompt + " " + prompt_template("function")
-            if "examples" not in args:
-                args["example"] = format_str_or_json(prompt_library.function_example)
-            if "tools" not in args:
-                args["tools"] = format_str_or_json(
-                    toolbox.list_definitions(
-                        {
-                            "subject": self.name,
-                            "action": "call",
-                        }
+            args = {}
+            args.update(self.context)
+            args.update(context)
+            args = {k: format_str_or_json(v) for k, v in args.items()}
+
+            toolbox = toolbox or self.toolbox
+            if toolbox:
+                prompt = prompt + " " + prompt_template("function")
+                if "examples" not in args:
+                    args["example"] = format_str_or_json(
+                        prompt_library.function_example
                     )
+                if "tools" not in args:
+                    args["tools"] = format_str_or_json(
+                        toolbox.list_definitions(
+                            {
+                                "subject": self.name,
+                                "action": "call",
+                            }
+                        )
+                    )
+
+            try:
+                formatted_prompt = prompt.format(**args)
+                formatted_backstory = self.backstory.format(**args)
+            except Exception as e:
+                logger.exception("Error formatting prompt: %s", prompt)
+                raise PromptError(
+                    f"{type(e).__name__} while formatting prompt: {str(e)}",
+                    self,
+                    prompt,
                 )
 
-        try:
-            formatted_prompt = prompt.format(**args)
-            formatted_backstory = self.backstory.format(**args)
-        except Exception as e:
-            logger.exception("Error formatting prompt: %s", prompt)
-            raise PromptError(
-                f"{type(e).__name__} while formatting prompt: {str(e)}", self, prompt
-            )
+            # log the formatted prompts and construct langchain messages
+            logger.debug("Agent: %s", self.name)
+            logger.debug("System: %s", formatted_backstory)
+            logger.debug("Prompt: %s", formatted_prompt)
 
-        # log the formatted prompts and construct langchain messages
-        logger.debug("Agent: %s", self.name)
-        logger.debug("System: %s", formatted_backstory)
-        logger.debug("Prompt: %s", formatted_prompt)
+            system = SystemMessage(content=formatted_backstory)
+            human = HumanMessage(content=formatted_prompt)
 
-        system = SystemMessage(content=formatted_backstory)
-        human = HumanMessage(content=formatted_prompt)
+            # add the memory to the messages if there are any memories to add
+            if self.memory:
+                messages = [
+                    system,
+                    *self.memory,
+                    human,
+                ]
+            else:
+                messages = [
+                    system,
+                    human,
+                ]
 
-        # add the memory to the messages if there are any memories to add
-        if self.memory:
-            messages = [
-                system,
-                *self.memory,
-                human,
-            ]
-        else:
-            messages = [
-                system,
-                human,
-            ]
+            result = self.invoke_retry(messages, prompt_library=prompt_library)
 
-        result = self.invoke_retry(messages, prompt_library=prompt_library)
+            if not self.response_complete(result):
+                logger.warning("LLM did not finish: %s", result)
 
-        if not self.response_complete(result):
-            logger.warning("LLM did not finish: %s", result)
+            reply = result.content
+            reply = reply.replace("<|im_end|>", "").strip()
+            logger.debug("Response: %s", reply)
 
-        reply = result.content
-        reply = reply.replace("<|im_end|>", "").strip()
-        logger.debug("Response: %s", reply)
+            # these need explicit not-None checks because memory can be an empty list
+            if self.memory is not None and self.memory_maker is not None:
+                self.memory_maker(self.memory, human)
+                self.memory_maker(self.memory, AIMessage(content=reply))
 
-        # these need explicit not-None checks because memory can be an empty list
-        if self.memory is not None and self.memory_maker is not None:
-            self.memory_maker(self.memory, human)
-            self.memory_maker(self.memory, AIMessage(content=reply))
-
-        return reply
+            report_output(reply)
+            return reply
 
     def response_complete(self, result: Any) -> bool:
         if "done" in result.response_metadata:
@@ -191,6 +200,9 @@ def agent_easy_connect(
 
     if not override_model:
         model = environ.get("PACKIT_MODEL", model)
+
+    if "PACKIT_TRACER" in environ:
+        set_tracer(environ["PACKIT_TRACER"])
 
     if driver == "openai":
         from langchain_openai import ChatOpenAI
