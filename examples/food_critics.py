@@ -14,6 +14,7 @@ backstories = {
     "harsh": "You are a harsh food critic. You are rating a list of entreés, harshly.",
     "average": "You are an average food critic. You are rating a list of entreés, averagely.",
     "generous": "You are a generous food critic. You are rating a list of entreés, generously.",
+    "unpredictable": "You are an unpredictable food critic. You are rating a list of entreés, unpredictably.",
 }
 
 entrees = [
@@ -35,18 +36,14 @@ decisions = {
 
 # Create the food critics
 llm = agent_easy_connect(model="mixtral")
-critics = {
-    critic: Agent(f"{critic} critic", backstory, {}, llm)
+critics = [
+    Agent(f"{critic} critic", backstory, {}, llm)
     for critic, backstory in backstories.items()
-}
+]
 
 # Create the panel, but make sure we listen to the generous critic twice as much
-panel_weights = {
-    critics["harsh"]: 1,
-    critics["average"]: 1,
-    critics["generous"]: 2,
-}
-panel = Panel(panel_weights)
+critic_weights = [1, 1, 2, 1]
+panel = Panel(critics, name="food_critics", weights=critic_weights)
 
 # Rate each of the entreés
 for entree in entrees:

@@ -7,17 +7,35 @@ from packit.loops import loop_retry
 from packit.results import bool_result
 from packit.tracing import trace
 from packit.types import ResultParser
+from packit.utils import make_list
 
 logger = getLogger(__name__)
 
 
 class Panel:
     agents: list[Agent]
+    name: str | None
     weights: list[int]
 
-    def __init__(self, agents: dict[Agent, int]):
-        self.agents = list(agents.keys())
-        self.weights = list(agents.values())
+    def __init__(
+        self,
+        agents: Agent | list[Agent],
+        name: str | None = None,
+        weights: int | list[int] = 1,
+    ):
+        agents = make_list(agents)
+        weights = make_list(weights)
+
+        if len(agents) != len(weights):
+            # if only one weight is provided, apply it to all agents
+            if len(weights) == 1:
+                weights = [weights[0]] * len(agents)
+            else:
+                raise ValueError("The number of agents and weights must match.")
+
+        self.agents = agents
+        self.name = name or "_".join(agent.name for agent in self.agents)
+        self.weights = weights
 
     def sample(
         self,
