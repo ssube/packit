@@ -57,34 +57,10 @@ class Agent:
         else:
             self.memory = None
 
-    def invoke_retry(
-        self,
-        messages: list[AgentModelMessage],
-        prompt_library: PromptLibrary = DEFAULT_PROMPTS,
-    ):
-        retry = 0
-        while retry < self.max_retry:
-            retry += 1
-            result = self.llm.invoke(messages)
-            if not self.response_complete(result):
-                logger.warning("LLM did not finish: %s", result)
-                # TODO: get the rest of the response
-
-            do_skip = False
-            for skip_token in prompt_library.skip:
-                if skip_token in result.content:
-                    logger.warning(
-                        "found skip token %s, skipping response: %s", skip_token, result
-                    )
-                    do_skip = True
-
-            if do_skip:
-                continue
-
-            return result
-
-        logger.warning("failed to get a valid response from agent")
-        return result
+    def __call__(
+        self, prompt: str, toolbox: Toolbox | None = None, **kwargs: Any
+    ) -> str:
+        return self.invoke(prompt, kwargs, toolbox=toolbox)
 
     def invoke(
         self,
@@ -170,6 +146,35 @@ class Agent:
             report_output(reply)
             return reply
 
+    def invoke_retry(
+        self,
+        messages: list[AgentModelMessage],
+        prompt_library: PromptLibrary = DEFAULT_PROMPTS,
+    ):
+        retry = 0
+        while retry < self.max_retry:
+            retry += 1
+            result = self.llm.invoke(messages)
+            if not self.response_complete(result):
+                logger.warning("LLM did not finish: %s", result)
+                # TODO: get the rest of the response
+
+            do_skip = False
+            for skip_token in prompt_library.skip:
+                if skip_token in result.content:
+                    logger.warning(
+                        "found skip token %s, skipping response: %s", skip_token, result
+                    )
+                    do_skip = True
+
+            if do_skip:
+                continue
+
+            return result
+
+        logger.warning("failed to get a valid response from agent")
+        return result
+
     def response_complete(self, result: Any) -> bool:
         if "done" in result.response_metadata:
             return result.response_metadata["done"]
@@ -178,11 +183,6 @@ class Agent:
             return result.response_metadata["finish_reason"] == "stop"
 
         return False
-
-    def __call__(
-        self, prompt: str, toolbox: Toolbox | None = None, **kwargs: Any
-    ) -> str:
-        return self.invoke(prompt, kwargs, toolbox=toolbox)
 
 
 def agent_easy_connect(

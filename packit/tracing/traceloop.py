@@ -68,18 +68,31 @@ def trace(
                     if _should_send_prompts():
                         span.set_attribute(
                             SpanAttributes.TRACELOOP_ENTITY_INPUT,
-                            dumps({"args": args, "kwargs": kwargs}),
+                            dumps({"args": args, "kwargs": kwargs}, default=dumper),
                         )
                 except TypeError:
-                    pass  # Some args might not be serializable
+                    # Some args might not be serializable
+                    logger.warning("failed to serialize args", exc_info=True)
 
             def report_output(res):
                 try:
                     if _should_send_prompts():
                         span.set_attribute(
-                            SpanAttributes.TRACELOOP_ENTITY_OUTPUT, dumps(res)
+                            SpanAttributes.TRACELOOP_ENTITY_OUTPUT,
+                            dumps(res, default=dumper),
                         )
                 except TypeError:
-                    pass
+                    logger.warning("failed to serialize output", exc_info=True)
 
             yield report_args, report_output
+
+
+def dumper(value):
+    from collections import deque
+
+    from packit.agent import Agent
+
+    if isinstance(value, Agent):
+        return f"agent.{value.name}"
+    elif isinstance(value, deque):
+        return list(value)
