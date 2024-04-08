@@ -2,12 +2,15 @@
 
 The Prompt Agent Construction Kit, or maybe the Programmable Agent Construction Kit.
 
-Composable constructs for conversational development. A loose toolkit of loops, groups, conditions, and parsers to help LLMs communicate with each other and with your code.
+Composable constructs for conversational development. A loose toolkit of loops, groups, conditions, and parsers to help
+LLMs communicate with each other and with your code.
 
 - Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI).
 - Compatible with all [Langchain chat models](https://python.langchain.com/docs/integrations/chat/).
 - Supports function calling with JSON-trained models.
-- Group agents to build hierarchical ensembles and mixtures of experts at runtime.
+- Group agents to build hierarchical [ensembles](#panel-group) and [mixtures of experts](#router-group) at runtime,
+  without fine-tuning or retraining the models.
+- Full [OTLP tracing](#tracing) with [Traceloop OpenLLMetry](https://github.com/traceloop/openllmetry).
 
 Try PACkit on [Google Colab](https://colab.research.google.com/drive/1repqnb8eCCju-3eCBaQjMTP3xWXhkBhv?usp=sharing) or
 using [the Jupyter notebook](./examples/packit-demo.ipynb).
@@ -22,7 +25,7 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
   - [Examples](#examples)
     - [With OpenAI API](#with-openai-api)
     - [With Ollama API](#with-ollama-api)
-  - [Concepts](#concepts)
+  - [Constructs](#constructs)
     - [Agents](#agents)
       - [Agent Backstory](#agent-backstory)
       - [Agent Context](#agent-context)
@@ -53,6 +56,9 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
       - [Function Results](#function-results)
       - [JSON Results](#json-results)
       - [Markdown Results](#markdown-results)
+  - [Tracing](#tracing)
+    - [Telemetry](#telemetry)
+    - [Traceloop OpenLLMetry](#traceloop-openllmetry)
 
 ## Quickstart
 
@@ -282,7 +288,7 @@ The critics decided that rocks is bad because:
 ...
 ```
 
-## Concepts
+## Constructs
 
 ### Agents
 
@@ -426,3 +432,44 @@ Interpret the response as JSON. If the result is not valid JSON, attempt to fix 
 Interpret the response as a Markdown document and extract certain blocks.
 
 By default, this extract code blocks with their language hint set to Python.
+
+## Tracing
+
+### Telemetry
+
+PACkit does not include any telemetry code of its own, but some of the libraries used in the examples use opt-out
+telemetry. Most of those libraries offer a way to disable telemetry with an environment variable, but that does not
+guarantee that data will not be collected. Be careful using libraries and make sure to monitor outgoing network traffic
+for any privacy-sensitive applications.
+
+Documentation for libraries with their own telemetry:
+
+- [Traceloop SDK telemetry](https://www.traceloop.com/docs/openllmetry/privacy/telemetry)
+- [vLLM usage stats](https://docs.vllm.ai/en/latest/serving/usage_stats.html)
+
+### Traceloop OpenLLMetry
+
+PACkit is fully integrated with [Traceloop's OpenLLMetry SDK](https://github.com/traceloop/openllmetry) for OTLP
+tracing.
+
+Tracing is **off by default** and must be enabled by setting the `PACKIT_TRACER` environment variable to `traceloop`
+or by initializing the Traceloop SDK in your own code.
+
+To export OTLP traces to a self-hosted Grafana Tempo server, set the `TODO` environment variable to the Tempo ingest
+URL:
+
+```shell
+PACKIT_TRACER=traceloop
+TRACELOOP_BASE_URL=http://traces.example.com
+```
+
+PACkit spans are named `packit.$type.$entity`, where `$entity` is a `lower_snake_case` name for an [Agent](#agents),
+[group](#groups), [loop](#loops), or tool. The `$type` indicates which construct initiated the span.
+
+![overview image of collapsed spans from the food critics example](./docs/traces-spans.png)
+
+Spans include their inputs and outputs, including prompt and context. For agents, this is the prompt, context, and
+response. For groups and loops, this captures the agents being used, prompts, context, and any other notable aspects of
+the construct.
+
+![spans from the food critics example in Grafana Temp showing a prompt about judging spaghetti carbonara](./docs/traces-prompt.png)
