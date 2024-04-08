@@ -33,7 +33,7 @@ def group_router(
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate | None = None,
-    result_parser: ResultParser = enum_result,
+    result_parser: ResultParser | None = None,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
@@ -45,15 +45,15 @@ def group_router(
     enum = list(routes.keys())
 
     def route_parser(value: str, **kwargs) -> str:
-        return result_parser(value, enum=enum, **kwargs)
+        return enum_result(value, enum=enum, **kwargs)
 
     with trace("router", "packit.group") as (report_args, report_output):
         report_args(decider, prompt, context, enum=enum)
 
         decision = loop_retry(
             decider,
-            prompt,
-            context=context,
+            prompt,  # TODO: add route prefix
+            context=context,  # TODO: add route/expert list
             abac_context=abac_context,
             agent_invoker=agent_invoker,
             agent_selector=agent_selector,
@@ -67,5 +67,23 @@ def group_router(
             tool_filter=tool_filter,
         )
 
-        report_output(decision)
-        return routes[decision]
+        expert = routes[decision]
+        result = loop_retry(
+            expert,
+            prompt,
+            context=context,
+            abac_context=abac_context,
+            agent_invoker=agent_invoker,
+            agent_selector=agent_selector,
+            memory_factory=memory_factory,
+            memory_maker=memory_maker,
+            prompt_filter=prompt_filter,
+            prompt_template=prompt_template,
+            result_parser=result_parser,
+            stop_condition=stop_condition,
+            toolbox=toolbox,
+            tool_filter=tool_filter,
+        )
+
+        report_output(result)
+        return result
