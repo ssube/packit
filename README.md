@@ -2,13 +2,12 @@
 
 The Prompt Agent Construction Kit, or maybe the Programmable Agent Construction Kit.
 
-Conversational development where your code is the manager.
+Composable constructs for conversational development. A loose toolkit of loops, groups, conditions, and parsers to help LLMs communicate with each other and with your code.
 
-Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI). A
-loose toolkit of loops, operators, and predicates to help LLMs communicate with each other and with your code.
-Compatible with all [Langchain chat models](https://python.langchain.com/docs/integrations/chat/) that support `invoke`,
-which is all of them. Supports function calling with JSON-trained models. Using [the `Panel`](#panels) with [MoE models
-like Mixtral](https://huggingface.co/blog/moe) allows you to build a hierarchical mixture of experts on the fly.
+- Something in between [Langchain](https://www.langchain.com/) and [CrewAI](https://github.com/joaomdmoura/crewAI).
+- Compatible with all [Langchain chat models](https://python.langchain.com/docs/integrations/chat/).
+- Supports function calling with JSON-trained models.
+- Group agents to build hierarchical ensembles and mixtures of experts at runtime.
 
 Try PACkit on [Google Colab](https://colab.research.google.com/drive/1repqnb8eCCju-3eCBaQjMTP3xWXhkBhv?usp=sharing) or
 using [the Jupyter notebook](./examples/packit-demo.ipynb).
@@ -28,19 +27,32 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
       - [Agent Backstory](#agent-backstory)
       - [Agent Context](#agent-context)
       - [Agent Temperature](#agent-temperature)
+    - [Groups](#groups)
+      - [Panel Group](#panel-group)
+        - [Panel Methods](#panel-methods)
+        - [Panel Results](#panel-results)
+      - [Router Group](#router-group)
     - [Loops](#loops)
-      - [Conversation Loops](#conversation-loops)
-      - [Extension Loops](#extension-loops)
-      - [Panel Loops](#panel-loops)
-      - [Refinement Loops](#refinement-loops)
-    - [Panels](#panels)
-      - [Panel Methods](#panel-methods)
-      - [Panel Results](#panel-results)
+      - [Base Loops](#base-loops)
+        - [Map](#map)
+        - [Reduce](#reduce)
+      - [Builder Loops](#builder-loops)
+        - [Prefix](#prefix)
+        - [Suffix](#suffix)
+        - [Midfix](#midfix)
+      - [Single-Agent Loops](#single-agent-loops)
+        - [Retry Loop](#retry-loop)
+        - [Tool Loop](#tool-loop)
+      - [Multi-Agent Loops](#multi-agent-loops)
+        - [Conversation Loop](#conversation-loop)
+        - [Extension Loop](#extension-loop)
+        - [Refinement Loop](#refinement-loop)
     - [Results](#results)
-      - [Binary Results](#binary-results)
-      - [Integer Results](#integer-results)
+      - [Primitive Results](#primitive-results)
+      - [Enum Results](#enum-results)
       - [Function Results](#function-results)
       - [JSON Results](#json-results)
+      - [Markdown Results](#markdown-results)
 
 ## Quickstart
 
@@ -292,9 +304,73 @@ In technical terms, the context is the dictionary of variables available for use
 
 An `Agent`'s temperature controls how creative they will be, but too high of a temperature will stop making sense.
 
+### Groups
+
+#### Panel Group
+
+The `Panel` is a weighted group of agents. Each agent will be given the same user prompt, along with their own system
+prompt, or backstory. Their responses will be interpreted the same way. Agents with a greater weight will be asked more
+often than the others.
+
+##### Panel Methods
+
+Panels can use many methods to make their decision. Agents can respond with a yes/no answer or rank items on a scale.
+When multiple items are provided, they can be evaluated individually or as a single group (with a large enough
+context window).
+
+##### Panel Results
+
+Panels can make their decision using any of the available comparators. By default, they will compare their mean
+rating against a predefined threshold. If the consensus exceeds the threshold, the panel will give an affirmative
+answer. This can also be inverted using a counter or the not comparator.
+
+#### Router Group
+
+The `Router` group uses a `decider` agent to select one or more `expert` agents. Each `expert` is presented with the
+same prompt, and their results can be used directly or summarized by the `decider`.
+
 ### Loops
 
-#### Conversation Loops
+#### Base Loops
+
+##### Map
+
+Presents the same prompt to each agent and collects their responses in a `dict` or `list`.
+
+##### Reduce
+
+Chains a series of agents, passing the response from the last one as the prompt for the next.
+
+#### Builder Loops
+
+##### Prefix
+
+Calls one of the [base loops](#base-loops), adding a prefix to the prompt before each iteration.
+
+##### Suffix
+
+Calls one of the [base loops](#base-loops), adding a suffix to the prompt before each iteration.
+
+##### Midfix
+
+Combines the prefix and suffix loops. Calls one of the [base loops](#base-loops), adding both a prefix and a suffix
+before each iteration.
+
+#### Single-Agent Loops
+
+##### Retry Loop
+
+Present the agent with a prompt. If the result cannot be parsed, present the error to the agent. Retry until the
+result is parsed successfully or the stop condition is met.
+
+##### Tool Loop
+
+Present the agent with a prompt and parse the result as a JSON function call. Invoke the tool and recursively parse
+the results until the response is not a JSON function call.
+
+#### Multi-Agent Loops
+
+##### Conversation Loop
 
 Using two or more agents, have them respond to one another in a conversational manner.
 
@@ -303,7 +379,7 @@ The conversation will continue until the iteration limit has been reached or the
 Each agent will pass their response on to the next agent and ask them to consider it. This is similar to what CrewAI
 does, but much simpler.
 
-#### Extension Loops
+##### Extension Loop
 
 Using one or more agents, have them incrementally extend the output.
 
@@ -311,11 +387,7 @@ The extension will continue until the iteration limit has been reached or the st
 
 Each agent will pass their response on to the next agent and prompt them to extend it.
 
-#### Panel Loops
-
-[Panels](#panels) are another kind of loop.
-
-#### Refinement Loops
+##### Refinement Loop
 
 Using one or more agents, have them incrementally refine the output.
 
@@ -323,39 +395,34 @@ The refinement will continue until the iteration limit has been reached or the s
 
 Each agent will pass their response on to the next agent and prompt them to refine and correct it.
 
-### Panels
-
-A `Panel` is a weighted panel of agents. Each agent will be given the same user prompt, along with their own system
-prompt, or backstory. Their responses will be interpreted the same way. Agents with a greater weight will be asked more
-often than the others.
-
-#### Panel Methods
-
-Panels can use many methods to make their decision. Agents can respond with a yes/no answer or rank items on a scale.
-When multiple items are provided, they can be evaluated individually or as a single group (with a large enough
-context window).
-
-#### Panel Results
-
-Panels can make their decision using any of the available comparators. By default, they will compare their mean
-rating against a predefined threshold. If the consensus exceeds the threshold, the panel will give an affirmative
-answer. This can also be inverted using a counter or the not comparator.
-
 ### Results
 
-#### Binary Results
+#### Primitive Results
 
-Interpret the response as a boolean, yes or no.
+Result parsers are provided for Python primitives, including:
 
-#### Integer Results
+- `bool`
+- `int`
+- `str`
 
-Interpret the response as an integer.
+#### Enum Results
+
+Interpret the response as one of the values from an enumeration or list of strings.
+
+If more than one value is present, returns the first one by position in the response.
 
 #### Function Results
 
-Interpret the response as a function call using [LangChain's JSON schema](https://python.langchain.com/docs/modules/model_io/chat/function_calling#defining-functions-schemas)
-for function calls and invoke the function from a dictionary of callbacks.
+Interpret the response as a function call using [LangChain's JSON
+schema](https://python.langchain.com/docs/modules/model_io/chat/function_calling#defining-functions-schemas) for
+function calls and invoke the function from a dictionary of callbacks.
 
 #### JSON Results
 
-Interpret the response as JSON.
+Interpret the response as JSON. If the result is not valid JSON, attempt to fix it.
+
+#### Markdown Results
+
+Interpret the response as a Markdown document and extract certain blocks.
+
+By default, this extract code blocks with their language hint set to Python.
