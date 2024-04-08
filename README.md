@@ -455,10 +455,10 @@ PACkit is fully integrated with [Traceloop's OpenLLMetry SDK](https://github.com
 tracing.
 
 OTLP tracing is **off by default** and must be enabled by setting the `PACKIT_TRACER` environment variable to `traceloop`
-or by initializing the Traceloop SDK in your own code.
+or by initializing the Traceloop SDK in your own code _and_ calling `packit.tracing.set_tracer("traceloop")`.
 
-To export OTLP traces to a self-hosted Grafana Tempo server, set the `TODO` environment variable to the Tempo ingest
-URL:
+To export OTLP traces to a self-hosted Grafana Tempo server, set the `TRACELOOP_BASE_URL` environment variable to the
+Tempo ingest URL:
 
 ```shell
 PACKIT_TRACER=traceloop
