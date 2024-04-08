@@ -26,7 +26,7 @@ def condition_list_once(items: list[Any]) -> Callable[[int, int], bool]:
     return _condition_list_once
 
 
-def condition_length(max: int = DEFAULT_MAX, current: str = 0) -> bool:
+def condition_length(max: int = DEFAULT_MAX, current: str = "") -> bool:
     """
     Stop when the current prompt reaches a certain length.
     """

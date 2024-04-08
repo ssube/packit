@@ -21,10 +21,10 @@ def snake_case(name: str) -> str:
     return camel_to_snake(name).replace(" ", "_").lower()
 
 
-def init() -> bool:
+def init():
     if TracerWrapper.verify_initialized():
         logger.debug("traceloop SDK already initialized")
-        return True
+        return
 
     disable_batch = environ.get("TRACELOOP_DISABLE_BATCH", "false").lower() == "true"
     logger.debug(

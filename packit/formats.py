@@ -15,8 +15,8 @@ def format_bullet_list(items: list[str], bullet="-") -> str:
 
 
 def format_number_list(items: list[int], start=1) -> str:
-    items = [str(item).replace("\n", " ").replace("\r", "") for item in items]
-    return "\n".join(f"{start + i}. {item}" for i, item in enumerate(items))
+    str_items = [str(item).replace("\n", " ").replace("\r", "") for item in items]
+    return "\n".join(f"{start + i}. {item}" for i, item in enumerate(str_items))
 
 
 def join_list(items: list[str], separator=", ") -> str:

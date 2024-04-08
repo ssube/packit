@@ -5,14 +5,14 @@ def make_rule(
     subject: str | None = None,
     resource: str | None = None,
     action: str | None = None,
-    context: str | None = None,
+    context: dict[str, str] | None = None,
     state: RuleState = RuleState.ALLOW,
 ) -> GenericRule:
     """
     Create a rule for an agent to perform an action on a resource.
     """
 
-    criteria = {}
+    criteria: dict[str, str] = {}
 
     if context:
         criteria.update(context)

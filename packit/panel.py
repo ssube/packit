@@ -14,7 +14,7 @@ logger = getLogger(__name__)
 
 class Panel:
     agents: list[Agent]
-    name: str | None
+    name: str
     weights: list[int]
 
     def __init__(
@@ -23,19 +23,19 @@ class Panel:
         name: str | None = None,
         weights: int | list[int] = 1,
     ):
-        agents = make_list(agents)
-        weights = make_list(weights)
+        agent_list = make_list(agents)
+        weight_list = make_list(weights)
 
-        if len(agents) != len(weights):
+        if len(agent_list) != len(weight_list):
             # if only one weight is provided, apply it to all agents
-            if len(weights) == 1:
-                weights = [weights[0]] * len(agents)
+            if len(weight_list) == 1:
+                weight_list = [weight_list[0]] * len(agent_list)
             else:
                 raise ValueError("The number of agents and weights must match.")
 
-        self.agents = agents
+        self.agents = agent_list
         self.name = name or "_".join(agent.name for agent in self.agents)
-        self.weights = weights
+        self.weights = weight_list
 
     def sample(
         self,

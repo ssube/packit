@@ -1,7 +1,7 @@
 from typing import List
 
 
-def enum_result(value: str, enum: List[str] = [], **kwargs) -> str:
+def enum_result(value: str, enum: List[str] = [], **kwargs) -> str | None:
     return find_first(value.lower(), [enum_value.lower() for enum_value in enum])
 
 

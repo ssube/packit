@@ -11,7 +11,7 @@ logger = getLogger(__name__)
 
 
 def recursive_result(
-    result_parser: ResultParser | None = None,
+    result_parser: ResultParser,
     stop_condition: Callable = lambda *args, **kwargs: False,
 ):
     def inner(

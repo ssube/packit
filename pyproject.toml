@@ -21,5 +21,11 @@ module = [
     "mistletoe",
     "mistletoe.block_token",
     "mistletoe.span_token",
+    "py_abac",
+    "traceloop.sdk",
+    "traceloop.sdk.decorators",
+    "traceloop.sdk.tracing",
+    "traceloop.sdk.tracing.tracing",
+    "traceloop.sdk.utils",
 ]
 ignore_missing_imports = true

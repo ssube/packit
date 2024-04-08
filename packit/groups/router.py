@@ -37,7 +37,7 @@ def group_router(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> Agent:
+) -> str:
     """
     Route the prompt to the correct agent.
     """

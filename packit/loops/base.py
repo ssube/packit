@@ -32,7 +32,7 @@ class BaseLoop(Protocol):
         prompt: PromptType,
         context: AgentContext | None = None,
         abac_context: ABACAttributes | None = None,
-        agent_invoke: AgentInvoker = invoke_agent,
+        agent_invoker: AgentInvoker = invoke_agent,
         agent_selector: AgentSelector = select_loop,
         memory_factory: MemoryFactory | None = None,
         memory_maker: MemoryMaker | None = None,
