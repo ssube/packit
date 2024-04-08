@@ -437,10 +437,12 @@ By default, this extract code blocks with their language hint set to Python.
 
 ### Telemetry
 
-PACkit does not include any telemetry code of its own, but some of the libraries used in the examples use opt-out
-telemetry. Most of those libraries offer a way to disable telemetry with an environment variable, but that does not
-guarantee that data will not be collected. Be careful using libraries and make sure to monitor outgoing network traffic
-for any privacy-sensitive applications.
+PACkit does not include any telemetry code of its own and the default tracer uses the Python logging infrastructure
+to write messages to the console (or any other destination that you configure).
+
+However, some of the libraries used in the examples use opt-out telemetry. Most of those libraries offer a way to
+disable telemetry with an environment variable, but that does not guarantee that data will not be collected. Be careful
+using libraries and make sure to monitor outgoing network traffic for any privacy-sensitive applications.
 
 Documentation for libraries with their own telemetry:
 
@@ -452,7 +454,7 @@ Documentation for libraries with their own telemetry:
 PACkit is fully integrated with [Traceloop's OpenLLMetry SDK](https://github.com/traceloop/openllmetry) for OTLP
 tracing.
 
-Tracing is **off by default** and must be enabled by setting the `PACKIT_TRACER` environment variable to `traceloop`
+OTLP tracing is **off by default** and must be enabled by setting the `PACKIT_TRACER` environment variable to `traceloop`
 or by initializing the Traceloop SDK in your own code.
 
 To export OTLP traces to a self-hosted Grafana Tempo server, set the `TODO` environment variable to the Tempo ingest
