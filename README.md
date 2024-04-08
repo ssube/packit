@@ -57,8 +57,8 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
       - [JSON Results](#json-results)
       - [Markdown Results](#markdown-results)
   - [Tracing](#tracing)
-    - [Telemetry](#telemetry)
     - [Traceloop OpenLLMetry](#traceloop-openllmetry)
+    - [Telemetry](#telemetry)
 
 ## Quickstart
 
@@ -435,20 +435,6 @@ By default, this extract code blocks with their language hint set to Python.
 
 ## Tracing
 
-### Telemetry
-
-PACkit does not include any telemetry code of its own and the default tracer uses the Python logging infrastructure
-to write messages to the console (or any other destination that you configure).
-
-However, some of the libraries used in the examples use opt-out telemetry. Most of those libraries offer a way to
-disable telemetry with an environment variable, but that does not guarantee that data will not be collected. Be careful
-using libraries and make sure to monitor outgoing network traffic for any privacy-sensitive applications.
-
-Documentation for libraries with their own telemetry:
-
-- [Traceloop SDK telemetry](https://www.traceloop.com/docs/openllmetry/privacy/telemetry)
-- [vLLM usage stats](https://docs.vllm.ai/en/latest/serving/usage_stats.html)
-
 ### Traceloop OpenLLMetry
 
 PACkit is fully integrated with [Traceloop's OpenLLMetry SDK](https://github.com/traceloop/openllmetry) for OTLP
@@ -475,3 +461,17 @@ response. For groups and loops, this captures the agents being used, prompts, co
 the construct.
 
 ![spans from the food critics example in Grafana Temp showing a prompt about judging spaghetti carbonara](./docs/traces-prompt.png)
+
+### Telemetry
+
+PACkit does not include any telemetry code of its own and the default tracer uses the Python logging infrastructure
+to write messages to the console (or any other destination that you configure).
+
+However, some of the libraries used in the examples use opt-out telemetry. Most of those libraries offer a way to
+disable telemetry with an environment variable, but that does not guarantee that data will not be collected. Be careful
+using libraries and make sure to monitor outgoing network traffic for any privacy-sensitive applications.
+
+Documentation for libraries with their own telemetry:
+
+- [Traceloop SDK telemetry](https://www.traceloop.com/docs/openllmetry/privacy/telemetry)
+- [vLLM usage stats](https://docs.vllm.ai/en/latest/serving/usage_stats.html)
