@@ -42,7 +42,7 @@ def loop_team(
     prompt_filter: PromptFilter | None = None,
     prompt_template: PromptTemplate = get_random_prompt,
     result_parser: ResultParser | None = multi_function_or_str_result,
-    stop_condition: StopCondition | None = condition_threshold,
+    stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
@@ -53,10 +53,12 @@ def loop_team(
     context = context or {}
 
     if callable(memory_factory):
-        memory_factory = memory_factory()
+        memory = memory_factory()
+    else:
+        memory = None
 
     def get_memory():
-        return memory_factory
+        return memory
 
     # prep names and tools
     worker_names = [worker.name for worker in workers]

@@ -7,7 +7,7 @@ def make_team_tools(team: list[Agent]):
     names = [agent.name for agent in team]
 
     def delegate_tool(
-        coworker: str, task: str, context: dict[str, str] | None = None
+        coworker: str, task: str, context: dict[str, str | list[str]] | None = None
     ) -> str:
         """
         Delegate a task to a coworker.
@@ -36,7 +36,7 @@ def make_team_tools(team: list[Agent]):
         )
 
     def question_tool(
-        coworker: str, question: str, context: dict[str, str] | None = None
+        coworker: str, question: str, context: dict[str, str | list[str]] | None = None
     ) -> str:
         """
         Ask a question of a coworker.

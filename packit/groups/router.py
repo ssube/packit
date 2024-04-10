@@ -45,7 +45,12 @@ def group_router(
     enum = list(routes.keys())
 
     def route_parser(value: str, **kwargs) -> str:
-        return enum_result(value, enum=enum, **kwargs)
+        choice = enum_result(value, enum=enum, **kwargs)
+        if choice is None:
+            raise ValueError("Please select a valid route.")
+        if choice in routes:
+            return choice
+        raise ValueError("Invalid selection.")
 
     with trace("router", "packit.group") as (report_args, report_output):
         report_args(decider, prompt, context, enum=enum)

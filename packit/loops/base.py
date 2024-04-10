@@ -120,7 +120,7 @@ def loop_map(
                 if callable(loop_context.result_parser):
                     result = loop_context.result_parser(
                         result,
-                        abac={
+                        abac_context={
                             "subject": agent.name,
                         },
                         toolbox=loop_context.toolbox,
@@ -176,9 +176,9 @@ def loop_reduce(
             report_args(agents, prompt, context)
 
             if callable(loop_context.memory_factory):
-                memory_factory = loop_context.memory_factory()
+                memory = loop_context.memory_factory()
             else:
-                memory_factory = None
+                memory = None
 
             current_iteration = 0
             result = prompt
@@ -196,18 +196,18 @@ def loop_reduce(
                     agent,
                     result,
                     context=context,
-                    memory=memory_factory,
+                    memory=memory,
                     prompt_template=loop_context.prompt_template,
                     toolbox=loop_context.toolbox,
                 )
 
                 if callable(loop_context.memory_maker):
-                    loop_context.memory_maker(memory_factory, result)
+                    loop_context.memory_maker(memory, result)
 
                 if callable(loop_context.result_parser):
                     result = loop_context.result_parser(
                         result,
-                        abac={
+                        abac_context={
                             "subject": agent.name,
                         },
                         toolbox=loop_context.toolbox,

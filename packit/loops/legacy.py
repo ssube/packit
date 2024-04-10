@@ -2,9 +2,10 @@ from logging import getLogger
 from typing import Callable
 
 from packit.agent import Agent, AgentContext
-from packit.conditions import Condition, condition_threshold
+from packit.conditions import condition_threshold
 from packit.prompts import get_function_example, get_random_prompt
 from packit.results import ToolFilter, multi_function_or_str_result
+from packit.types import StopCondition
 
 logger = getLogger(__name__)
 
@@ -16,7 +17,7 @@ def loop_converse(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_threshold,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a list of agents and have them converse with each other.
@@ -45,7 +46,7 @@ def loop_extend(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_threshold,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a list of agents to extend a prompt.
@@ -74,7 +75,7 @@ def loop_refine(
     prompt: str,
     context: AgentContext | None = None,
     max_iterations: int = 10,
-    stop_condition: Condition = condition_threshold,
+    stop_condition: StopCondition = condition_threshold,
 ) -> str:
     """
     Loop through a list of agents to refine a prompt.
@@ -110,7 +111,7 @@ def loop_team(
     result_parser: Callable[
         [str, ToolDict, ToolFilter], list[str]
     ] = multi_function_or_str_result,
-    stop_condition: Condition = condition_threshold,
+    stop_condition: StopCondition = condition_threshold,
     tool_filter: Callable[[str], str] | None = None,
 ) -> str:
     """

@@ -42,7 +42,7 @@ def loop_prefix(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     """
     Run a map or reduce loop, adding a prefix to the prompt each iteration.
     """
@@ -89,7 +89,7 @@ def loop_suffix(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     """
     Run a map or reduce loop, adding a suffix to the prompt each iteration.
     """
@@ -137,7 +137,7 @@ def loop_midfix(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     """
     Run a map or reduce loop, adding a prefix and suffix to the prompt each iteration.
     """

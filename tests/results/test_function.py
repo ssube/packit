@@ -8,8 +8,9 @@ from packit.toolbox import Toolbox
 
 class TestFunctionResult(TestCase):
     def test_function_list(self):
+        toolbox = Toolbox([])
         with self.assertRaises(ValueError):
-            function_result(dumps(["test-1", "test-2", "test-3"]))
+            function_result(dumps(["test-1", "test-2", "test-3"]), toolbox=toolbox)
 
     def test_function_invalid(self):
         toolbox = Toolbox([])

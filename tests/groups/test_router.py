@@ -34,5 +34,5 @@ class TestGroupRouter(TestCase):
             "c": agent_c,
         }
 
-        with self.assertRaises(KeyError):
+        with self.assertRaises(ValueError):
             group_router(agent_a, "test", routes)

@@ -1,5 +1,6 @@
 from json import dumps
 from logging import getLogger
+from typing import Any
 
 from packit.abac import ABACAttributes
 from packit.errors import ToolError
@@ -13,15 +14,24 @@ from .primitive import str_result
 
 logger = getLogger(__name__)
 
+FunctionParamsDict = dict[str, Any]
+FunctionDict = dict[str, str | FunctionParamsDict]
+
 
 def function_result(
     value: str,
-    abac: ABACAttributes = {},
+    abac_context: ABACAttributes | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
+    # toolbox has to be optional to match the other parser signatures
+    if toolbox is None:
+        raise ValueError("Toolbox is required")
+
+    abac_context = abac_context or {}
+
     value = value.replace(
         "\\_", "_"
     )  # some models like to escape underscores in the function name
@@ -37,18 +47,18 @@ def function_result(
         raise ValueError("No function specified")
 
     function_name = data["function"]
-    if function_name not in toolbox.list_tools(abac):
+    if function_name not in toolbox.list_tools(abac_context):
         raise ToolError(f"Unknown tool {function_name}", None, value, function_name)
 
     logger.debug("Using tool: %s", data)
-    function_params = data.get("parameters", {})
+    function_params: FunctionParamsDict = data.get("parameters", {})
 
     if tool_filter is not None:
         filter_result = tool_filter(data)
         if filter_result is not None:
             return filter_result
 
-    tool = toolbox.get_tool(function_name, abac)
+    tool = toolbox.get_tool(function_name, abac_context)
     try:
         with trace(function_name, "packit.tool") as (report_args, report_output):
             report_args(**function_params)
@@ -62,7 +72,7 @@ def function_result(
     if callable(result_parser):
         return result_parser(
             tool_result,
-            abac=abac,
+            abac_context=abac_context,
             fix_filter=fix_filter,
             toolbox=toolbox,
             tool_filter=tool_filter,
@@ -73,7 +83,7 @@ def function_result(
 
 def multi_function_result(
     value: str,
-    abac: ABACAttributes = {},
+    abac_context: ABACAttributes | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
     toolbox: Toolbox | None = None,
@@ -99,7 +109,7 @@ def multi_function_result(
             results.append(
                 function_result(
                     call,
-                    abac=abac,
+                    abac_context=abac_context,
                     fix_filter=None,
                     result_parser=result_parser,
                     toolbox=toolbox,
@@ -115,16 +125,16 @@ def multi_function_result(
 
 def multi_function_or_str_result(
     value: str,
-    toolbox: Toolbox,
-    abac: ABACAttributes = {},
+    abac_context: ABACAttributes | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
+    toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str:
     if could_be_json(value):
         results = multi_function_result(
             value,
-            abac=abac,
+            abac_context=abac_context,
             fix_filter=fix_filter,
             result_parser=result_parser,
             toolbox=toolbox,
@@ -136,9 +146,11 @@ def multi_function_or_str_result(
 
 
 # region json utils
+
+
 def normalize_function_json(
-    data: dict[str, str] | list[str],
-) -> dict[str, str] | list[dict[str, str]]:
+    data: Any,
+) -> FunctionDict | list[FunctionDict]:
     if isinstance(data, list):
         return [normalize_function_json(item) for item in data]
 

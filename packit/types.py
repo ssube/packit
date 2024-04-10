@@ -1,13 +1,15 @@
 from enum import Enum
-from typing import Any, Callable, Protocol, TypeVar
+from typing import Any, Callable, Dict, List, Optional, Protocol, TypeVar
+
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
 # primitives and type vars
-MemoryType = str
+MemoryType = str | AIMessage | HumanMessage | SystemMessage
 PromptType = str
 SelectorType = TypeVar("SelectorType")
 
 # ABAC types
-ABACAttributes = dict[str, str]
+ABACAttributes = Dict[str, str]
 
 
 class RuleState(str, Enum):
@@ -21,6 +23,32 @@ class ABACAdapter(Protocol):
         pass  # pragma: no cover
 
 
+class AgentInvoker(Protocol):
+    def __call__(
+        self,
+        agent: Any,
+        prompt: PromptType,
+        context: "AgentContext",
+        memory: List[MemoryType] | None = None,
+        prompt_template: Optional["PromptTemplate"] = None,
+        toolbox: Any | None = None,
+    ) -> PromptType:
+        pass  # pragma: no cover
+
+
+class ResultParser(Protocol):
+    def __call__(
+        self,
+        value: PromptType,
+        abac_context: ABACAttributes | None = None,
+        fix_filter: Callable | None = None,
+        result_parser: Optional["ResultParser"] = None,
+        toolbox: Any | None = None,
+        tool_filter: Optional["ToolFilter"] = None,
+    ) -> Any:
+        pass
+
+
 class StopCondition(Protocol):
     # TODO: kwargs and prompts and all those other things
     def __call__(self, max: int, current: int) -> bool:
@@ -28,11 +56,10 @@ class StopCondition(Protocol):
 
 
 # Loop types
-AgentInvoker = Callable[[Any, str, dict], str]
+AgentContext = Dict[str, str | List[str]]
 AgentSelector = Callable[[list[SelectorType], int], SelectorType]
 MemoryFactory = Callable[[], list[MemoryType]]
 MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
 PromptTemplate = Callable[[str], PromptType]
 PromptFilter = Callable[[PromptType], PromptType | None]
-ResultParser = Callable[[PromptType, Any], Any]
 ToolFilter = Callable[[dict], dict | None]

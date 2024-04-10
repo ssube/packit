@@ -1,6 +1,6 @@
 from logging import getLogger
 from os import environ
-from typing import Any, Protocol
+from typing import Any, List, Protocol, Sequence
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
 
@@ -9,17 +9,19 @@ from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import DEFAULT_PROMPTS, PromptLibrary, get_random_prompt
 from packit.toolbox import Toolbox
 from packit.tracing import set_tracer, trace
-from packit.types import MemoryFactory, MemoryMaker, PromptTemplate
+from packit.types import (
+    AgentContext,
+    MemoryFactory,
+    MemoryMaker,
+    MemoryType,
+    PromptTemplate,
+)
 
 logger = getLogger(__name__)
 
 
-AgentContext = dict[str, str]
-AgentModelMessage = HumanMessage | SystemMessage
-
-
 class AgentModel(Protocol):
-    def invoke(self, prompts: list[AgentModelMessage], **kwargs):
+    def invoke(self, messages: Sequence[MemoryType], **kwargs):
         pass  # pragma: no cover
 
 
@@ -28,7 +30,7 @@ class Agent:
     context: AgentContext
     llm: AgentModel
     max_retry: int
-    memory: list[AgentModelMessage] | None
+    memory: list[MemoryType] | None
     memory_maker: MemoryMaker | None
     name: str
     toolbox: Toolbox | None
@@ -148,7 +150,7 @@ class Agent:
 
     def invoke_retry(
         self,
-        messages: list[AgentModelMessage],
+        messages: list[MemoryType],
         prompt_library: PromptLibrary = DEFAULT_PROMPTS,
     ):
         retry = 0
@@ -230,7 +232,7 @@ def invoke_agent(
     agent: Agent,
     prompt: str,
     context: AgentContext,
-    memory: list[str] | None = None,
+    memory: List[MemoryType] | None = None,
     prompt_template: PromptTemplate | None = None,
     toolbox: Toolbox | None = None,
 ) -> str:

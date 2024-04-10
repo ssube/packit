@@ -12,9 +12,3 @@ class TestEnumResult(TestCase):
 
     def test_first_value(self):
         self.assertEqual(enum_result("yes and no", enum=["yes", "no"]), "yes")
-
-
-if __name__ == "__main__":
-    from unittest import main
-
-    main()

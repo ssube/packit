@@ -21,7 +21,7 @@ def snake_case(name: str) -> str:
     return camel_to_snake(name).replace(" ", "_").lower()
 
 
-def init():
+def init(exporter=None):
     if TracerWrapper.verify_initialized():
         logger.debug("traceloop SDK already initialized")
         return
@@ -32,7 +32,7 @@ def init():
         "without" if disable_batch else "with",
     )
 
-    Traceloop.init(disable_batch=disable_batch)
+    Traceloop.init(disable_batch=disable_batch, exporter=exporter)
 
 
 @contextmanager
@@ -93,6 +93,6 @@ def dumper(value):
     from packit.agent import Agent
 
     if isinstance(value, Agent):
-        return f"agent.{value.name}"
+        return f"agent.{snake_case(value.name)}"
     elif isinstance(value, deque):
         return list(value)

@@ -1,5 +1,6 @@
 from logging import getLogger
 from random import randint
+from typing import Callable
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_or, condition_threshold
@@ -73,7 +74,14 @@ def loop_retry(
             report_args(agent, prompt, context)
             closure_tag = randint(0, 1000000)
 
-            def parse_or_error(value, **kwargs) -> str:
+            def parse_or_error(
+                value: PromptType,
+                abac_context: ABACAttributes | None = None,
+                fix_filter: Callable | None = None,
+                result_parser: ResultParser | None = None,
+                toolbox: Toolbox | None = None,
+                tool_filter: ToolFilter | None = None,
+            ) -> str:
                 nonlocal last_error
                 nonlocal success
 
@@ -81,7 +89,14 @@ def loop_retry(
 
                 try:
                     if callable(loop_context.result_parser):
-                        parsed = loop_context.result_parser(value, **kwargs)
+                        parsed = loop_context.result_parser(
+                            value,
+                            abac_context=abac_context,
+                            fix_filter=fix_filter,
+                            result_parser=result_parser,
+                            toolbox=toolbox,
+                            tool_filter=tool_filter,
+                        )
                     else:
                         parsed = value
 
@@ -120,7 +135,10 @@ def loop_retry(
                 report_output(result)
                 return result
 
-            raise last_error
+            if last_error:
+                raise last_error
+
+            raise Exception("No error was raised, but the result could not be parsed.")
 
 
 def loop_tool(
@@ -133,7 +151,7 @@ def loop_tool(
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
-    result_parser: ResultParser | None = multi_function_or_str_result,
+    result_parser: ResultParser = multi_function_or_str_result,
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
@@ -147,16 +165,27 @@ def loop_tool(
     with trace("tool", "packit.loop") as (report_args, report_output):
         report_args(agent, prompt, context)
 
+        outer_result_parser = result_parser
         outer_toolbox = toolbox
 
         def result_parser_with_tools(
-            value: str, abac=None, toolbox=None, tool_filter=None
+            value: str,
+            abac_context=None,
+            fix_filter=None,
+            result_parser=None,
+            toolbox=None,
+            tool_filter=None,
         ) -> str:
-            if callable(result_parser):
-                return result_parser(
+            inner_result_parser = result_parser or outer_result_parser
+            inner_toolbox = toolbox or outer_toolbox
+
+            if callable(inner_result_parser):
+                return inner_result_parser(
                     value,
-                    abac=abac,
-                    toolbox=toolbox or outer_toolbox,
+                    abac_context=abac_context,
+                    fix_filter=fix_filter,
+                    result_parser=inner_result_parser,
+                    toolbox=inner_toolbox,
                     tool_filter=tool_filter,
                 )
 

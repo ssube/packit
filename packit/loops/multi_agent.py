@@ -40,7 +40,7 @@ def loop_converse(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     with trace("converse", "packit.loop") as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(
@@ -79,7 +79,7 @@ def loop_extend(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     with trace("extend", "packit.loop") as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(
@@ -118,7 +118,7 @@ def loop_refine(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> str | list[str]:
     with trace("refine", "packit.loop") as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(

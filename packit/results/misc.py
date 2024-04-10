@@ -14,10 +14,13 @@ def recursive_result(
     result_parser: ResultParser,
     stop_condition: Callable = lambda *args, **kwargs: False,
 ):
+    outer_result_parser = result_parser
+
     def inner(
         value: str,
-        abac: ABACAttributes = {},
+        abac_context: ABACAttributes = {},
         fix_filter=json_fixups,
+        result_parser: ResultParser | None = None,
         toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
     ) -> str:
@@ -28,11 +31,11 @@ def recursive_result(
         result = value
 
         while not stop_condition(result):
-            result = result_parser(
+            result = outer_result_parser(
                 result,
-                abac=abac,
+                abac_context=abac_context,
                 fix_filter=fix_filter,
-                result_parser=result_parser,
+                result_parser=outer_result_parser,
                 toolbox=toolbox,
                 tool_filter=tool_filter,
             )

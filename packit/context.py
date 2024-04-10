@@ -4,6 +4,7 @@ from random import randint
 from threading import local
 
 from packit.agent import invoke_agent
+from packit.conditions import condition_threshold
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
 from packit.types import (
@@ -29,14 +30,14 @@ thread_context = local()
 class LoopContext:
     # context
     abac_context: ABACAttributes | None
-    agent_invoker: AgentInvoker | None
-    agent_selector: AgentSelector | None
+    agent_invoker: AgentInvoker
+    agent_selector: AgentSelector
     memory_factory: MemoryFactory | None
     memory_maker: MemoryMaker | None
     prompt_filter: PromptFilter | None
     prompt_template: PromptTemplate | None
     result_parser: ResultParser | None
-    stop_condition: StopCondition | None
+    stop_condition: StopCondition
     toolbox: Toolbox | None
     tool_filter: ToolFilter | None
 
@@ -54,7 +55,7 @@ class LoopContext:
         prompt_filter: PromptFilter | None = None,
         prompt_template: PromptTemplate | None = None,
         result_parser: ResultParser | None = None,
-        stop_condition: StopCondition | None = None,
+        stop_condition: StopCondition = condition_threshold,
         toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
         context_depth: int = 0,
@@ -95,8 +96,8 @@ def get_loop_context() -> LoopContext | None:
 def inherit_loop_context(
     parent_context: LoopContext | None = None,
     abac_context: ABACAttributes | None = None,
-    agent_invoker: AgentInvoker = invoke_agent,
-    agent_selector: AgentSelector = select_loop,
+    agent_invoker: AgentInvoker | None = None,
+    agent_selector: AgentSelector | None = None,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,
@@ -122,6 +123,13 @@ def inherit_loop_context(
             context_depth=parent_context.depth + 1,
         )
     else:
+        if agent_invoker is None:
+            raise ValueError("agent_invoker is required")
+        if agent_selector is None:
+            raise ValueError("agent_selector is required")
+        if stop_condition is None:
+            raise ValueError("stop_condition is required")
+
         return LoopContext(
             abac_context=abac_context,
             agent_invoker=agent_invoker,
@@ -139,8 +147,8 @@ def inherit_loop_context(
 
 def push_loop_context(
     abac_context: ABACAttributes | None = None,
-    agent_invoker: AgentInvoker = invoke_agent,
-    agent_selector: AgentSelector = select_loop,
+    agent_invoker: AgentInvoker | None = None,
+    agent_selector: AgentSelector | None = None,
     memory_factory: MemoryFactory | None = None,
     memory_maker: MemoryMaker | None = None,
     prompt_filter: PromptFilter | None = None,

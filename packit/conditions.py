@@ -1,7 +1,7 @@
 from time import monotonic
 from typing import Any, Callable
 
-Condition = Callable[[int, int], bool]
+from packit.types import StopCondition
 
 DEFAULT_MAX = 10
 
@@ -63,7 +63,7 @@ def condition_threshold_mean(max: float = DEFAULT_MAX, *currents: int) -> bool:
     return sum(currents) / len(currents) > max
 
 
-def condition_and(*conditions: Condition) -> Condition:
+def condition_and(*conditions: StopCondition) -> StopCondition:
     """
     Stop when all conditions are met.
     """
@@ -74,7 +74,7 @@ def condition_and(*conditions: Condition) -> Condition:
     return _condition_and
 
 
-def condition_or(*conditions: Condition) -> Condition:
+def condition_or(*conditions: StopCondition) -> StopCondition:
     """
     Stop when any condition is met.
     """
@@ -85,7 +85,7 @@ def condition_or(*conditions: Condition) -> Condition:
     return _condition_or
 
 
-def condition_not(condition: Condition) -> Condition:
+def condition_not(condition: StopCondition) -> StopCondition:
     """
     Stop when the condition is not met.
     """

@@ -1,4 +1,4 @@
-from packit.agent import AgentModelMessage
+from packit.types import MemoryType
 
 DEFAULT_STOP = {"done": True, "finish_reason": "stop"}
 
@@ -14,7 +14,7 @@ class MockResponse:
 
 class MockLLM:
     index: int
-    messages: list[AgentModelMessage]
+    messages: list[MemoryType]
     replies: list[str]
 
     def __init__(self, replies: list[str], start_index=0):
@@ -22,7 +22,7 @@ class MockLLM:
         self.messages = []
         self.replies = replies
 
-    def invoke(self, messages: list[AgentModelMessage]) -> str:
+    def invoke(self, messages: list[MemoryType]) -> str:
         self.messages.extend(messages)
         reply = self.replies[self.index]
 
