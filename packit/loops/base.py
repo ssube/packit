@@ -124,6 +124,7 @@ def loop_map(
                         abac_context={
                             "subject": agent.name,
                         },
+                        agent=agent,
                         toolbox=loop_context.toolbox,
                         tool_filter=loop_context.tool_filter,
                     )
@@ -212,6 +213,7 @@ def loop_reduce(
                         abac_context={
                             "subject": agent.name,
                         },
+                        agent=agent,
                         toolbox=loop_context.toolbox,
                         tool_filter=loop_context.tool_filter,
                     )

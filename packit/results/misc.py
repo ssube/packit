@@ -2,6 +2,7 @@ from logging import getLogger
 from typing import Callable
 
 from packit.abac import ABACAttributes
+from packit.agent import Agent
 from packit.toolbox import Toolbox
 from packit.types import ResultParser, ToolFilter
 
@@ -19,6 +20,7 @@ def recursive_result(
     def inner(
         value: str,
         abac_context: ABACAttributes = {},
+        agent: Agent | None = None,
         fix_filter=json_fixups,
         result_parser: ResultParser | None = None,
         toolbox: Toolbox | None = None,
@@ -34,6 +36,7 @@ def recursive_result(
             result = outer_result_parser(
                 result,
                 abac_context=abac_context,
+                agent=agent,
                 fix_filter=fix_filter,
                 result_parser=outer_result_parser,
                 toolbox=toolbox,

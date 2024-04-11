@@ -22,14 +22,17 @@ FunctionDict = dict[str, str | FunctionParamsDict]
 def function_result(
     value: str,
     abac_context: ABACAttributes | None = None,
-    calling_agent: Agent | None = None,
+    agent: Agent | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
     **kwargs,
 ) -> str:
-    # toolbox has to be optional to match the other parser signatures
+    # agent and toolbox have to be optional to match the other parser signatures
+    if agent is None:
+        raise ValueError("Agent is required")
+
     if toolbox is None:
         raise ValueError("Toolbox is required")
 
@@ -59,9 +62,7 @@ def function_result(
         raise ValueError("Function name must be a string")
 
     if function_name not in toolbox.list_tools(abac_context):
-        raise ToolError(
-            f"Unknown tool {function_name}", calling_agent, value, function_name
-        )
+        raise ToolError(f"Unknown tool {function_name}", agent, value, function_name)
 
     logger.debug("Using tool: %s", normalized_data)
     function_params = normalized_data.get("parameters", {})
@@ -75,7 +76,7 @@ def function_result(
     except Exception as e:
         raise ToolError(
             f"Error running tool {function_name}: {e}",
-            calling_agent,
+            agent,
             value,
             function_name,
         )
@@ -84,6 +85,7 @@ def function_result(
         tool_result = result_parser(
             tool_result,
             abac_context=abac_context,
+            agent=agent,
             fix_filter=fix_filter,
             toolbox=toolbox,
             tool_filter=tool_filter,
