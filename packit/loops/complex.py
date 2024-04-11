@@ -18,6 +18,7 @@ from packit.types import (
     MemoryMaker,
     PromptFilter,
     PromptTemplate,
+    PromptType,
     ResultParser,
     StopCondition,
     ToolFilter,
@@ -32,8 +33,8 @@ logger = getLogger(__name__)
 def loop_team(
     manager: Agent,
     workers: list[Agent],
-    prompt: str,
-    loop_prompt: str,
+    prompt: PromptType,
+    loop_prompt: PromptType,
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
@@ -46,7 +47,7 @@ def loop_team(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> PromptType:
     """
     Loop through a team of agents, with a manager and workers, to refine a prompt.
     """

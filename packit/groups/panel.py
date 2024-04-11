@@ -1,27 +1,30 @@
 from logging import getLogger
-from typing import Any
+from typing import Any, Dict, List
 
 from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
 from packit.loops import loop_retry
 from packit.results import bool_result
 from packit.tracing import trace
-from packit.types import ResultParser
+from packit.types import PromptType, ResultParser
 from packit.utils import make_list
 
 logger = getLogger(__name__)
 
 
+PanelResult = Dict[str, PromptType]
+
+
 class Panel:
-    agents: list[Agent]
+    agents: List[Agent]
     name: str
-    weights: list[int]
+    weights: List[int]
 
     def __init__(
         self,
-        agents: Agent | list[Agent],
+        agents: Agent | List[Agent],
         name: str | None = None,
-        weights: int | list[int] = 1,
+        weights: int | List[int] = 1,
     ):
         agent_list = make_list(agents)
         weight_list = make_list(weights)
@@ -39,10 +42,10 @@ class Panel:
 
     def sample(
         self,
-        prompt: str,
+        prompt: PromptType,
         context: AgentContext,
         result_parser: ResultParser = bool_result,
-    ) -> dict[str, str]:
+    ) -> PanelResult:
         results = {}
 
         with trace(self.name, "packit.panel") as (report_args, report_output):
@@ -64,12 +67,12 @@ class Panel:
 
     def invoke(
         self,
-        prompt: str,
+        prompt: PromptType,
         context: AgentContext,
         result_parser=bool_result,
         decision_condition=condition_threshold_mean,
         min_threshold: float = 0.5,
-    ) -> tuple[bool, dict[str, str]]:
+    ) -> tuple[bool, PanelResult]:
         results = self.sample(prompt, context, result_parser=result_parser)
         values = list(results.values())
 

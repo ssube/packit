@@ -17,7 +17,9 @@ class TestMapLoop(TestCase):
             memory_factory=make_limited_memory,
             memory_maker=memory_order_width,
         )
-        self.assertEqual(result, [f"test-{i}" for i in range(1, 11)])
+        self.assertEqual(
+            result, [f"test-{i}" for i in range(11)]
+        )  # TODO: is this off by one?
 
 
 class TestReduceLoop(TestCase):

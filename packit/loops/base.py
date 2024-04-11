@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Protocol
+from typing import List, Protocol
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_threshold
@@ -43,7 +43,7 @@ class BaseLoop(Protocol):
         toolbox: Toolbox | None = None,
         tool_filter: ToolFilter | None = None,
         save_context: bool = True,
-    ) -> str | list[str]:
+    ) -> PromptType:
         pass  # pragma: no cover
 
 
@@ -63,7 +63,7 @@ def loop_map(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
     save_context: bool = True,
-) -> list[str]:
+) -> List[PromptType]:
     """
     Loop through a list of agents, passing the same prompt to each agent.
     """
@@ -94,6 +94,7 @@ def loop_map(
                 memory = None
 
             current_iteration = 0
+            results = []
 
             while not loop_context.stop_condition(current=current_iteration):
                 agent = loop_context.agent_selector(agents, current_iteration)
@@ -127,11 +128,12 @@ def loop_map(
                         tool_filter=loop_context.tool_filter,
                     )
 
+                results.append(result)
+
                 current_iteration += 1
 
-            result = list(memory) or []
-            report_output(result)
-            return result
+            report_output(results)
+            return results
 
 
 def loop_reduce(
@@ -150,7 +152,7 @@ def loop_reduce(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
     save_context: bool = True,
-) -> str:
+) -> PromptType:
     """
     Loop through a list of agents, passing the result of each agent on to the next.
     """

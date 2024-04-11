@@ -69,3 +69,18 @@ def head_list(value):
         return value[0]
 
     return value
+
+
+def flatten(value):
+    """
+    Recursively flatten a list of nested lists.
+    """
+
+    if not isinstance(value, list):
+        return [value]
+
+    result = []
+    for item in value:
+        result.extend(flatten(item))
+
+    return result

@@ -40,11 +40,12 @@ class ResultParser(Protocol):
     def __call__(
         self,
         value: PromptType,
-        abac_context: ABACAttributes | None = None,
-        fix_filter: Callable | None = None,
-        result_parser: Optional["ResultParser"] = None,
-        toolbox: Any | None = None,
-        tool_filter: Optional["ToolFilter"] = None,
+        # abac_context: ABACAttributes | None = None,
+        # fix_filter: Callable | None = None,
+        # result_parser: Optional["ResultParser"] = None,
+        # toolbox: Any | None = None,
+        # tool_filter: Optional["ToolFilter"] = None,
+        **kwargs,
     ) -> Any:
         pass
 
@@ -62,4 +63,4 @@ MemoryFactory = Callable[[], list[MemoryType]]
 MemoryMaker = Callable[[list[MemoryType], MemoryType], None]
 PromptTemplate = Callable[[str], PromptType]
 PromptFilter = Callable[[PromptType], PromptType | None]
-ToolFilter = Callable[[dict], dict | None]
+ToolFilter = Callable[[dict], dict | str | None]

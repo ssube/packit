@@ -37,15 +37,22 @@ def group_router(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> PromptType:
     """
     Route the prompt to the correct agent.
     """
 
     enum = list(routes.keys())
 
-    def route_parser(value: str, **kwargs) -> str:
-        choice = enum_result(value, enum=enum, **kwargs)
+    def route_parser(
+        value: str,
+        **kwargs,
+    ) -> str:
+        choice = enum_result(
+            value,
+            enum=enum,
+            **kwargs,
+        )
         if choice is None:
             raise ValueError("Please select a valid route.")
         if choice in routes:

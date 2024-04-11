@@ -1,6 +1,5 @@
 from logging import getLogger
 from random import randint
-from typing import Callable
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_or, condition_threshold
@@ -46,7 +45,7 @@ def loop_retry(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
     memory: list[str] | None = None,  # TODO: remove
-) -> str:
+) -> PromptType:
     """
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt
     will be repeated with the error message.
@@ -76,11 +75,7 @@ def loop_retry(
 
             def parse_or_error(
                 value: PromptType,
-                abac_context: ABACAttributes | None = None,
-                fix_filter: Callable | None = None,
-                result_parser: ResultParser | None = None,
-                toolbox: Toolbox | None = None,
-                tool_filter: ToolFilter | None = None,
+                **kwargs,
             ) -> str:
                 nonlocal last_error
                 nonlocal success
@@ -91,11 +86,7 @@ def loop_retry(
                     if callable(loop_context.result_parser):
                         parsed = loop_context.result_parser(
                             value,
-                            abac_context=abac_context,
-                            fix_filter=fix_filter,
-                            result_parser=result_parser,
-                            toolbox=toolbox,
-                            tool_filter=tool_filter,
+                            **kwargs,
                         )
                     else:
                         parsed = value
@@ -155,7 +146,7 @@ def loop_tool(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-) -> str:
+) -> PromptType:
     """
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
     """
@@ -170,11 +161,9 @@ def loop_tool(
 
         def result_parser_with_tools(
             value: str,
-            abac_context=None,
-            fix_filter=None,
             result_parser=None,
             toolbox=None,
-            tool_filter=None,
+            **kwargs,
         ) -> str:
             inner_result_parser = result_parser or outer_result_parser
             inner_toolbox = toolbox or outer_toolbox
@@ -182,11 +171,9 @@ def loop_tool(
             if callable(inner_result_parser):
                 return inner_result_parser(
                     value,
-                    abac_context=abac_context,
-                    fix_filter=fix_filter,
                     result_parser=inner_result_parser,
                     toolbox=inner_toolbox,
-                    tool_filter=tool_filter,
+                    **kwargs,
                 )
 
             return value

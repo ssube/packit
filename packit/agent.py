@@ -2,7 +2,8 @@ from logging import getLogger
 from os import environ
 from typing import Any, List, Protocol, Sequence
 
-from langchain_core.messages import AIMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.prompt_values import PromptValue
 
 from packit.formats import format_str_or_json
 from packit.memory import make_limited_memory, memory_order_width
@@ -15,13 +16,21 @@ from packit.types import (
     MemoryMaker,
     MemoryType,
     PromptTemplate,
+    PromptType,
 )
 
 logger = getLogger(__name__)
 
 
 class AgentModel(Protocol):
-    def invoke(self, messages: Sequence[MemoryType], **kwargs):
+    def invoke(
+        self,
+        input: PromptValue | PromptType | Sequence[BaseMessage | tuple | str | dict],
+        config: Any | None = None,
+        *,
+        stop: List[str] | None = None,
+        **kwargs,
+    ) -> Any:
         pass  # pragma: no cover
 
 
@@ -30,7 +39,7 @@ class Agent:
     context: AgentContext
     llm: AgentModel
     max_retry: int
-    memory: list[MemoryType] | None
+    memory: List[MemoryType] | None
     memory_maker: MemoryMaker | None
     name: str
     toolbox: Toolbox | None
