@@ -4,7 +4,8 @@ Ask a panel of food critics to rate a list of entreés.
 
 from packit.agent import Agent, agent_easy_connect
 from packit.formats import format_bullet_list
-from packit.panel import Panel
+from packit.groups import Panel
+from packit.tracing import trace
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -47,10 +48,15 @@ panel = Panel(critics, name="food_critics", weights=critic_weights)
 
 # Rate each of the entreés
 for entree in entrees:
-    decision, reasons = panel(
-        "Do you think {entree} is a good dish? Reply with a one word answer, yes or no.",
-        entree=entree,
-    )
-    logger.info(
-        f"The critics decided that {entree} is {decisions[decision]} because:\n{format_bullet_list(reasons.values())}"
-    )
+    with trace("task", "packit.example") as (report_args, report_output):
+        report_args(entree)
+
+        decision, reasons = panel(
+            "Do you think {entree} is a good dish? Reply with a one word answer, yes or no.",
+            entree=entree,
+        )
+
+        report_output(decision)
+        logger.info(
+            f"The critics decided that {entree} is {decisions[decision]} because:\n{format_bullet_list(reasons.values())}"
+        )

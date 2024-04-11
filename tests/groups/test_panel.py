@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from packit.agent import Agent
-from packit.panel import Panel
+from packit.groups import Panel
 from tests.mocks import MockLLM
 
 

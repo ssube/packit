@@ -4,7 +4,7 @@ from packit.filters import *  # noqa
 from packit.formats import *  # noqa
 from packit.loops import *  # noqa
 from packit.memory import *  # noqa
-from packit.panel import *  # noqa
+from packit.groups.panel import *  # noqa
 from packit.prompts import *  # noqa
 from packit.results import *  # noqa
 from packit.tools import *  # noqa

@@ -23,3 +23,16 @@ class TestFunctionResult(TestCase):
         toolbox = Toolbox([])
         with self.assertRaises(ValueError):
             function_result(dumps({"parameters": {}}), toolbox=toolbox)
+
+    def test_missing_toolbox(self):
+        with self.assertRaises(ValueError):
+            function_result(dumps({"function": "test", "parameters": {}}))
+
+    def test_tool_filter(self):
+        toolbox = Toolbox([])
+        result = function_result(
+            dumps({"function": "test", "parameters": {}}),
+            toolbox=toolbox,
+            tool_filter=lambda x: "nope",
+        )
+        self.assertEqual(result, "nope")

@@ -9,6 +9,7 @@ from packit.prompts import get_random_prompt
 from packit.results import multi_function_or_str_result
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
+from packit.tracing import trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -60,44 +61,56 @@ def loop_team(
     def get_memory():
         return memory
 
-    # prep names and tools
-    worker_names = [worker.name for worker in workers]
+    with trace("team", "packit.loop") as (report_args, report_output):
+        report_args(
+            manager=manager,
+            workers=workers,
+            prompt=prompt,
+            loop_prompt=loop_prompt,
+            context=context,
+        )
 
-    loop_context = {
-        "coworkers": worker_names,
-        **context,
-    }
+        # prep names and tools
+        worker_names = [worker.name for worker in workers]
 
-    result = loop_retry(
-        manager,
-        prompt + get_random_prompt("coworker"),
-        context=loop_context,
-        abac_context=abac_context,
-        agent_invoker=agent_invoker,
-        agent_selector=agent_selector,
-        memory_factory=get_memory,
-        memory_maker=memory_maker,
-        prompt_filter=prompt_filter,
-        prompt_template=prompt_template,
-        result_parser=result_parser,
-        stop_condition=stop_condition,
-        toolbox=toolbox,
-        tool_filter=tool_filter,
-    )
+        loop_context = {
+            "coworkers": worker_names,
+            **context,
+        }
 
-    return loop_reduce(
-        [manager],
-        result + loop_prompt + get_random_prompt("coworker"),
-        context=loop_context,
-        abac_context=abac_context,
-        agent_invoker=loop_retry,
-        agent_selector=agent_selector,
-        memory_factory=get_memory,
-        memory_maker=memory_maker,
-        prompt_filter=prompt_filter,
-        prompt_template=prompt_template,
-        result_parser=result_parser,
-        stop_condition=stop_condition,
-        toolbox=toolbox,
-        tool_filter=tool_filter,
-    )
+        result = loop_retry(
+            manager,
+            prompt + get_random_prompt("coworker"),
+            context=loop_context,
+            abac_context=abac_context,
+            agent_invoker=agent_invoker,
+            agent_selector=agent_selector,
+            memory_factory=get_memory,
+            memory_maker=memory_maker,
+            prompt_filter=prompt_filter,
+            prompt_template=prompt_template,
+            result_parser=result_parser,
+            stop_condition=stop_condition,
+            toolbox=toolbox,
+            tool_filter=tool_filter,
+        )
+
+        result = loop_reduce(
+            [manager],
+            result + loop_prompt + get_random_prompt("coworker"),
+            context=loop_context,
+            abac_context=abac_context,
+            agent_invoker=loop_retry,
+            agent_selector=agent_selector,
+            memory_factory=get_memory,
+            memory_maker=memory_maker,
+            prompt_filter=prompt_filter,
+            prompt_template=prompt_template,
+            result_parser=result_parser,
+            stop_condition=stop_condition,
+            toolbox=toolbox,
+            tool_filter=tool_filter,
+        )
+
+        report_output(result)
+        return result

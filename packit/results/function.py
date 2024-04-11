@@ -43,6 +43,11 @@ def function_result(
         # TODO: should this be allowed without going through one of the multi-function wrappers?
         raise ValueError("Cannot run multiple functions at once")
 
+    if tool_filter is not None:
+        filter_result = tool_filter(data)
+        if filter_result is not None:
+            return filter_result
+
     if "function" not in data:
         raise ValueError("No function specified")
 
@@ -52,11 +57,6 @@ def function_result(
 
     logger.debug("Using tool: %s", data)
     function_params: FunctionParamsDict = data.get("parameters", {})
-
-    if tool_filter is not None:
-        filter_result = tool_filter(data)
-        if filter_result is not None:
-            return filter_result
 
     tool = toolbox.get_tool(function_name, abac_context)
     try:
@@ -70,7 +70,7 @@ def function_result(
         )
 
     if callable(result_parser):
-        return result_parser(
+        tool_result = result_parser(
             tool_result,
             abac_context=abac_context,
             fix_filter=fix_filter,
