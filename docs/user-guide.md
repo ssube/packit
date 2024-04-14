@@ -2,7 +2,7 @@
 
 ## 🚧 Under Construction 🚧
 
-This user guide has created using generative AI and is still under construction. The documentation has been generated
+This user guide was created using generative AI and is still under construction. The documentation has been generated
 from the diagrams and function signatures. Text and examples may not be fully accurate and are still being edited for
 correctness. Please refer to the [examples directory](../examples/) for complete, working examples.
 
