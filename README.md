@@ -50,6 +50,8 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
         - [Conversation Loop](#conversation-loop)
         - [Extension Loop](#extension-loop)
         - [Refinement Loop](#refinement-loop)
+      - [Complex Loops](#complex-loops)
+        - [Team Loop](#team-loop)
     - [Results](#results)
       - [Primitive Results](#primitive-results)
       - [Enum Results](#enum-results)
@@ -318,6 +320,20 @@ The `Panel` is a weighted group of agents. Each agent will be given the same use
 prompt, or backstory. Their responses will be interpreted the same way. Agents with a greater weight will be asked more
 often than the others.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Agent1: Prompt
+    Start --> Agent2: Prompt
+    Start --> Agent3: Prompt
+    Agent1 --> ResultParser: Response
+    Agent2 --> ResultParser: Response
+    Agent3 --> ResultParser: Response
+    ResultParser --> Decision: Parse Response into Result
+    Decision --> End
+    End --> [*]
+```
+
 ##### Panel Methods
 
 Panels can use many methods to make their decision. Agents can respond with a yes/no answer or rank items on a scale.
@@ -335,6 +351,20 @@ answer. This can also be inverted using a counter or the not comparator.
 The `Router` group uses a `decider` agent to select one or more `expert` agents. Each `expert` is presented with the
 same prompt, and their results can be used directly or summarized by the `decider`.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Manager: Prompt
+    Manager --> ExpertRouting: Expert Routing
+    ExpertRouting --> Expert1: Prompt
+    ExpertRouting --> Expert2: Prompt
+    Expert1 --> Manager: Response 2a
+    Expert2 --> Manager: Response 2b
+    Manager --> Manager: Prompt 3ab
+    Manager --> End: Response 3
+    End --> [*]
+```
+
 ### Loops
 
 #### Base Loops
@@ -343,9 +373,34 @@ same prompt, and their results can be used directly or summarized by the `decide
 
 Presents the same prompt to each agent and collects their responses in a `dict` or `list`.
 
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Agent1: Prompt
+    Start --> Agent2: Prompt
+    Start --> Agent3: Prompt
+    Start --> Agent4: Prompt
+    Agent1 --> Responses: Response 1
+    Agent2 --> Responses: Response 2
+    Agent3 --> Responses: Response 3
+    Agent4 --> Responses: Response 4
+    Responses --> [*]: End
+```
+
 ##### Reduce
 
 Chains a series of agents, passing the response from the last one as the prompt for the next.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Agent1: Prompt
+    Agent1 --> Agent2: Response as Prompt
+    Agent2 --> Agent3: Response as Prompt
+    Agent3 --> Agent4: Response as Prompt
+    Agent4 --> End: Response
+    End --> [*]
+```
 
 #### Builder Loops
 
@@ -368,6 +423,21 @@ before each iteration.
 
 Present the agent with a prompt. If the result cannot be parsed, present the error to the agent. Retry until the
 result is parsed successfully or the stop condition is met.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Agent1: Prompt
+    Agent1 --> ResultParser: Response
+    ResultParser --> Agent1: Prompt + Error
+    Agent1 --> Agent2: Prompt + Error
+    Agent2 --> ResultParser: Response
+    ResultParser --> Agent2: Prompt + Error
+    Agent2 --> Agent3: Prompt + Error
+    Agent3 --> ResultParser: Response
+    ResultParser --> End: Success
+    End --> [*]
+```
 
 ##### Tool Loop
 
@@ -400,6 +470,26 @@ Using one or more agents, have them incrementally refine the output.
 The refinement will continue until the iteration limit has been reached or the stop condition becomes true.
 
 Each agent will pass their response on to the next agent and prompt them to refine and correct it.
+
+#### Complex Loops
+
+##### Team Loop
+
+Using a manager and one or more agents, delegate subtasks or ask questions to complete the task given in the prompt.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Start
+    Start --> Manager: Prompt
+    Manager --> Agent1: Delegate / Question
+    Agent1 --> Manager: Response
+    Manager --> Agent2: Task Prompt
+    Agent2 --> Manager: Response
+    Manager --> Agent3: Delegate / Question
+    Agent3 --> Manager: Response
+    Manager --> End: Complete
+    End --> [*]
+```
 
 ### Results
 
