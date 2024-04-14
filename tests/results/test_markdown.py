@@ -46,9 +46,3 @@ This is a text block."""
                 "This is a text block.",
             ],
         )
-
-
-if __name__ == "__main__":
-    from unittest import main
-
-    main()
