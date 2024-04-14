@@ -1,7 +1,7 @@
 from packit.abac import *  # noqa
 from packit.agent import *  # noqa
 from packit.conditions import *  # noqa
-from packit.context import * # noqa
+from packit.context import *  # noqa
 from packit.errors import *  # noqa
 from packit.filters import *  # noqa
 from packit.formats import *  # noqa

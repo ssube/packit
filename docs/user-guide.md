@@ -97,21 +97,118 @@ TODO
 ## Groups Constructs
 
 Groups in PACkit are designed to handle interactions involving multiple agents, allowing for sophisticated
-decision-making structures. The Panel and Router are two types of groups that you can utilize:
+decision-making structures. The `Panel` and `Router` are two types of groups that you can utilize.
 
 ### Panel
 
-This construct helps you form a weighted ensemble of agents. By combining responses from multiple agents, the Panel can
-make comprehensive decisions based on the aggregated insights.
+The `Panel` construct in PACkit is designed to form a weighted ensemble of agents. This construct is particularly useful
+when decisions need to be based on integrated insights from multiple agents, each contributing to the final outcome with
+a specified weight. This approach allows for robust decision-making that harnesses the strengths of various agents to
+come to a consensus or aggregate responses.
 
 ![panel diagram](./packit-panel.png)
 
+```python
+from packit import Agent, Panel
+
+# Example LLMs for demonstration
+llm1 = "Langchain Model for Finance"  # Placeholder for a real model
+llm2 = "Langchain Model for Economics"  # Placeholder for a real model
+
+# Define agents with specific expertise
+finance_agent = Agent(
+    name="FinanceExpert",
+    backstory="Handles complex financial queries.",
+    context={"finance_terms": "advanced", "regulations": "updated"},
+    llm=llm1
+)
+
+economics_agent = Agent(
+    name="EconomicsExpert",
+    backstory="Analyzes economic trends and data.",
+    context={"economic_models": "global", "data_sources": "multiple"},
+    llm=llm2
+)
+
+# Create a Panel with weights reflecting the reliability or importance of each agent's input
+panel = Panel(
+    agents=[finance_agent, economics_agent],
+    weights=[0.6, 0.4]
+)
+
+# Execute the Panel to handle a complex query
+prompt = "What is the expected economic impact of the new financial regulation?"
+result = panel.execute(prompt=prompt)
+
+print(result)
+```
+
+In this example:
+
+- Two agents, each specialized in finance and economics, are initialized with specific contexts and language models.
+- The `Panel` construct is used to integrate their responses into a weighted decision process. The finance agent has a
+  higher weight (0.6) indicating its responses are given more importance in this context.
+- The prompt regarding the impact of financial regulations is presented, and the `Panel` processes the responses based on
+  the defined weights to generate a comprehensive answer.
+
 ### Router
 
+The `Router` construct allows dynamic routing of prompts to the most appropriate agent based on the prompt's content and
+context. This is particularly useful in scenarios where different agents have specialized knowledge in specific domains.
 This construct manages a hierarchical mixture of experts, directing prompts to the most suitable agent based on the
 context.
 
 ![router diagram](./packit-router.png)
+
+```python
+from packit import Agent, group_router
+
+# Example LLMs
+llm_general = "Langchain General Model"  # Placeholder for a real model
+llm_healthcare = "Langchain Healthcare Model"  # Placeholder for a real model
+
+# General agent for deciding routing
+decider_agent = Agent(
+    name="GeneralDecider",
+    backstory="Determines the best agent for handling various prompts.",
+    context={"knowledge_base": "broad"},
+    llm=llm_general
+)
+
+# Specialist agent for healthcare questions
+healthcare_agent = Agent(
+    name="HealthcareExpert",
+    backstory="Specializes in healthcare-related inquiries.",
+    context={"medical_terms": "extensive", "treatment_protocols": "current"},
+    llm=llm_healthcare
+)
+
+# Define routes based on domain expertise
+routes = {
+    'healthcare': healthcare_agent,
+}
+
+# Define a prompt that needs specialized knowledge
+prompt = "What are the latest treatment protocols for Type 2 diabetes?"
+
+# Execute the Router
+response = group_router(
+    decider=decider_agent,
+    prompt=prompt,
+    routes=routes,
+    context=None  # No additional context needed
+)
+
+print(response)
+```
+
+In this scenario:
+
+- A general decider agent assesses prompts to determine the best route.
+- A specialized healthcare agent handles prompts specific to healthcare, leveraging its detailed context and specialized
+  model.
+- The `group_router` function routes the prompt about diabetes treatment to the healthcare agent, ensuring that the
+  inquiry is handled by the most knowledgeable agent available.
 
 ## Results
 
@@ -138,7 +235,7 @@ to provide granular visibility into the execution of tasks and data flow between
 groups, and individual agent calls is encapsulated as a "span" in a trace, allowing developers to visualize and analyze
 the sequence and duration of events.
 
-For example, when using a Panel or Router, tracing can reveal how each agent's response contributes to the final
+For example, when using a `Panel` or `Router`, tracing can reveal how each agent's response contributes to the final
 decision, or in loops, how data transforms through each iteration. This is especially useful in debugging complex
 scenarios where multiple agents interact over extended sessions. The ability to include inputs and outputs within these
 spans ensures that developers can trace not just the flow of control but also the flow of data across agents and
