@@ -70,12 +70,12 @@ logger.info("Decision: %s", decision)
 
 # Compare the outputs
 if bool_result(decision):
-    if (a * b) == result:
+    if str(a * b) == result:
         logger.info("The manager accepted the correct result.")
     else:
         logger.error("The manager accepted an incorrect result.")
 else:
-    if (a * b) == result:
+    if str(a * b) == result:
         logger.error("The manager rejected the correct result.")
     else:
         logger.info("The manager rejected an incorrect result.")
