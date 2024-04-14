@@ -7,10 +7,10 @@ from packit.toolbox import Toolbox
 from tests.mocks import MockLLM
 
 
-class TestLoopRetry(TestCase):
+class TestLoopTool(TestCase):
     def test_immediate_success(self):
         def test_tool():
-            return "test"
+            return "done"
 
         llm = MockLLM(['{"function": "test_tool"}', "done"])
         agent = Agent("test", "Test agent", {}, llm)
@@ -41,7 +41,7 @@ class TestLoopRetry(TestCase):
         result = loop_tool(
             agent, "test", result_parser=multi_function_or_str_result, toolbox=toolbox
         )
-        self.assertEqual(result, "done")
+        self.assertEqual(result, "output")
 
 
 if __name__ == "__main__":
