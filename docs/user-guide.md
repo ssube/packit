@@ -32,6 +32,7 @@ that convert LLM responses into usable data formats, such as basic Python types 
     - [Context](#context)
     - [Toolbox](#toolbox)
       - [Restricted Toolbox](#restricted-toolbox)
+        - [Restricted Toolbox Example](#restricted-toolbox-example)
   - [Loops Constructs](#loops-constructs)
     - [Basic Loops](#basic-loops)
       - [Map](#map)
@@ -40,10 +41,17 @@ that convert LLM responses into usable data formats, such as basic Python types 
         - [Reduce Example](#reduce-example)
     - [Single-agent Loops](#single-agent-loops)
       - [Retry](#retry)
+        - [Retry Example](#retry-example)
   - [Groups Constructs](#groups-constructs)
     - [Panel](#panel)
+      - [Panel Example](#panel-example)
     - [Router](#router)
+      - [Router Example](#router-example)
   - [Results](#results)
+    - [Role of the Result Parser](#role-of-the-result-parser)
+    - [Recursion in Result Parsers](#recursion-in-result-parsers)
+    - [Enum and Structured Markup Parsers](#enum-and-structured-markup-parsers)
+    - [Recursive Parser Wrapper](#recursive-parser-wrapper)
   - [Tools](#tools)
   - [Tracing](#tracing)
 
@@ -128,19 +136,89 @@ temperatures may produce more diverse and less deterministic outputs.
 
 ### Prompt
 
-Template strings.
+In PACkit, a `PromptType` serves as a crucial mechanism for initiating a dialogue with a language model agent (LLM). As
+an alias for the Python str type, it encapsulates a query or instruction formatted as a template string. This string
+follows the Python template syntax, allowing placeholders for variables, such as `hello {var} world`, where `{var}` is
+dynamically replaced with actual values at runtime. The ability to insert variables into prompts adds a layer of
+flexibility and dynamism, enabling the development of more complex and nuanced interactions. The prompts are crafted not
+only to elicit specific information or actions from the agent but also to guide the conversation flow based on the
+context, ensuring that the agent's responses are aligned with the user's needs and the situation at hand.
 
 ### Context
 
-Facts that the agent always knows. Can be interpolated into the prompt.
+`AgentContext`, a Python type alias for a dictionary with `str` keys and values that can be of types `float`, `int`,
+`bool`, or `str`, represents the environment or state in which an agent operates. It acts as a repository of variable
+bindings that are referenced in the prompt template. When a prompt is issued to an agent, the variables within the
+template string are substituted with corresponding values from the `AgentContext`. This passing of context enables
+personalized and stateful interactions, allowing the agent to maintain a sense of continuity and to apply its
+accumulated knowledge to new prompts. This approach is vital for complex tasks where the agent's behavior needs to adapt
+based on previous interactions, evolving information, or user-specific requirements.
 
 ### Toolbox
 
-OpenAI-compatible tool calling.
+The `Toolbox` class in PACkit acts as a repository for these tools, encapsulating the callable functions and their
+metadata. When initializing a `Toolbox`, a list of callable functions is passed, which are then available for the agent
+to use. These functions are structured to be recognized and executed by the agent when it interprets a JSON response
+that adheres to the OpenAI-compatible tools schema. This schema typically includes a "function" field, which specifies
+the tool's name, and a "parameters" field, containing the arguments for the tool.
+
+The toolbox can be bound directly to an agent, meaning that the agent has direct access to the callable tools at
+creation. Alternatively, it can be passed as part of a loop, akin to binding tools to a Langchain LLM for a session or a
+specific task in CrewAI. This flexibility allows developers to customize the agent's capabilities according to the
+specific needs of each task or dialogue sequence.
 
 #### Restricted Toolbox
 
-Toolbox with an ABAC firewall.
+Building on the foundation of the `Toolbox`, the `RestrictedToolbox` introduces an additional layer of control:
+attribute-based access control (ABAC). The `ABACAdapter` within the `RestrictedToolbox` connects to ABAC systems, which
+can be as simple as a dict subset-based implementation or as complex as a full-fledged PyABAC integration supporting
+XACML policies.
+
+When a tool is invoked, the `RestrictedToolbox` uses the provided ABAC context to determine whether the agent has the
+attributes required to access the tool. This decision can be enforced by a static policy or dynamically made by a
+decision-making LLM. The `RestrictedToolbox` thus not only manages the tools but also enforces access policies, ensuring
+that each agent can only use the tools it is authorized to, based on its attributes. This is particularly important in
+environments with multiple agents or where certain operations require adherence to strict security or operational
+protocols.
+
+##### Restricted Toolbox Example
+
+Here is an example of how to initialize a `Toolbox` and a `RestrictedToolbox`:
+
+```python
+from packit import Toolbox, RestrictedToolbox, ABACAdapter
+
+# Example tool functions
+def tool_add(parameters):
+    # A simple tool that adds two numbers
+    return parameters['a'] + parameters['b']
+
+def tool_concat(parameters):
+    # A tool that concatenates two strings
+    return parameters['str1'] + parameters['str2']
+
+# Initialize a Toolbox with a list of callable tools
+toolbox = Toolbox(tools=[tool_add, tool_concat])
+
+# ABAC policy example
+abac_policy = {
+    "allow": True,
+    "attributes": {
+        "role": "trusted_agent"
+    }
+}
+
+# Initialize an ABACAdapter with a simple policy
+abac_adapter = ABACAdapter(policy=abac_policy)
+
+# Initialize a RestrictedToolbox with the same tools but with access control
+restricted_toolbox = RestrictedToolbox(tools=[tool_add, tool_concat], abac=abac_adapter)
+```
+
+In the above code, `toolbox` grants unrestricted access to the defined tools, while `restricted_toolbox` applies the
+policy specified in `abac_adapter` to control access to the same set of tools. This demonstrates the fundamental
+difference between the two types of toolboxes: one offers a suite of tools for the agent to utilize freely, while the
+other imposes policy-driven restrictions on tool access.
 
 ## Loops Constructs
 
@@ -291,6 +369,8 @@ beginning with the initial prompt, proceeding through the error-checking phases,
 result or an error-based loop iteration. This visual representation serves as an intuitive guide to understanding the
 loop's mechanisms and its practical applications within PACkit.
 
+##### Retry Example
+
 Here is a hypothetical code snippet using `loop_retry`:
 
 ```python
@@ -342,6 +422,8 @@ a specified weight. This approach allows for robust decision-making that harness
 come to a consensus or aggregate responses.
 
 ![panel diagram](./packit-panel.png)
+
+#### Panel Example
 
 ```python
 from packit import Agent, Panel
@@ -395,6 +477,8 @@ context.
 
 ![router diagram](./packit-router.png)
 
+#### Router Example
+
 ```python
 from packit import Agent, group_router
 
@@ -447,7 +531,57 @@ In this scenario:
 
 ## Results
 
-TODO
+The PACkit result parser plays an integral role in processing and interpreting the responses from language model agents
+(LLMs) within the loop and group constructs. It acts as a post-processing step that takes the raw output from an agent
+and converts it into a structured format that can be easily manipulated or evaluated by the subsequent stages of the
+system.
+
+In summary, result parsers are a cornerstone of PACkit’s architecture, allowing developers to extract, verify, and
+transform agent outputs into actionable intelligence. The protocol-based design of these parsers provides the necessary
+abstraction to work across various data types and structured formats, and their recursive capabilities ensure that even
+the most complex agent outputs can be handled effectively. This versatile parsing mechanism is critical in enabling
+sophisticated workflows and interactions within loops and groups, ultimately contributing to the creation of robust and
+intelligent systems powered by LLMs.
+
+### Role of the Result Parser
+
+In the context of loops and groups, the result parser serves as a critical intermediary, ensuring that the data flowing
+through the system is consistent and usable. Loops may involve multiple iterations of prompts and responses, and groups
+may aggregate responses from various agents; in both cases, result parsers are necessary to maintain the integrity and
+structure of the data being exchanged.
+
+The flexibility of the `ResultParser` protocol allows it to be adapted to various data types that LLMs might output,
+including primitive data types like `bool`, `float`, `int`, `str`, and more complex enumerated types. Parsers for
+structured data formats like JSON and Markdown further expand the toolkit’s utility, enabling the handling of rich
+content formats. For instance, the JSON parser not only parses the output but can also rectify minor errors within the
+JSON structure, enhancing the system's fault tolerance.
+
+### Recursion in Result Parsers
+
+Result parsers in PACkit can be recursive, which is a powerful feature when dealing with nested or multi-step responses
+that can be interpreted as subsequent function calls. The `function_result` exemplifies this capability, wherein it
+recursively interprets responses as JSON function calls, continually parsing the output until it no longer resembles a
+JSON structure or until a stop condition is met. This recursive nature is particularly useful when dealing with complex
+LLM outputs that require multiple layers of interpretation before reaching a format that is suitable for application
+use.
+
+### Enum and Structured Markup Parsers
+
+The `enum_result` parser is tailored for scenarios where the response needs to be validated against a predefined list of
+acceptable values (enumerations). By providing a list of expected `enum` values, the parser can ensure that the output
+aligns with the expected set, returning `None` if it does not match any of the enumerated options.
+
+Structured markup parsers for JSON and Markdown offer specialized processing for these formats. The Markdown parser, for
+instance, is capable of extracting specific types of content from the markup, such as text blocks or code blocks
+identified by language, enabling the selective retrieval of information from a response that may contain various types
+of content.
+
+### Recursive Parser Wrapper
+
+PACkit also provides a wrapper to make any parser recursive, coupled with a stop condition function. This feature allows
+developers to create custom parsing strategies that apply the same parsing logic repeatedly until a certain condition is
+fulfilled. Such recursive parsing is essential when an agent's response may contain multiple actionable items or when a
+response needs to be incrementally unpacked.
 
 ## Tools
 
