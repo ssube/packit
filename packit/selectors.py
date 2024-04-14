@@ -1,7 +1,7 @@
 from random import choice
-from typing import List, TypeVar
+from typing import List
 
-SelectorType = TypeVar("SelectorType")
+from packit.types import SelectorType
 
 
 def select_leader(items: List[SelectorType], iteration: int) -> SelectorType:
