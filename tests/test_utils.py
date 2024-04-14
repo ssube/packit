@@ -30,3 +30,4 @@ class TestCouldBeJSON(TestCase):
 
     def test_definitely_not_json(self):
         self.assertFalse(could_be_json("test"))
+        self.assertFalse(could_be_json(None))

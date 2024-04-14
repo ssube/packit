@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter
+from opentelemetry.semconv.ai import TraceloopSpanKindValues
 
 from packit.tracing import set_tracer
 from packit.tracing.traceloop import init, trace
@@ -17,6 +18,31 @@ class TestTraceloopTrace(TestCase):
         with trace("name", "kind") as (report_args, report_output):
             self.assertIsNone(report_args())
             self.assertIsNone(report_output("test"))
+
+    def test_trace_kind_enum(self):
+        init(exporter=ConsoleSpanExporter())
+        with trace("name", TraceloopSpanKindValues.AGENT) as (
+            report_args,
+            report_output,
+        ):
+            self.assertIsNone(report_args())
+            self.assertIsNone(report_output("test"))
+
+    def test_trace_arg_error(self):
+        class NoJSON:
+            nope = None
+
+        init(exporter=ConsoleSpanExporter())
+        with trace("name", "kind") as (report_args, report_output):
+            report_args(NoJSON())
+
+    def test_trace_output_error(self):
+        class NoJSON:
+            nope = None
+
+        init(exporter=ConsoleSpanExporter())
+        with trace("name", "kind") as (report_args, report_output):
+            report_output(NoJSON())
 
 
 class TestSetTrace(TestCase):
@@ -35,3 +61,7 @@ class TestSetTrace(TestCase):
     def test_set_invalid_tracer(self):
         with self.assertRaises(ValueError):
             set_tracer("invalid")
+
+    def test_set_invalid_tracer_type(self):
+        with self.assertRaises(ValueError):
+            set_tracer(1)

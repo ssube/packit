@@ -89,9 +89,9 @@ def loop_map(
             report_args(agents, prompt, context)
 
             if callable(loop_context.memory_factory):
-                memory = loop_context.memory_factory()
+                history = loop_context.memory_factory()
             else:
-                memory = None
+                history = None
 
             current_iteration = 0
             results = []
@@ -109,14 +109,16 @@ def loop_map(
                 result = agent_invoker(
                     agent,
                     agent_prompt,
-                    context=context,
-                    memory=memory,
+                    context={
+                        **context,
+                        "history": history,
+                    },
                     prompt_template=loop_context.prompt_template,
                     toolbox=loop_context.toolbox,
                 )
 
                 if callable(loop_context.memory_maker):
-                    loop_context.memory_maker(memory, result)
+                    loop_context.memory_maker(history, result)
 
                 if callable(loop_context.result_parser):
                     result = loop_context.result_parser(
@@ -179,9 +181,9 @@ def loop_reduce(
             report_args(agents, prompt, context)
 
             if callable(loop_context.memory_factory):
-                memory = loop_context.memory_factory()
+                history = loop_context.memory_factory()
             else:
-                memory = None
+                history = None
 
             current_iteration = 0
             result = prompt
@@ -198,14 +200,16 @@ def loop_reduce(
                 result = agent_invoker(
                     agent,
                     result,
-                    context=context,
-                    memory=memory,
+                    context={
+                        **context,
+                        "history": history,
+                    },
                     prompt_template=loop_context.prompt_template,
                     toolbox=loop_context.toolbox,
                 )
 
                 if callable(loop_context.memory_maker):
-                    loop_context.memory_maker(memory, result)
+                    loop_context.memory_maker(history, result)
 
                 if callable(loop_context.result_parser):
                     result = loop_context.result_parser(

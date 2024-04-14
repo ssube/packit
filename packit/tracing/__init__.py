@@ -23,9 +23,9 @@ def set_tracer(fn: Callable | str):
 
                 init()
                 tracer = traceloop_trace
-            except ImportError:
+            except ImportError:  # pragma: no cover
                 raise ImportError(
-                    "To use the traceloop integration, you must install the traceloop SDK."
+                    "To use the traceloop integration, you must install the traceloop-sdk package."
                 )
         else:
             raise ValueError(f"Unknown tracer integration name: {fn}")

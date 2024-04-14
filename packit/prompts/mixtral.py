@@ -7,7 +7,7 @@ function_call = {
 
 prompts = PromptLibrary(
     answers=[
-        "Your coworkers have provided the following answers: {memory}.",
+        "Your coworkers have provided the following answers: {history}.",
     ],
     converse=[
         "What do you think about this?",

@@ -227,7 +227,7 @@ for product in products:
                 "" + get_budget_prompt() + ""
                 "When you are satisfied with the development, use the complete tool to finish the product. "
                 "Make sure to finish the product before you exhaust your budget. "
-                "Your progress so far is: {memory}. "
+                "Your progress so far is: {history}. "
             ),
             stop_condition=complete_or_threshold,
             toolbox=toolbox,

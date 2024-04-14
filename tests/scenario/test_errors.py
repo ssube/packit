@@ -37,10 +37,10 @@ class TestToolError(TestCase):
 
         mock_0 = Mock(agent_0)
         mock_0.name = agent_0.name
-        mock_0.side_effect = agent_0
+        mock_0.invoke.side_effect = agent_0.invoke
         mock_1 = Mock(agent_1)
         mock_1.name = agent_1.name
-        mock_1.side_effect = agent_1
+        mock_1.invoke.side_effect = agent_1.invoke
 
         def error_tool():
             raise ValueError("Error")

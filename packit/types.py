@@ -23,31 +23,41 @@ class ABACAdapter(Protocol):
         pass  # pragma: no cover
 
 
+# input types
 class AgentInvoker(Protocol):
     def __call__(
         self,
         agent: Any,
         prompt: PromptType,
         context: "AgentContext",
-        memory: List[MemoryType] | None = None,
-        prompt_template: Optional["PromptTemplate"] = None,
         toolbox: Any | None = None,
+        **kwargs,
     ) -> PromptType:
         pass  # pragma: no cover
 
 
+# output types
 class ResultParser(Protocol):
     def __call__(
         self,
         value: PromptType,
-        # abac_context: ABACAttributes | None = None,
-        # fix_filter: Callable | None = None,
-        # result_parser: Optional["ResultParser"] = None,
-        # toolbox: Any | None = None,
-        # tool_filter: Optional["ToolFilter"] = None,
         **kwargs,
     ) -> Any:
-        pass
+        pass  # pragma: no cover
+
+
+class FunctionResultParser(Protocol):
+    def __call__(
+        self,
+        value: PromptType,
+        abac_context: ABACAttributes | None = None,
+        fix_filter: Callable | None = None,
+        result_parser: ResultParser | None = None,
+        toolbox: Any | None = None,
+        tool_filter: Optional["ToolFilter"] = None,
+        **kwargs,
+    ) -> Any:
+        pass  # pragma: no cover
 
 
 class StopCondition(Protocol):

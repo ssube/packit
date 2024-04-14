@@ -241,18 +241,18 @@ def invoke_agent(
     agent: Agent,
     prompt: str,
     context: AgentContext,
-    memory: List[MemoryType] | None = None,
-    prompt_template: PromptTemplate | None = None,
     toolbox: Toolbox | None = None,
+    **kwargs,
 ) -> str:
     """
     Invoke an agent with a prompt and context.
     This is provided as a loose function to allow for use in loop context and parameters.
     """
-    return agent(
+    return agent.invoke(
         prompt,
-        **context,
-        memory=memory,
-        prompt_template=prompt_template,
+        context={
+            **context,
+            **kwargs,
+        },
         toolbox=toolbox,
     )

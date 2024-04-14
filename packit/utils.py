@@ -64,13 +64,6 @@ def make_list(value):
     return [value]
 
 
-def head_list(value):
-    if isinstance(value, list):
-        return value[0]
-
-    return value
-
-
 def flatten(value):
     """
     Recursively flatten a list of nested lists.

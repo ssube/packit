@@ -6,7 +6,7 @@ from packit.conditions import condition_or, condition_threshold
 from packit.context import loopum
 from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
-from packit.selectors import select_loop
+from packit.selectors import select_leader
 from packit.toolbox import Toolbox
 from packit.tracing import trace
 from packit.types import (
@@ -22,7 +22,7 @@ from packit.types import (
     StopCondition,
     ToolFilter,
 )
-from packit.utils import could_be_json, head_list
+from packit.utils import could_be_json, make_list
 
 from .base import loop_reduce
 
@@ -35,7 +35,7 @@ def loop_retry(
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
-    agent_selector: AgentSelector = select_loop,
+    agent_selector: AgentSelector = select_leader,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
@@ -44,14 +44,13 @@ def loop_retry(
     stop_condition: StopCondition = condition_threshold,
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
-    memory: list[str] | None = None,  # TODO: remove
 ) -> PromptType:
     """
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt
     will be repeated with the error message.
     """
 
-    agent = head_list(agents)
+    agent = select_leader(make_list(agents), 0)
 
     last_error: Exception | None = None
     success: bool = False
@@ -129,7 +128,10 @@ def loop_retry(
             if last_error:
                 raise last_error
 
-            raise Exception("No error was raised, but the result could not be parsed.")
+            # this is very difficult to reach, but here for completeness
+            raise Exception(
+                "No error was raised, but the result could not be parsed."
+            )  # pragma: no cover
 
 
 def loop_tool(
@@ -138,7 +140,7 @@ def loop_tool(
     context: AgentContext | None = None,
     abac_context: ABACAttributes | None = None,
     agent_invoker: AgentInvoker = invoke_agent,
-    agent_selector: AgentSelector = select_loop,
+    agent_selector: AgentSelector = select_leader,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
     prompt_filter: PromptFilter | None = None,
@@ -151,7 +153,7 @@ def loop_tool(
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
     """
 
-    agent = head_list(agents)
+    agent = agent_selector(make_list(agents), 0)
 
     with trace("tool", "packit.loop") as (report_args, report_output):
         report_args(agent, prompt, context)
@@ -169,7 +171,7 @@ def loop_tool(
             inner_toolbox = toolbox or outer_toolbox
 
             if callable(inner_result_parser):
-                return inner_result_parser(
+                value = inner_result_parser(
                     value,
                     result_parser=inner_result_parser,
                     toolbox=inner_toolbox,
