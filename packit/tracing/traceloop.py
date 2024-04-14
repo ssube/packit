@@ -98,5 +98,7 @@ def dumper(value):
         return f"agent.{snake_case(value.name)}"
     elif isinstance(value, deque):
         return list(value)
+    elif callable(value):
+        return f"function.{value.__name__}"
 
     raise TypeError(f"unsupported type: {type(value)}")

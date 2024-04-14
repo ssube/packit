@@ -235,7 +235,7 @@ def loopum(
         depth = count_loop_contexts()
         logger.debug(
             "entering loop context: depth %s/%s, tag %s",
-            context.depth,
+            context.depth + 1,
             depth,
             context.tag,
         )
@@ -245,7 +245,7 @@ def loopum(
         if save_context:
             logger.debug(
                 "leaving loop context: depth %s/%s, tag %s",
-                context.depth,
+                context.depth + 1,
                 depth,
                 context.tag,
             )
