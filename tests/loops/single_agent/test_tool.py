@@ -42,9 +42,3 @@ class TestLoopTool(TestCase):
             agent, "test", result_parser=multi_function_or_str_result, toolbox=toolbox
         )
         self.assertEqual(result, "output")
-
-
-if __name__ == "__main__":
-    import unittest
-
-    unittest.main()
