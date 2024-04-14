@@ -33,4 +33,4 @@ class TestPanelBasics(TestCase):
         panel = Panel(agents)
 
         decision, _results = panel("prompt")
-        self.assertEqual(decision, False)
+        self.assertFalse(decision)

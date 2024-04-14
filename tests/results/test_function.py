@@ -73,9 +73,9 @@ class TestFunctionResult(TestCase):
 
 class TestNormalizeFunctionJson(TestCase):
     def test_normalize_valid(self):
-        input = {"function": "test", "parameters": {}}
-        result = normalize_function_json(input)
-        self.assertEqual(result, input)
+        data = {"function": "test", "parameters": {}}
+        result = normalize_function_json(data)
+        self.assertEqual(result, data)
 
     def test_normalize_invalid(self):
         for input in [

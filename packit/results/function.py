@@ -6,7 +6,7 @@ from packit.abac import ABACAttributes
 from packit.agent import Agent
 from packit.errors import ToolError
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import ResultParser, ToolFilter
 from packit.utils import could_be_json, flatten
 
@@ -69,7 +69,7 @@ def function_result(
 
     tool = toolbox.get_tool(function_name, abac_context)
     try:
-        with trace(function_name, "packit.tool") as (report_args, report_output):
+        with trace(function_name, SpanKind.TOOL) as (report_args, report_output):
             report_args(**function_params)
             tool_result = tool(**function_params)
             report_output(tool_result)

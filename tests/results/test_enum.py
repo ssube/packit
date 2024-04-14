@@ -8,7 +8,7 @@ class TestEnumResult(TestCase):
         self.assertEqual(enum_result("yes", enum=["yes", "no"]), "yes")
 
     def test_invalid_value(self):
-        self.assertEqual(enum_result("maybe", enum=["yes", "no"]), None)
+        self.assertIsNone(enum_result("maybe", enum=["yes", "no"]))
 
     def test_first_value(self):
         self.assertEqual(enum_result("yes and no", enum=["yes", "no"]), "yes")

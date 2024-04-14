@@ -17,6 +17,8 @@ using [the Jupyter notebook](./examples/packit-demo.ipynb).
 
 ![a network of lego people standing on a blueprint together](./docs/packit-banner.jpg)
 
+[![codecov](https://codecov.io/gh/ssube/packit/graph/badge.svg?token=LRXFEHFBGS)](https://codecov.io/gh/ssube/packit)
+
 ## Contents
 
 - [PACkit](#packit)

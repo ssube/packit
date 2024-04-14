@@ -6,7 +6,7 @@ from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import get_random_prompt
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -41,7 +41,7 @@ def loop_converse(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str | list[str]:
-    with trace("converse", "packit.loop") as (report_args, report_output):
+    with trace("converse", SpanKind.LOOP) as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(
             agents,
@@ -80,7 +80,7 @@ def loop_extend(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str | list[str]:
-    with trace("extend", "packit.loop") as (report_args, report_output):
+    with trace("extend", SpanKind.LOOP) as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(
             agents,
@@ -119,7 +119,7 @@ def loop_refine(
     toolbox: Toolbox | None = None,
     tool_filter: ToolFilter | None = None,
 ) -> str | list[str]:
-    with trace("refine", "packit.loop") as (report_args, report_output):
+    with trace("refine", SpanKind.LOOP) as (report_args, report_output):
         report_args(agents, prompt, context)
         result = loop_prefix(
             agents,

@@ -6,7 +6,7 @@ from packit.conditions import condition_threshold
 from packit.context import loopum
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -85,7 +85,7 @@ def loop_map(
         tool_filter=tool_filter,
         save_context=save_context,
     ) as loop_context:
-        with trace("map", "packit.loop") as (report_args, report_output):
+        with trace("map", SpanKind.LOOP) as (report_args, report_output):
             report_args(agents, prompt, context)
 
             if callable(loop_context.memory_factory):
@@ -177,7 +177,7 @@ def loop_reduce(
         tool_filter=tool_filter,
         save_context=save_context,
     ) as loop_context:
-        with trace("reduce", "packit.loop") as (report_args, report_output):
+        with trace("reduce", SpanKind.LOOP) as (report_args, report_output):
             report_args(agents, prompt, context)
 
             if callable(loop_context.memory_factory):

@@ -1,5 +1,4 @@
 from logging import getLogger
-from random import randint
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_or, condition_threshold
@@ -8,7 +7,7 @@ from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
 from packit.selectors import select_leader
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -68,9 +67,8 @@ def loop_retry(
         toolbox=toolbox,
         tool_filter=tool_filter,
     ) as loop_context:
-        with trace("retry", "packit.loop") as (report_args, report_output):
+        with trace("retry", SpanKind.LOOP) as (report_args, report_output):
             report_args(agent, prompt, context)
-            closure_tag = randint(0, 1000000)
 
             def parse_or_error(
                 value: PromptType,
@@ -78,8 +76,6 @@ def loop_retry(
             ) -> str:
                 nonlocal last_error
                 nonlocal success
-
-                logger.debug("closure_tag: %s", closure_tag)
 
                 try:
                     if callable(loop_context.result_parser):
@@ -129,7 +125,7 @@ def loop_retry(
                 raise last_error
 
             # this is very difficult to reach, but here for completeness
-            raise Exception(
+            raise ValueError(
                 "No error was raised, but the result could not be parsed."
             )  # pragma: no cover
 
@@ -155,7 +151,7 @@ def loop_tool(
 
     agent = agent_selector(make_list(agents), 0)
 
-    with trace("tool", "packit.loop") as (report_args, report_output):
+    with trace("tool", SpanKind.LOOP) as (report_args, report_output):
         report_args(agent, prompt, context)
 
         outer_result_parser = result_parser

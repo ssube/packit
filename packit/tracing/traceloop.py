@@ -14,6 +14,8 @@ from traceloop.sdk.tracing.tracing import (
 )
 from traceloop.sdk.utils import camel_to_snake
 
+from .spans import SpanKind
+
 logger = getLogger(__name__)
 
 
@@ -38,13 +40,13 @@ def init(exporter=None):
 @contextmanager
 def trace(
     name: str,
-    kind: str | TraceloopSpanKindValues = TraceloopSpanKindValues.TASK,
+    kind: str | SpanKind | TraceloopSpanKindValues = TraceloopSpanKindValues.TASK,
 ):
     if not TracerWrapper.verify_initialized():
         yield lambda *_, **__: None, lambda _: None
         return
 
-    if isinstance(kind, TraceloopSpanKindValues):
+    if isinstance(kind, (TraceloopSpanKindValues, SpanKind)):
         kind = kind.value
 
     task_name = snake_case(name)

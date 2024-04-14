@@ -9,7 +9,7 @@ from packit.formats import format_str_or_json
 from packit.memory import make_limited_memory, memory_order_width
 from packit.prompts import DEFAULT_PROMPTS, PromptLibrary, get_random_prompt
 from packit.toolbox import Toolbox
-from packit.tracing import set_tracer, trace
+from packit.tracing import SpanKind, set_tracer, trace
 from packit.types import (
     AgentContext,
     MemoryFactory,
@@ -83,7 +83,7 @@ class Agent:
     ) -> str:
         from packit.errors import PromptError
 
-        with trace(self.name, "packit.agent") as (report_args, report_output):
+        with trace(self.name, SpanKind.AGENT) as (report_args, report_output):
             report_args(prompt, context, prompt_template)
 
             args = {}

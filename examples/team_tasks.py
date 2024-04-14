@@ -4,7 +4,7 @@ from packit.filters import repeat_tool_filter
 from packit.loops import loop_team
 from packit.toolbox import Toolbox
 from packit.tools import make_complete_tool, make_team_tools
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -65,7 +65,7 @@ tasks = [
 
 for task in tasks:
     logger.info("Task: %s", task)
-    with trace("task", "packit.example") as (report_args, report_output):
+    with trace("task", SpanKind.EXAMPLE) as (report_args, report_output):
         report_args(task=task)
 
         clear_filter()

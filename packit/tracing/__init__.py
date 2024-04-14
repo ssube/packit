@@ -2,6 +2,7 @@ from typing import Literal, Callable
 from contextlib import contextmanager
 
 from .console import trace as console_trace
+from .spans import SpanKind
 
 TracerIntegrations = Literal["console", "traceloop"]
 
@@ -36,6 +37,6 @@ def set_tracer(fn: Callable | str):
 
 
 @contextmanager
-def trace(name: str, kind: str = "packit.task"):
+def trace(name: str, kind: str | SpanKind = SpanKind.TASK):
     with tracer(name, kind) as reporters:
         yield reporters

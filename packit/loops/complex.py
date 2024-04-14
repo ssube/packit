@@ -9,7 +9,7 @@ from packit.prompts import get_random_prompt
 from packit.results import multi_function_or_str_result
 from packit.selectors import select_loop
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -62,7 +62,7 @@ def loop_team(
     def get_memory():
         return memory
 
-    with trace("team", "packit.loop") as (report_args, report_output):
+    with trace("team", SpanKind.LOOP) as (report_args, report_output):
         report_args(
             manager=manager,
             workers=workers,

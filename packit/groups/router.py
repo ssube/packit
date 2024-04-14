@@ -3,7 +3,7 @@ from packit.conditions import condition_threshold
 from packit.loops import loop_retry, select_loop
 from packit.results import enum_result
 from packit.toolbox import Toolbox
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import (
     ABACAttributes,
     AgentInvoker,
@@ -59,7 +59,7 @@ def group_router(
             return choice
         raise ValueError("Invalid selection.")
 
-    with trace("router", "packit.group") as (report_args, report_output):
+    with trace("router", SpanKind.GROUP) as (report_args, report_output):
         report_args(decider, prompt, context, enum=enum)
 
         decision = loop_retry(

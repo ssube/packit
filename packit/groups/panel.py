@@ -5,7 +5,7 @@ from packit.agent import Agent, AgentContext
 from packit.conditions import condition_threshold_mean
 from packit.loops import loop_retry
 from packit.results import bool_result
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.types import PromptType, ResultParser
 from packit.utils import make_list
 
@@ -48,7 +48,10 @@ class Panel:
     ) -> PanelResult:
         results = {}
 
-        with trace(self.name, "packit.panel") as (report_args, report_output):
+        with trace(f"panel_{self.name}", SpanKind.GROUP) as (
+            report_args,
+            report_output,
+        ):
             report_args(prompt, context)
 
             for agent, weight in zip(self.agents, self.weights):

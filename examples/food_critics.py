@@ -5,7 +5,7 @@ Ask a panel of food critics to rate a list of entreés.
 from packit.agent import Agent, agent_easy_connect
 from packit.formats import format_bullet_list
 from packit.groups import Panel
-from packit.tracing import trace
+from packit.tracing import SpanKind, trace
 from packit.utils import logger_with_colors
 
 logger = logger_with_colors(__name__)
@@ -48,7 +48,7 @@ panel = Panel(critics, name="food_critics", weights=critic_weights)
 
 # Rate each of the entreés
 for entree in entrees:
-    with trace("task", "packit.example") as (report_args, report_output):
+    with trace("task", SpanKind.EXAMPLE) as (report_args, report_output):
         report_args(entree)
 
         decision, reasons = panel(
