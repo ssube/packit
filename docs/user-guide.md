@@ -1,4 +1,12 @@
-# Introduction to PACkit
+# PACkit User Guide
+
+## 🚧 Under Construction 🚧
+
+This user guide has created using generative AI and is still under construction. The documentation has been generated
+from the diagrams and function signatures. Text and examples may not be fully accurate and are still being edited for
+correctness. Please refer to the [examples directory](../examples/) for complete, working examples.
+
+## Introduction to PACkit
 
 PACkit, short for Prompt Agent Construction Kit, is a versatile Python library designed to facilitate complex
 interactions between language model agents (LLMs) and your code. Serving as a comprehensive framework, PACkit allows
@@ -20,7 +28,9 @@ that convert LLM responses into usable data formats, such as basic Python types 
 
 ## Contents
 
-- [Introduction to PACkit](#introduction-to-packit)
+- [PACkit User Guide](#packit-user-guide)
+  - [🚧 Under Construction 🚧](#-under-construction-)
+  - [Introduction to PACkit](#introduction-to-packit)
   - [Contents](#contents)
   - [Basics](#basics)
     - [Agent](#agent)
