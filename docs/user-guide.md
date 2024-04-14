@@ -24,6 +24,10 @@ that convert LLM responses into usable data formats, such as basic Python types 
   - [Contents](#contents)
   - [Basics](#basics)
     - [Agent](#agent)
+      - [Key Components of the Agent](#key-components-of-the-agent)
+      - [Importance of the System Prompt](#importance-of-the-system-prompt)
+      - [Customizing Model Behavior](#customizing-model-behavior)
+      - [LLM Temperature](#llm-temperature)
     - [Prompt](#prompt)
     - [Context](#context)
     - [Toolbox](#toolbox)
@@ -31,7 +35,9 @@ that convert LLM responses into usable data formats, such as basic Python types 
   - [Loops Constructs](#loops-constructs)
     - [Basic Loops](#basic-loops)
       - [Map](#map)
+        - [Map Example](#map-example)
       - [Reduce](#reduce)
+        - [Reduce Example](#reduce-example)
     - [Single-agent Loops](#single-agent-loops)
       - [Retry](#retry)
   - [Groups Constructs](#groups-constructs)
@@ -45,9 +51,80 @@ that convert LLM responses into usable data formats, such as basic Python types 
 
 ### Agent
 
-Wrapper for LLM with backstory, temperature, and other configuration.
+The basic Agent in PACkit is a fundamental component designed to manage interactions with language model agents (LLMs).
+This entity encapsulates the core attributes and functionalities needed to interface effectively with sophisticated AI
+models, facilitating targeted conversations and decision-making processes.
 
-Agents have their own memory.
+```python
+from packit import Agent
+from langchain.openai import OpenAIChat
+
+# Setup the OpenAI chat model from Langchain
+# Assume API_KEY is your OpenAI API key; this should be securely managed
+api_key = "your_openai_api_key"
+chat_model = OpenAIChat(api_key=api_key, model="gpt-4")  # Using GPT-4 for this example
+
+# Define the backstory and context for the agent
+backstory = "I am a travel advisor bot trained to provide travel advice, " \
+            "including destinations, booking tips, and current travel safety measures."
+context = {
+    "travel_trends": "current",
+    "health_safety_standards": "updated",
+    "preferred_destinations": "tropical islands"
+}
+
+# Create the agent with the specified Langchain model
+travel_advisor_agent = Agent(
+    name="TravelAdvisor",
+    backstory=backstory,
+    context=context,
+    llm=chat_model
+)
+
+# Now you can use this agent to handle prompts relevant to its domain
+prompt = "What are the top three destinations for a family vacation in July?"
+response = travel_advisor_agent.llm.chat(prompt=prompt)
+
+print("Travel Advice:", response)
+```
+
+#### Key Components of the Agent
+
+- **Name**: This is a short identifier or codename for each agent, helping to distinguish between different agents within
+  the system. The name typically reflects the agent's specialty or primary function.
+- **Backstory**: The backstory of an agent serves as the system prompt for the LLM used by that agent. This is a crucial
+  component as it sets the initial context or "personality" of the agent. It provides foundational knowledge and
+  instructions that influence how the agent interprets and responds to prompts.
+- **Context**: This is a dictionary containing specific facts or key pieces of information that the agent knows and can
+  utilize in its reasoning and responses. The context enhances the agent's ability to provide relevant and accurate
+  information tailored to the situation at hand.
+- **LLM**: This parameter links the agent to a specific language model. The choice of LLM influences the agent's
+  capabilities, as different models may be trained on different data sets or optimized for different types of tasks.
+
+#### Importance of the System Prompt
+
+The system prompt, encapsulated in the agent's backstory, is essential in shaping the behavior of the LLM. By providing
+a narrative or a set of instructions embedded within the backstory, developers can guide the LLM's responses to align
+with specific objectives or operational guidelines. This can include emphasizing certain types of information, adhering
+to regulatory requirements, or avoiding particular topics. The backstory effectively primes the LLM, setting the stage
+for its interactions and ensuring consistency in its approach to handling queries.
+
+#### Customizing Model Behavior
+
+Customization of an LLM's behavior is primarily achieved through the backstory and context parameters. By adjusting
+these elements, developers can fine-tune how the model processes and responds to input:
+
+- **Backstory Adjustments**: Modifying the backstory can change the model's focus, ethical guidelines, or knowledge base,
+  directly influencing how it interprets and responds to prompts.
+- **Contextual Tweaks**: By updating the context dictionary, developers can provide the agent with up-to-date information,
+  specialized knowledge, or situational awareness, enhancing the relevance and accuracy of its responses.
+
+#### LLM Temperature
+
+The temperature setting for an LLM is an important parameter that controls the randomness of the model's responses.
+While not detailed here, it's worth noting that adjusting the temperature can affect the creativity and variability of
+the agent's output. Lower temperatures generally result in more predictable and conservative responses, whereas higher
+temperatures may produce more diverse and less deterministic outputs.
 
 ### Prompt
 
@@ -77,22 +154,180 @@ Key loop types include Map, Reduce, Retry, and several more.
 This loop type applies the same prompt to multiple agents and aggregates their responses. It is ideal for collecting
 varied perspectives on a single question.
 
+The `loop_map` function in PACkit is an embodiment of the functional programming paradigm `map`, adapted for
+orchestrating operations across one or more language model agents (LLMs). This construct applies a given prompt to an
+array of agents, each potentially tailored with specialized capabilities, and aggregates their independent outputs into
+a list. The signature for `loop_map` includes parameters for the agents, the prompt, and an optional context, which
+enriches the environment in which each agent operates, enhancing the pertinence and depth of their responses.
+Importantly, `loop_map` retains an internal history of interactions, leveraging the same memory mechanisms utilized by
+agents for maintaining state across sessions. This feature is critical in applications where continuity of context
+enhances the quality of the decision-making process, such as in iterative refinement tasks or multi-agent consultations
+within the AI/ML domain.
+
 ![map diagram](./packit-map.png)
+
+##### Map Example
+
+This example demonstrates how to use `loop_map` to concurrently send a prompt to a list of agents. Each agent will
+respond independently, and the responses will be aggregated into a list.
+
+```python
+from packit import Agent, loop_map
+
+# Define some mock agents with different areas of expertise
+agent1 = Agent(name="DataScientist", backstory="Expert in data analysis", context={}, llm="Langchain Data Model")
+agent2 = Agent(name="MLExpert", backstory="Specializes in machine learning algorithms", context={}, llm="Langchain ML Model")
+
+# Define a list of agents
+agents = [agent1, agent2]
+
+# Define a prompt to send to all agents
+prompt = "What are the latest trends in your field?"
+
+# Execute the map loop
+responses = loop_map(agents=agents, prompt=prompt)
+
+# Print each agent's response
+for response in responses:
+    print(response)
+```
+
+In this example, `loop_map` sends the same prompt to two different agents, each specializing in different aspects of AI
+and machine learning. The function collects responses from each agent and returns them as a list.
 
 #### Reduce
 
 This loop passes the result of one agent as a prompt to the next, effectively creating a chain of responses that refine
 or expand upon the initial input.
 
+Conversely, the `loop_reduce` function represents a sophisticated implementation of the `reduce` (or `fold`) operation
+from functional programming, specifically tailored for sequential data processing tasks in machine learning and AI
+contexts. This function iteratively applies a prompt to a sequence of agents, where the output from one agent serves as
+the input to the next, thereby chaining their responses to evolve the prompt dynamically. The `loop_reduce` function
+accepts either a single agent or a list of agents, a prompt, and an optional context, which may modify the agent's
+operational parameters or influence its output. The operation concludes with a single consolidated result from the final
+agent in the sequence, embodying the cumulative modifications imposed by all preceding agents. Similar to `loop_map`,
+`loop_reduce` also maintains an internal history of the prompt’s evolution across agents using the same memory
+mechanisms inherent to the agents. This feature is invaluable for tasks requiring progressive elaboration or refinement,
+such as generating complex reports, developing ideas, or troubleshooting where each step builds upon the previous one in
+a logical and coherent manner.
+
 ![reduce diagram](./packit-reduce.png)
+
+##### Reduce Example
+
+This example shows how to use `loop_reduce` to pass a prompt through a series of agents, where each agent processes the
+prompt and passes its output to the next agent. The final output is the result of the cumulative processing by all
+agents.
+
+```python
+from packit import Agent, loop_reduce
+
+# Define some mock agents that will process information in a sequential manner
+agent1 = Agent(name="Researcher", backstory="Identifies key issues", context={}, llm="Langchain Research Model")
+agent2 = Agent(name="Analyst", backstory="Analyzes identified issues", context={}, llm="Langchain Analysis Model")
+agent3 = Agent(name="SolutionArchitect", backstory="Proposes solutions based on analysis", context={}, llm="Langchain Solution Model")
+
+# Define a list of agents
+agents = [agent1, agent2, agent3]
+
+# Define an initial prompt
+initial_prompt = "Examine the impact of AI on urban sustainability."
+
+# Execute the reduce loop
+final_result = loop_reduce(agents=agents, prompt=initial_prompt)
+
+# Print the final result
+print(final_result)
+```
+
+In this `loop_reduce` example, the prompt starts with the first agent who examines a broad topic, the next agent analyzes
+the issues identified by the first, and finally, the third agent proposes solutions based on the analysis. The output
+from each agent serves as the input for the next, resulting in a comprehensive final result that encapsulates the input
+and work of all agents involved.
 
 ### Single-agent Loops
 
 #### Retry
 
-TODO
+The `loop_retry` construct in PACkit serves as an iterative error-correction mechanism, enhancing the robustness of
+interactions with language model agents (LLMs). At its core, the `loop_retry` function encapsulates a feedback loop
+where an agent's response is evaluated for correctness and completeness based on a defined result parser. If the parser
+encounters an error, indicating that the response is not satisfactory, the prompt is modified, usually by appending an
+error message or clarification, and re-presented to the agent for another attempt.
 
 ![retry diagram](./packit-retry.png)
+
+The function signature for the `loop_retry` is as follows:
+
+```python
+def loop_retry(
+    agents: Agent | list[Agent],
+    prompt: PromptType,
+    context: AgentContext | None = None,
+    result_parser: ResultParser,
+) -> PromptType:
+    ...
+```
+
+The retry loop is optimally utilized with a single agent, which underpins its primary use case: refining the output of
+an LLM until the result meets the specified criteria. The process begins with the agent receiving an initial prompt,
+followed by a response that is then passed through the result parser. If the parser detects an error—such as an
+incomplete answer, a logical inconsistency, or information that does not match the required format—the error is fed back
+into the loop. The prompt, now augmented with additional information derived from the parser's error, is presented
+again, and the agent is prompted to rectify the mistake.
+
+This iterative process continues until the result parser successfully validates a response or until a predefined stop
+condition is met, typically a maximum number of iterations. This stop condition is crucial as it prevents an indefinite
+loop in the event that the agent is incapable of generating a valid response.
+
+In more complex scenarios involving multiple agents, the `loop_retry` can be extended to engage secondary agents for
+assistance. Should the primary agent fail to provide a valid response, subsequent agents can be invoked to attempt to
+repair the output. This collaborative approach can enhance the likelihood of achieving a valid result, leveraging the
+collective capabilities of multiple LLMs.
+
+The `loop_retry` loop, depicted in the provided diagram, clearly illustrates this process with a flow of steps:
+beginning with the initial prompt, proceeding through the error-checking phases, and culminating in either a successful
+result or an error-based loop iteration. This visual representation serves as an intuitive guide to understanding the
+loop's mechanisms and its practical applications within PACkit.
+
+Here is a hypothetical code snippet using `loop_retry`:
+
+```python
+from packit import Agent, loop_retry, ResultParser
+
+# Define a single agent with its properties
+agent = Agent(
+    name="QAAssistant",
+    backstory="A quality assurance assistant that validates information accuracy.",
+    context={"valid_data_sources": "trusted_datasets"},
+    llm="Langchain QA Model"
+)
+
+# Define the prompt to be sent to the agent
+prompt = "Verify the accuracy of the following data: [data snippet]"
+
+# Define a result parser that checks the response for accuracy
+def result_parser(response):
+    # Pseudo-code for parsing the result
+    if "error" in response or "unverified" in response:
+        return None, "Error: The data could not be verified. Please try again."
+    else:
+        return response, None
+
+# Execute the retry loop with the agent
+final_result = loop_retry(
+    agents=agent,
+    prompt=prompt,
+    result_parser=result_parser
+)
+
+print(final_result)
+```
+
+In this code example, the loop_retry function is employed to ensure that the QA assistant agent provides a response that
+passes the verification criteria set by the result_parser. If the parser identifies an issue, the agent is prompted to
+revise its response until it is deemed accurate or until the retry attempts are exhausted.
 
 ## Groups Constructs
 
