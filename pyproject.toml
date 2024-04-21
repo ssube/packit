@@ -1,3 +1,20 @@
+[project]
+name = "packit-llm"
+version = "0.1.0"
+description = "Packit LLM"
+authors = [{name = "ssube", email = "seansube@gmail.com"}]
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/ssube/packit"
+Issues = "https://github.com/ssube/packit/issues"
+
 [tool.black]
 force-exclude = '''/(diffusion_original|lpw).py'''
 
