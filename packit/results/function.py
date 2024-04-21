@@ -97,6 +97,7 @@ def function_result(
 def multi_function_result(
     value: str,
     abac_context: ABACAttributes | None = None,
+    agent: Agent | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
     toolbox: Toolbox | None = None,
@@ -124,6 +125,7 @@ def multi_function_result(
                 function_result(
                     call,
                     abac_context=abac_context,
+                    agent=agent,
                     fix_filter=None,
                     result_parser=result_parser,
                     toolbox=toolbox,
@@ -141,6 +143,7 @@ def multi_function_result(
 def multi_function_or_str_result(
     value: str,
     abac_context: ABACAttributes | None = None,
+    agent: Agent | None = None,
     fix_filter=json_fixups,
     result_parser: ResultParser | None = None,
     toolbox: Toolbox | None = None,
@@ -151,6 +154,7 @@ def multi_function_or_str_result(
         results = multi_function_result(
             value,
             abac_context=abac_context,
+            agent=agent,
             fix_filter=fix_filter,
             result_parser=result_parser,
             toolbox=toolbox,
