@@ -1,5 +1,5 @@
 from time import monotonic
-from typing import Any, Callable
+from typing import Any, Callable, Tuple
 
 from packit.types import StopCondition
 
@@ -94,3 +94,20 @@ def condition_not(condition: StopCondition) -> StopCondition:
         return not condition(*args, **kwargs)
 
     return _condition_not
+
+
+def make_flag_condition() -> Tuple[Callable[[bool], bool], StopCondition]:
+    """
+    Make a flag condition that stops when the flag is set.
+    """
+
+    flag = False
+
+    def _condition_flag(*args, **kwargs) -> bool:
+        return flag
+
+    def _set_flag() -> None:
+        nonlocal flag
+        flag = True
+
+    return _set_flag, _condition_flag
