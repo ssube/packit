@@ -1,6 +1,6 @@
 from logging import getLogger
 from os import environ
-from typing import Any, List, Protocol, Sequence
+from typing import Any, List, MutableSequence, Protocol, Sequence
 
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
 from langchain_core.prompt_values import PromptValue
@@ -39,7 +39,7 @@ class Agent:
     context: AgentContext
     llm: AgentModel
     max_retry: int
-    memory: List[MemoryType] | None
+    memory: MutableSequence[MemoryType] | None
     memory_maker: MemoryMaker | None
     name: str
     toolbox: Toolbox | None
