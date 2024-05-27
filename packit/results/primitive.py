@@ -45,16 +45,24 @@ def float_result(value: str, **kwargs) -> float:
     pattern = re.compile(r"[-+]?\d*\.?\d+")
     match = pattern.search(value)
 
-    if match:
-        return float(match.group())
+    try:
+        if match:
+            return float(match.group())
 
-    raise ValueError(f"No floating point number found in {value}")
+        raise ValueError(
+            f"No decimal number found in {value}. Please provide a number."
+        )
+    except ValueError:
+        raise ValueError(f"{value} is not a valid decimal number.")
 
 
 def int_result(value: str, **kwargs) -> int:
     value = remove_prefix(value)
 
-    return int(value)
+    try:
+        return int(value)
+    except ValueError:
+        raise ValueError(f"No integer found in {value}. Please provide an integer.")
 
 
 def str_result(value: str, **kwargs) -> str:
