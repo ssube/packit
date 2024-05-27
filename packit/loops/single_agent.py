@@ -2,7 +2,7 @@ from logging import getLogger
 
 from packit.agent import Agent, AgentContext, invoke_agent
 from packit.conditions import condition_or, condition_threshold
-from packit.context import loopum
+from packit.context import INHERIT, loopum
 from packit.memory import make_limited_memory, memory_order_width
 from packit.results import multi_function_or_str_result
 from packit.selectors import select_leader
@@ -32,17 +32,17 @@ def loop_retry(
     agents: Agent | list[Agent],
     prompt: PromptType,
     context: AgentContext | None = None,
-    abac_context: ABACAttributes | None = None,
+    abac_context: ABACAttributes | None = INHERIT,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_leader,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
-    prompt_filter: PromptFilter | None = None,
-    prompt_template: PromptTemplate | None = None,
-    result_parser: ResultParser | None = None,
+    prompt_filter: PromptFilter | None = INHERIT,
+    prompt_template: PromptTemplate | None = INHERIT,
+    result_parser: ResultParser | None = INHERIT,
     stop_condition: StopCondition = condition_threshold,
-    toolbox: Toolbox | None = None,
-    tool_filter: ToolFilter | None = None,
+    toolbox: Toolbox | None = INHERIT,
+    tool_filter: ToolFilter | None = INHERIT,
 ) -> PromptType:
     """
     Loop through a single agent, retrying until the result parser succeeds. If the result cannot be parsed, the prompt
@@ -134,16 +134,16 @@ def loop_tool(
     agents: Agent | list[Agent],
     prompt: PromptType,
     context: AgentContext | None = None,
-    abac_context: ABACAttributes | None = None,
+    abac_context: ABACAttributes | None = INHERIT,
     agent_invoker: AgentInvoker = invoke_agent,
     agent_selector: AgentSelector = select_leader,
     memory_factory: MemoryFactory | None = make_limited_memory,
     memory_maker: MemoryMaker | None = memory_order_width,
-    prompt_filter: PromptFilter | None = None,
+    prompt_filter: PromptFilter | None = INHERIT,
     result_parser: ResultParser = multi_function_or_str_result,
     stop_condition: StopCondition = condition_threshold,
-    toolbox: Toolbox | None = None,
-    tool_filter: ToolFilter | None = None,
+    toolbox: Toolbox | None = INHERIT,
+    tool_filter: ToolFilter | None = INHERIT,
 ) -> PromptType:
     """
     Loop using a single agent, parsing the result as a function call until it is no longer JSON.
